@@ -3,6 +3,7 @@ import argparse
 
 # IceCube imports
 from icecube import icetray, dataio, dataclasses
+from icecube.recclasses import I3PortiaEvent
 
 # custom imports
 import ehe_utils as ehe_utils
@@ -32,21 +33,9 @@ while file.more() and i<maxEvents:
 		continue
 
 	if ehe_utils.has_ehe_objects(frame):
-		print("Particle {} Has EHE objects".format(i))
+		# print("Particle {} Has EHE objects".format(i))
+		portia_npe, portia_chans = ehe_utils.get_portia_pulses_and_chans(frame)
+		print("Particle {} has {} NPE and {} Chans".format(i,portia_npe, portia_chans))
 
 	i+=1
-
-
-# while file.more():
-# 	try:
-# 		frame = event_file.pop_physics()
-# 	except:
-# 		continue
-
-# 	# use the real InIceSplit
-# 	if frame["I3EventHeader"].sub_event_stream != "InIceSplit":
-# 		continue
-
-# 	if frame.Has("EHEOpheliaParticleSRT_ImpLF"):
-# 		print("Has Ophelia Object!")
 
