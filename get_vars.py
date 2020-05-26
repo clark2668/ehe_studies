@@ -31,6 +31,8 @@ verbose_mode = args.verbose_mode
 
 file_in = dataio.I3File(input_file)
 
+run_id=-10
+
 i = 0
 maxEvents=5e2 # big number
 while file_in.more() and i<maxEvents:
@@ -39,24 +41,33 @@ while file_in.more() and i<maxEvents:
 	except:
 		continue
 
+	header = frame.Get("I3EventHeader") # get the header for this frame
+	
+	# if we don't already have the runid, get it
+	if(run_id<0):
+		run_id = header.run_id
+
 	# skip if it's not an InIceSplit P-frame
-	if frame.Get("I3EventHeader").sub_event_stream != "InIceSplit":
-		continue
+	if header.sub_event_stream != "InIceSplit":
+		continue	
 
 	# check if the frame contains the EHE L2 objects
 	if ehe_utils.has_ehe_objects(frame):
 
-		# first, get out all of the variables related to the "classic" analysis
+		# first, get some bookkeeping information
+		event_id = header.event_id
+		subevent_id = header.sub_event_id
 
-		# get the npe and nchans as reconstructed by portia
+		# then, get out all of the variables related to the "classic" analysis
+
+		# npe and nchans as reconstructed by portia
 		portia_npe, portia_chans = ehe_utils.get_portia_pulses_and_chans(frame)
 		
-		# get the direction as reconstructed by ophelia
+		# direction as reconstructed by ophelia
 		ophelia_zenith = ehe_utils.get_ophelia_zenith(frame)
 
 
-		# second, get homogonized qtot, which is something we might use in the 
-		# off-brand version of the analysis
+		# then, get variables we might use in an "offbrand" analysis
 		homogenized_qtot = ob_utils.get_homogenized_qtot(frame)
 
 		if(verbose_mode):		
