@@ -5,7 +5,9 @@ def has_ehe_objects(frame):
 	Returns true if a P-frame has EHE L2 objects.
 
 	This function will return true only if the p-frame that has been passed
-	contains the EHE L2 objects, namely the Ophelia and Portia objects
+	contains the EHE L2 objects, namely some Ophelia and Portia reconstructions.
+	These are generated at the L2 level at pole.
+	(see https://code.icecube.wisc.edu/projects/icecube/browser/IceCube/projects/filterscripts/releases/V19-07-00/python/offlineL2/level2_Reconstruction_EHE.py)
 
 	Parameters
 	----------
@@ -40,3 +42,37 @@ def get_portia_pulses_and_chans(frame):
 		npe = frame.Get("EHEPortiaEventSummarySRT").GetTotalBestNPE()
 		nchan = frame.Get("EHEPortiaEventSummarySRT").GetTotalNch()
 	return npe, nchan
+
+def get_ophelia_zenith(frame):
+	"""
+	Return EHE L2 Ophelia zenith
+
+	This function will return the zenith of the event
+	as computed by the Portia EHE filter.
+
+	The EHE L2 filter running online at pole saves the final result
+	as an I3Particle with the name "EHEOpheliaParticleSRT_ImpFL"
+	(see https://code.icecube.wisc.edu/projects/icecube/browser/IceCube/projects/filterscripts/releases/V19-07-00/python/offlineL2/level2_Reconstruction_EHE.py#L76)
+	This is, as best I can tell, a pulse series as reconstructed by Portia
+	then being passed to improved LineFit
+
+	Because this is an I3Particle, we get it's properties by calling dir.zenith
+	(see http://software.icecube.wisc.edu/documentation/projects/dataclasses/particle.html?highlight=i3particle)
+
+	Parameters
+	----------
+	frame: I3 P-frame containing EHE objects
+		An I3 P-frame containing EHE objects
+
+	"""
+
+	zenith=-10
+	if(frame.Has("EHEOpheliaParticleSRT_ImpLF")):
+		zenith = frame.Get("EHEOpheliaParticleSRT_ImpLF").dir.zenith
+	return zenith
+
+
+
+
+
+
