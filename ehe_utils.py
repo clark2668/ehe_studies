@@ -1,4 +1,6 @@
+# IceCube import
 from icecube import icetray
+from icecube.recclasses import I3PortiaEvent
 
 def has_ehe_objects(frame):
 	"""

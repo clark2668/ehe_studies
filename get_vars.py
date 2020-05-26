@@ -2,8 +2,7 @@
 import argparse
 
 # IceCube imports
-from icecube import icetray, dataio, dataclasses
-from icecube.recclasses import I3PortiaEvent
+from icecube import icetray, dataio
 
 # custom imports
 import ehe_utils as ehe_utils
@@ -42,8 +41,8 @@ while file.more() and i<maxEvents:
 		ophelia_zenith = ehe_utils.get_ophelia_zenith(frame)
 		
 		# print something about the particle we found
-		# print("Particle {} has {} NPE, {} Chans, and {} Zenith"
-		# 	.format(i,portia_npe, portia_chans,ophelia_zenith))
+		print("Particle {} has {} NPE, {} Chans, and {} Zenith"
+			.format(i,portia_npe, portia_chans,ophelia_zenith))
 
 
 
