@@ -21,21 +21,31 @@ input_file = args.input_file
 file = dataio.I3File(input_file)
 
 i = 0
-maxEvents=5000
+maxEvents=1e5 # big number
 while file.more() and i<maxEvents:
 	try:
 		frame = file.pop_physics()
 	except:
 		continue
 
-	# skip if it's not an InIceSplit
+	# skip if it's not an InIceSplit P-frame
 	if frame.Get("I3EventHeader").sub_event_stream != "InIceSplit":
 		continue
 
+	# check if the frame contains the EHE L2 objects
 	if ehe_utils.has_ehe_objects(frame):
-		# print("Particle {} Has EHE objects".format(i))
+
+		# if so, we get the npe and nchans as reconstructed by portia
 		portia_npe, portia_chans = ehe_utils.get_portia_pulses_and_chans(frame)
-		print("Particle {} has {} NPE and {} Chans".format(i,portia_npe, portia_chans))
+		
+		# and get the direction as reconstructed by ophelia
+		ophelia_zenith = ehe_utils.get_ophelia_zenith(frame)
+		
+		# print something about the particle we found
+		# print("Particle {} has {} NPE, {} Chans, and {} Zenith"
+		# 	.format(i,portia_npe, portia_chans,ophelia_zenith))
+
+
 
 	i+=1
 
