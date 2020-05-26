@@ -96,6 +96,8 @@ homog_qtots = np.asarray(homog_qtots)
 event_ids = np.asarray(event_ids)
 subevent_ids = np.asarray(subevent_ids)
 
+# write information out to hdf5 file
+
 output_file_path = "{}/Run{}_Subrun{}_Part{}.hdf5".format(ouput_dir, run, subrun, part)
 file_out = h5py.File(output_file_path, "w")
 
