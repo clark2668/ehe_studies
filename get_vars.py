@@ -8,6 +8,7 @@ from icecube import icetray, dataio
 # custom imports
 import ehe_utils as ehe_utils # original ehe utilities
 import ob_utils as ob_utils # off brand (ob) ehe utilities
+import file_handler as fh
 
 
 # /data/exp/IceCube/2011/filtered/level2pass2a/1113/Run00118920/Level2pass2_IC86.2011_data_Run00118920_Subrun00000000_00000209.i3.zst
@@ -29,9 +30,8 @@ input_file = args.input_file
 ouput_dir = args.ouput_dir
 verbose_mode = args.verbose_mode
 
+run, subrun, part = fh.get_run_subrun_part(input_file)
 file_in = dataio.I3File(input_file)
-
-run_id=-10
 
 i = 0
 maxEvents=5e2 # big number
@@ -43,13 +43,8 @@ while file_in.more() and i<maxEvents:
 
 	header = frame.Get("I3EventHeader") # get the header for this frame
 	
-	# if we don't already have the runid, get it
-	if(run_id<0):
-		run_id = header.run_id
-
-	# skip if it's not an InIceSplit P-frame
 	if header.sub_event_stream != "InIceSplit":
-		continue	
+		continue # skip if it's not an InIceSplit P-frame
 
 	# check if the frame contains the EHE L2 objects
 	if ehe_utils.has_ehe_objects(frame):
@@ -77,7 +72,7 @@ while file_in.more() and i<maxEvents:
 
 	i+=1
 
-output_file_path = ouput_dir+"/something.hdf5"
+output_file_path = "{}/Run{}_Subrun{}_Part{}.hdf5".format(ouput_dir, run, subrun, part)
 file_out = h5py.File(output_file_path, "w")
 file_out.close()
 
