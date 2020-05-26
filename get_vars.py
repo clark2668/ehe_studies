@@ -88,7 +88,7 @@ while file_in.more() and i<maxEvents:
 
 	i+=1
 
-# turn them all into np arrays before storying for output
+# turn them all into np arrays before storing for output
 npe = np.asarray(npe)
 chans = np.asarray(chans)
 zeniths = np.asarray(zeniths)
