@@ -42,7 +42,7 @@ event_ids=[]
 subevent_ids=[]
 
 i = 0
-maxEvents=5e3 # big number
+maxEvents=5e5 # big number
 while file_in.more() and i<maxEvents:
 	try:
 		frame = file_in.pop_physics()
