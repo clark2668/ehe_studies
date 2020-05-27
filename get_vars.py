@@ -7,9 +7,9 @@ import numpy as np
 from icecube import icetray, dataio
 
 # custom imports
-import ehe_utils as ehe_utils # original ehe utilities
-import ob_utils as ob_utils # off brand (ob) ehe utilities
-import file_handler as fh
+import utils_ehe as ehe_utils # original ehe utilities
+import utils_ob as ob_utils # off brand (ob) ehe utilities
+import utils_io as fh
 
 
 # /data/exp/IceCube/2011/filtered/level2pass2a/1113/Run00118920/Level2pass2_IC86.2011_data_Run00118920_Subrun00000000_00000209.i3.zst
