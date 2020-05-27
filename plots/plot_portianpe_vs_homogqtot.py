@@ -47,7 +47,7 @@ ax.hist(npe,bins=50, histtype='step')
 ax.set_yscale('log')
 ax.set_xlabel('Portia NPE')
 ax.set_ylabel('Number of Events')
-fig.savefig('test.png')
+fig.savefig('portianpe.png')
 
 fig2 = plt.figure(figsize=(9,7))
 ax2 = fig2.add_subplot(111)
