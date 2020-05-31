@@ -1,3 +1,7 @@
+#!/bin/sh /cvmfs/icecube.opensciencegrid.org/py3-v4.1.0/icetray-start
+#METAPROJECT combo/V00-00-03
+
+
 # python imports
 import argparse
 import h5py
