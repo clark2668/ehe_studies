@@ -97,7 +97,7 @@ event_ids = np.asarray(event_ids)
 subevent_ids = np.asarray(subevent_ids)
 
 
-output_file_path = "{}/Run{}.hdf5".format(ouput_dir, run, subrun, part)
+output_file_path = "{}/run{}.hdf5".format(ouput_dir, run, subrun, part)
 file_out = h5py.File(output_file_path, "w")
 
 data = file_out.create_group("data")
