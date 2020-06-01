@@ -2,6 +2,7 @@ import h5py
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as colors
 
 
 parser = argparse.ArgumentParser()
@@ -56,6 +57,7 @@ counts, xedges, yedges, im = ax2.hist2d(npe, homog_qtot,
 		bins=50,
 		range = [[plot_min,plot_max],[plot_min,plot_max]],
 		cmap=my_map,
+		norm=colors.LogNorm(),
 		cmin=1)
 cbar = plt.colorbar(im, ax=ax2)
 cbar.set_label('Number of Events')
