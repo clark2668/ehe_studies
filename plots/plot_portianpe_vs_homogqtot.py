@@ -28,18 +28,9 @@ for file in files:
 npe = np.asarray(npe)
 homog_qtot = np.asarray(homog_qtot)
 
-plot_min = np.min(npe)
-min_homog_qtot = np.min(homog_qtot)
-if(min_homog_qtot>plot_min):
-	plot_min = min_homog_qtot
-plot_min*=0.9
-
-plot_max = np.max(npe)
-max_homog_qtot = np.max(homog_qtot)
-if(max_homog_qtot>plot_max):
-	plot_max = max_homog_qtot
-plot_max*=1.1
-
+# choose start and end point for 
+plot_min = 0.9 * min(np.min(homog_qtot), np.min(npe))
+plot_max = 1.1 * max(np.max(homog_qtot), np.max(npe))
 
 
 fig = plt.figure(figsize=(5,5))
