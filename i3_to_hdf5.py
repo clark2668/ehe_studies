@@ -35,6 +35,7 @@ npe=[]
 chans=[]
 zeniths=[]
 homog_qtots=[]
+fit_quals=[]
 runs=[]
 subruns=[]
 parts=[]
@@ -66,15 +67,17 @@ for file in input_files:
 			subevent_id = header.sub_event_id
 			portia_npe, portia_nchan = ehe_utils.get_portia_pulses_and_chans(frame)
 			ophelia_zenith = ehe_utils.get_ophelia_zenith(frame)
+			ophelia_fitqual = ehe_utils.get_ophelia_fitqual(frame)
 			homogenized_qtot = ob_utils.get_homogenized_qtot(frame)
 
 			if(verbose_mode):		
-				print("Particle {:5}: NPE = {:10.2f} , NChan = {:3}, Zenith = {:.3f}. Homogonized Qtot = {:10.2f}"
-					.format(i, portia_npe, int(portia_nchan), ophelia_zenith, homogenized_qtot))
+				print("Particle {:5}: NPE = {:10.2f} , NChan = {:3}, Zenith = {:.3f}, FitQual = {:.3f}. Homogonized Qtot = {:10.2f}"
+					.format(i, portia_npe, int(portia_nchan), ophelia_zenith, ophelia_fitqual, homogenized_qtot))
 
 			npe.append(portia_npe)
 			chans.append(portia_nchan)
 			zeniths.append(ophelia_zenith)
+			fit_quals.append(ophelia_fitqual)
 			homog_qtots.append(homogenized_qtot)
 
 			runs.append(run)
@@ -90,6 +93,7 @@ npe = np.asarray(npe)
 chans = np.asarray(chans)
 zeniths = np.asarray(zeniths)
 homog_qtots = np.asarray(homog_qtots)
+fit_quals = np.asarray(fit_quals)
 runs = np.asarray(runs)
 subruns = np.asarray(subruns)
 parts = np.asarray(parts)
@@ -104,6 +108,7 @@ data = file_out.create_group("data")
 data.create_dataset("portia_npe",data=npe)
 data.create_dataset("portia_nchan",data=npe)
 data.create_dataset("ophelia_zenith",data=zeniths)
+data.create_dataset("ophelia_fitqual",data=fit_quals)
 data.create_dataset("homogenized_qtot",data=homog_qtots)
 data.create_dataset("runs",data=runs)
 data.create_dataset("subruns",data=subruns)

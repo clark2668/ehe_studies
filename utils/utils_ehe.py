@@ -25,12 +25,15 @@ def has_ehe_objects(frame):
 	)
 	return passed_cut
 
-def get_portia_pulses_and_chans(frame):
+def get_ophelia_fitqual(frame):
 	"""
-	Return EHE L2 Portia NPE and NChans hit.
+	Return EHE L2 Ophelia Improved Linefit Fit Quality
 
-	This function will return the number of NPE and number of channels
-	hit as computed by the Portia EHE filter.
+	This function will return the fit quality (chi^2/ndf) of the ophelia
+	improved linefit
+
+	The EHE L2 filter running online at pole saves the final result
+	as an EHEOpheliaSRT_ImpLF frame, which we can get the fit_quality of
 
 	Parameters
 	----------
@@ -38,12 +41,12 @@ def get_portia_pulses_and_chans(frame):
 		An I3 P-frame containing EHE objects
 
 	"""
-	npe=-10
-	nchan = -10
-	if(frame.Has("EHEPortiaEventSummarySRT")):
-		npe = frame.Get("EHEPortiaEventSummarySRT").GetTotalBestNPE()
-		nchan = frame.Get("EHEPortiaEventSummarySRT").GetTotalNch()
-	return npe, nchan
+
+	fitqual=-10
+	if(frame.Has("EHEOpheliaSRT_ImpLF")):
+		fitqual = frame.Get("EHEOpheliaSRT_ImpLF").fit_quality
+	return fitqual
+
 
 def get_ophelia_zenith(frame):
 	"""
@@ -72,6 +75,26 @@ def get_ophelia_zenith(frame):
 	if(frame.Has("EHEOpheliaParticleSRT_ImpLF")):
 		zenith = frame.Get("EHEOpheliaParticleSRT_ImpLF").dir.zenith
 	return zenith
+
+def get_portia_pulses_and_chans(frame):
+	"""
+	Return EHE L2 Portia NPE and NChans hit.
+
+	This function will return the number of NPE and number of channels
+	hit as computed by the Portia EHE filter.
+
+	Parameters
+	----------
+	frame: I3 P-frame containing EHE objects
+		An I3 P-frame containing EHE objects
+
+	"""
+	npe=-10
+	nchan = -10
+	if(frame.Has("EHEPortiaEventSummarySRT")):
+		npe = frame.Get("EHEPortiaEventSummarySRT").GetTotalBestNPE()
+		nchan = frame.Get("EHEPortiaEventSummarySRT").GetTotalNch()
+	return npe, nchan
 
 
 
