@@ -106,7 +106,7 @@ file_out = h5py.File(output_file_path, "w")
 
 data = file_out.create_group("data")
 data.create_dataset("portia_npe",data=npe)
-data.create_dataset("portia_nchan",data=npe)
+data.create_dataset("portia_nchan",data=chans)
 data.create_dataset("ophelia_zenith",data=zeniths)
 data.create_dataset("ophelia_fitqual",data=fit_quals)
 data.create_dataset("homogenized_qtot",data=homog_qtots)
