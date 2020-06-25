@@ -1,8 +1,8 @@
 import h5py
 import argparse
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.colors as colors
+import utils.utils_ehe as ehe_utils # original ehe utilities
+
 import ROOT
 from ROOT import gStyle, gPad
 
@@ -16,37 +16,206 @@ parser.add_argument("-f", type=str, nargs='+',
 args = parser.parse_args()
 files = args.input_files
 
-h1_zenith = ROOT.TH1D("h1_zenith","h1_zenith",20,-1,1)
-h1_npe = ROOT.TH1D("h1_npe","h1_npe",20,4,6)
+h1_npe = ROOT.TH1D("h1_npe","h1_npe",40,1,8)
+h1_nchan = ROOT.TH1D("h1_nchan","h1_nchan",100,0,500)
+h1_fitqual = ROOT.TH1D("h1_fitqual","h1_fitqual",100,0,200)
+
+# atL2 = after L2 cuts
+h1_npe_atL2 = ROOT.TH1D("h1_npe_atL2","h1_npe_atL2",40,4,8)
+h1_zenith_atL2 = ROOT.TH1D("h1_zenith_atL2","h1_zenith_atL2",20,-1,1)
+h1_fitqual_atL2 = ROOT.TH1D("h1_fitqual_atL2","h1_fitqual_atL2",100,0,200)
+h2_npe_vs_zenith_atL2 = ROOT.TH2D("h2_npe_vs_zenith_atL2","h2_npe_vs_zenith_atL2",20,-1,1,40,4,8)
+h2_npe_vs_fitqual_atL2 = ROOT.TH2D("h2_npe_vs_fitqual_atL2","h2_npe_vs_fitqual_atL2",100,0,200,40,4,8)
+
+# atL3 = after L3 cuts
+h1_npe_atL3 = ROOT.TH1D("h1_npe_atL3","h1_npe_atL3",40,4,8)
+h1_zenith_atL3 = ROOT.TH1D("h1_zenith_atL3","h1_zenith_atL3",20,-1,1)
+h1_fitqual_atL3 = ROOT.TH1D("h1_fitqual_atL3","h1_fitqual_atL3",100,0,200)
+h2_npe_vs_zenith_atL3 = ROOT.TH2D("h2_npe_vs_zenith_atL3","h2_npe_vs_zenith_atL3",20,-1,1,40,4,8)
+h2_npe_vs_fitqual_atL3 = ROOT.TH2D("h2_npe_vs_fitqual_atL3","h2_npe_vs_fitqual_atL3",100,0,200,40,4,8)
+
+
 
 for file in files:
 	print(file)
 	file_in = h5py.File(file, "r")
 	data = file_in['data']
 	portia_npe = data['portia_npe']
+	portia_nchan = data['portia_nchan']
 	ophelia_zenith = data['ophelia_zenith']
+	ophelia_fitqual = data['ophelia_fitqual']
+	
 	for event, this_portia_npe in enumerate(portia_npe):
-		if(this_portia_npe>25000):
-			h1_zenith.Fill(ophelia_zenith[event])
-			h1_npe.Fill(np.log10(portia_npe[event]))
+		
+		h1_npe.Fill(np.log10(portia_npe[event]))
+		h1_nchan.Fill(portia_nchan[event])
+		h1_fitqual.Fill(ophelia_fitqual[event])
+
+		# L2 cuts are a cut on NPE, Nchan, and fit quality
+		if(ehe_utils.pass_L2(portia_npe[event], 
+			portia_nchan[event], 
+			ophelia_fitqual[event])):
+			
+			h1_npe_atL2.Fill(np.log10(portia_npe[event]))
+			h1_zenith_atL2.Fill(np.cos(ophelia_zenith[event]))
+			h1_fitqual_atL2.Fill(ophelia_fitqual[event])
+			h2_npe_vs_zenith_atL2.Fill(np.cos(ophelia_zenith[event]),np.log10(portia_npe[event]))
+			h2_npe_vs_fitqual_atL2.Fill(ophelia_fitqual[event],np.log10(portia_npe[event]))
+
+			# L3 cuts are cut on fit quality and NPE
+			if(ehe_utils.pass_L3(portia_npe[event], portia_nchan[event])):
+				
+				h1_npe_atL3.Fill(np.log10(portia_npe[event]))
+				h1_zenith_atL3.Fill(np.cos(ophelia_zenith[event]))
+				h1_fitqual_atL3.Fill(ophelia_fitqual[event])
+				h2_npe_vs_zenith_atL3.Fill(np.cos(ophelia_zenith[event]),np.log10(portia_npe[event]))
+				h2_npe_vs_fitqual_atL3.Fill(ophelia_fitqual[event],np.log10(portia_npe[event]))
+
+		
+
+# first, the "all data" plots
+print_L1=True
+if(print_L1):
+
+	# h1 npe all data
+	c_npe = ROOT.TCanvas("c_npe","c_npe",1100,850)
+	c_npe.cd()
+	h1_npe.Draw("hist")
+	h1_npe.SetTitle("L1;log_{10}(NPE);Number of Events")
+	gPad.SetLogy()
+	c_npe.SaveAs('ehe_npe_L1_{:d}events.pdf'.format(int(h1_npe.GetEntries())))
+
+	# h1 nchan all data
+	c_nchan = ROOT.TCanvas("c_npe","c_npe",1100,850)
+	c_nchan.cd()
+	h1_nchan.Draw("hist")
+	h1_nchan.SetTitle("L1;Nchan;Number of Events")
+	gPad.SetLogy()
+	c_nchan.SaveAs('ehe_nchan_L1_{:d}events.pdf'.format(int(h1_nchan.GetEntries())))
+
+	# h1 fit qual all data
+	c_fitqual = ROOT.TCanvas("c_fitqual","c_fitqual",1100,850)
+	c_fitqual.cd()
+	h1_fitqual.Draw("hist")
+	h1_fitqual.SetTitle("L1;#chi^{2}/NDF Fit Qual;Number of Events")
+	gPad.SetLogy()
+	c_fitqual.SaveAs('ehe_fitqual_L1_{:d}events.pdf'.format(int(h1_npe.GetEntries())))
+
+print_L2=True
+if(print_L2):
+
+	# h1 npe at L2
+	c_npe_L2 = ROOT.TCanvas("c_npe_L2","c_npe_L2",1100,850)
+	c_npe_L2.cd()
+	h1_npe_atL2.Draw("hist")
+	h1_npe_atL2.SetTitle("L2;log_{10}(NPE);Number of Events")
+	gPad.SetLogy()
+	c_npe_L2.SaveAs('ehe_npe_L2_{:d}events.pdf'.format(int(h1_npe_atL2.GetEntries())))
+
+	# h1 nchan at L2
+	c_zenith_L2 = ROOT.TCanvas("c_zenith_L2","c_zenith_L2",1100,850)
+	c_zenith_L2.cd()
+	h1_zenith_atL2.Draw("hist")
+	h1_zenith_atL2.SetTitle("L2;cos(#theta);Number of Events")
+	gPad.SetLogy()
+	c_zenith_L2.SaveAs('ehe_zenith_L2_{:d}events.pdf'.format(int(h1_npe_atL2.GetEntries())))
+
+	# h1 fit qual at L2
+	c_fitqual_L2 = ROOT.TCanvas("c_fitqual_L2","c_fitqual_L2",1100,850)
+	c_fitqual_L2.cd()
+	h1_fitqual_atL2.Draw("hist")
+	h1_fitqual_atL2.SetTitle("L2;#chi^{2}/NDF Fit Qual;Number of Events")
+	gPad.SetLogy()
+	c_fitqual_L2.SaveAs('ehe_fitqual_L2_{:d}events.pdf'.format(int(h1_npe_atL2.GetEntries())))
+
+	#h2 npe vs zenith at L2
+	c_npe_vs_zenith_L2 = ROOT.TCanvas("c_npe_vs_zenith_L2","c_npe_vs_zenith_L2",1100,850)
+	c_npe_vs_zenith_L2.cd()
+	h2_npe_vs_zenith_atL2.Draw("colz")
+	h2_npe_vs_zenith_atL2.SetTitle("L2;cos(#theta);log_{10}(NPE);Number of Events")
+	gPad.SetLogz()
+	gPad.SetRightMargin(0.15)
+	c_npe_vs_zenith_L2.SaveAs('ehe_npe_vs_zenith_L2_{:d}events.pdf'.format(int(h1_npe_atL2.GetEntries())))
+
+	#h2 npe vs fit qual at L2
+	c_npe_vs_fitqual = ROOT.TCanvas("c_npe_vs_fitqual","c_npe_vs_fitqual",1100,850)
+	c_npe_vs_fitqual.cd()
+	h2_npe_vs_fitqual_atL2.Draw("colz")
+	h2_npe_vs_fitqual_atL2.SetTitle("L2;#chi^{2}/NDF Fit Qual;log_{10}(NPE);Number of Events")
+	gPad.SetLogz()
+	gPad.SetRightMargin(0.15)
+	c_npe_vs_fitqual.SaveAs('ehe_npe_vs_fitqual_L2_{:d}events.pdf'.format(int(h1_npe_atL2.GetEntries())))
+
+print_L3=True
+if(print_L3):
+
+	#first make the L2 plots with the L3 cuts superimposed
+	xvals_fitqual = np.linspace(30,200,171)
+	func = np.vectorize(ehe_utils.get_lognpecut_by_fitqual)
+	yvals_lognpe = func(xvals_fitqual)
+	gr_L3_cut = ROOT.TGraph(len(xvals_fitqual),xvals_fitqual,yvals_lognpe)
+
+	#h2 npe vs fit qual at L3
+	c_npe_vs_fitqual_L2wcut = ROOT.TCanvas("c_npe_vs_fitqual_L2wcut","c_npe_vs_fitqual_L2wcut",1100,850)
+	c_npe_vs_fitqual_L2wcut.cd()
+	h2_npe_vs_fitqual_atL2.Draw("colz")
+	h2_npe_vs_fitqual_atL2.SetTitle("L2;#chi^{2}/NDF Fit Qual;log_{10}(NPE);Number of Events")
+	gr_L3_cut.Draw("sameL")
+	gPad.SetLogz()
+	gPad.SetRightMargin(0.15)
+	c_npe_vs_fitqual_L2wcut.SaveAs('ehe_npe_vs_fitqual_L2wcut_{:d}events.pdf'.format(int(h1_npe_atL2.GetEntries())))
+
+	# h1 npe at L3
+	c_npe_L3 = ROOT.TCanvas("c_npe_L3","c_npe_L3",1100,850)
+	c_npe_L3.cd()
+	h1_npe_atL3.Draw("hist")
+	h1_npe_atL3.SetTitle("L3;log_{10}(NPE);Number of Events")
+	gPad.SetLogy()
+	c_npe_L3.SaveAs('ehe_npe_L3_{:d}events.pdf'.format(int(h1_npe_atL3.GetEntries())))
+
+	# h1 nchan at L3
+	c_zenith_L3 = ROOT.TCanvas("c_zenith_L3","c_zenith_L3",1100,850)
+	c_zenith_L3.cd()
+	h1_zenith_atL3.Draw("hist")
+	h1_zenith_atL3.SetTitle("L3;cos(#theta);Number of Events")
+	gPad.SetLogy()
+	c_zenith_L3.SaveAs('ehe_zenith_L3_{:d}events.pdf'.format(int(h1_npe_atL3.GetEntries())))
+
+	# h1 fit qual at L3
+	c_fitqual_L3 = ROOT.TCanvas("c_fitqual_L3","c_fitqual_L3",1100,850)
+	c_fitqual_L3.cd()
+	h1_fitqual_atL3.Draw("hist")
+	h1_fitqual_atL3.SetTitle("L3;#chi^{2}/NDF Fit Qual;Number of Events")
+	gPad.SetLogy()
+	c_fitqual_L3.SaveAs('ehe_fitqual_L3_{:d}events.pdf'.format(int(h1_npe_atL3.GetEntries())))
+
+	#h2 npe vs zenith at L3
+	c_npe_vs_zenith_L3 = ROOT.TCanvas("c_npe_vs_zenith_L3","c_npe_vs_zenith_L3",1100,850)
+	c_npe_vs_zenith_L3.cd()
+	h2_npe_vs_zenith_atL3.Draw("colz")
+	h2_npe_vs_zenith_atL3.SetTitle("L3;cos(#theta);log_{10}(NPE);Number of Events")
+	gPad.SetLogz()
+	gPad.SetRightMargin(0.15)
+	c_npe_vs_zenith_L3.SaveAs('ehe_npe_vs_zenith_L3_{:d}events.pdf'.format(int(h1_npe_atL3.GetEntries())))
+
+	#h2 npe vs fit qual at L3
+	c_npe_vs_fitqual_L3 = ROOT.TCanvas("c_npe_vs_fitqual_L3","c_npe_vs_fitqual_L3",1100,850)
+	c_npe_vs_fitqual_L3.cd()
+	h2_npe_vs_fitqual_atL3.Draw("colz")
+	h2_npe_vs_fitqual_atL3.SetTitle("L3;#chi^{2}/NDF Fit Qual;log_{10}(NPE);Number of Events")
+	gPad.SetLogz()
+	gPad.SetRightMargin(0.15)
+	c_npe_vs_fitqual_L3.SaveAs('ehe_npe_vs_fitqual_L3_{:d}events.pdf'.format(int(h1_npe_atL3.GetEntries())))
 
 
-# h1 zenith
-c_zenith = ROOT.TCanvas("c_zenith","c_zenith",1100,850)
-c_zenith.cd()
-h1_zenith.Draw("histe")
-h1_zenith.GetXaxis().SetTitle("cos(#theta)")
-h1_zenith.GetYaxis().SetTitle("Number of Events")
-h1_zenith.SetTitle("")
-gPad.SetLogy()
-c_zenith.SaveAs('ehe_zenith_{:d}events.pdf'.format(int(h1_zenith.GetEntries())))
 
-# h1 npe
-c_npe = ROOT.TCanvas("c_npe","c_npe",1100,850)
-c_npe.cd()
-h1_npe.Draw("histe")
-h1_npe.GetXaxis().SetTitle("log_{10}(NPE)")
-h1_npe.GetYaxis().SetTitle("Number of Events")
-h1_npe.SetTitle("")
-gPad.SetLogy()
-c_npe.SaveAs('ehe_npe_{:d}events.pdf'.format(int(h1_npe.GetEntries())))
+
+
+
+
+
+
+
+
+
+
