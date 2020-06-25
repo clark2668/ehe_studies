@@ -1,6 +1,7 @@
 # IceCube import
 from icecube import icetray
 from icecube.recclasses import I3PortiaEvent
+import numpy as np
 
 def has_ehe_objects(frame):
 	"""
@@ -95,6 +96,78 @@ def get_portia_pulses_and_chans(frame):
 		npe = frame.Get("EHEPortiaEventSummarySRT").GetTotalBestNPE()
 		nchan = frame.Get("EHEPortiaEventSummarySRT").GetTotalNch()
 	return npe, nchan
+
+def get_lognpecut_by_fitqual(fitqual):
+	"""
+	Return the log10npe cut value by fit quality for the EHE L3 cut
+
+	This function will return log10(npe) cut value for the EHE L3 cut
+	based on the fitqual value
+
+
+	Parameters
+	----------
+	fitqual: double
+		Ophelia fit quality
+	"""
+
+	lognpe_cut = 1e30 #ridiculously large number
+	if(fitqual>=30):
+		if (fitqual<80):
+			lognpe_cut = 4.6
+		elif (fitqual<120):
+			lognpe_cut = 4.6 + 0.015*(fitqual-80)
+		else:
+			lognpe_cut = 5.2
+	return lognpe_cut
+
+def pass_L3(npe, fitqual):
+	"""
+	Returns true if an event passes the L3 filter
+
+	This function will return true only if the ehe event passes the L3 filter
+	This is a fit quality and NPE cut
+
+
+	Parameters
+	----------
+	npe: double
+		Number of Portia NPE
+	fitqual: double
+		Ophelia fit quality
+	"""
+
+	lognpe_cut = get_lognpecut_by_fitqual(fitqual)
+	result=False # start off with failing the cut
+	if(np.log10(npe) >= lognpe_cut):
+		result = True
+	return result
+
+def pass_L2(npe, nchan, fitqual):
+	"""
+	Returns true if an event passes the L2 filter
+
+	This function will return true only if the ehe event passes the L2 filter
+	Which means npe > 25000
+				nchan > 100
+				fitqual > 30
+
+	Parameters
+	----------
+	npe: double
+		Number of Portia NPE
+	nchan: int
+		Number of Portia chans
+	fitqual: double
+		Ophelia fit quality
+	"""
+
+	result=False # start off with failing the cut
+	if(npe>25000 and nchan>100 and fitqual>30):
+		result=True 
+	return result
+
+
 
 
 
