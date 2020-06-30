@@ -111,6 +111,9 @@ def get_lognpecut_by_fitqual(fitqual):
 		Ophelia fit quality
 	"""
 
+	assert fitqual>=0, \
+		'fitqual is less than or equal to zero'
+
 	lognpe_cut = 1e30 #ridiculously large number
 	if(fitqual>=30):
 		if (fitqual<80):
@@ -121,27 +124,30 @@ def get_lognpecut_by_fitqual(fitqual):
 			lognpe_cut = 5.2
 	return lognpe_cut
 
-def pass_L3(npe, fitqual):
+def get_lognpecut_by_zenith(zenith):
 	"""
-	Returns true if an event passes the L3 filter
+	Return the log10npe cut value by cos(zenith) EHE L4 cut
 
-	This function will return true only if the ehe event passes the L3 filter
-	This is a fit quality and NPE cut
+	This function will return log10(npe) cut value for the EHE L4 cut
+	based on the cos(zenith) value
 
 
 	Parameters
 	----------
-	npe: double
-		Number of Portia NPE
-	fitqual: double
-		Ophelia fit quality
+	zenith: double
+		Ophelia zenith
 	"""
+	
+	assert abs(zenith)<np.pi, \
+		'zenith angle is larger than pi; check that zenith is in radians'
 
-	lognpe_cut = get_lognpecut_by_fitqual(fitqual)
-	result=False # start off with failing the cut
-	if(np.log10(npe) >= lognpe_cut):
-		result = True
-	return result
+	lognpe_cut = 1e30 #ridiculously large number
+	coszenith = np.cos(zenith)
+	if coszenith < 0.06:
+		lognpe_cut = 4.6
+	else:
+		lognpe_cut = 4.6 + 1.85*np.sqrt(1-((coszenith-1.)/0.94)**2)
+	return lognpe_cut
 
 def pass_L2(npe, nchan, fitqual):
 	"""
@@ -161,11 +167,79 @@ def pass_L2(npe, nchan, fitqual):
 	fitqual: double
 		Ophelia fit quality
 	"""
+	
+	assert npe>=0, \
+		'npe is less than zero'
+
+	assert nchan>=0, \
+		'nchan is less than zero'
+
+	assert fitqual>=0, \
+		'fitqual is less than or equal to zero'
 
 	result=False # start off with failing the cut
 	if(npe>25000 and nchan>100 and fitqual>30):
 		result=True 
 	return result
+
+def pass_L3(npe, fitqual):
+	"""
+	Returns true if an event passes the L3 filter
+
+	This function will return true only if the ehe event passes the L3 filter
+	This is a fit quality and NPE cut
+
+
+	Parameters
+	----------
+	npe: double
+		Number of Portia NPE
+	fitqual: double
+		Ophelia fit quality
+	"""
+
+	assert npe>0, \
+		'npe is less than or equal to zero'
+
+	assert fitqual>=0, \
+		'fitqual is less than or equal to zero'
+	
+	lognpe_cut = get_lognpecut_by_fitqual(fitqual)
+	result=False # start off with failing the cut
+	if(np.log10(npe) >= lognpe_cut):
+		result = True
+	return result
+
+
+def pass_L4(npe, zenith):
+	"""
+	Returns true if an event passes the L4 filter
+
+	This function will return true only if the ehe event passes the L4 filter
+	This is a cos(zenith) and NPE cut
+
+
+	Parameters
+	----------
+	npe: double
+		Number of Portia NPE
+	zenith: double
+		Ophelia zenith
+	"""
+
+	assert npe>0, \
+		'npe is less than or equal to zero'
+
+	assert abs(zenith)<np.pi, \
+		'zenith angle is larger than pi; check that zenith is in radians'
+	
+	lognpe_cut = get_lognpecut_by_zenith(fitqual)
+	result=False # start off with failing the cut
+	if(np.log10(npe) >= lognpe_cut):
+		result = True
+	return result
+
+
 
 
 
