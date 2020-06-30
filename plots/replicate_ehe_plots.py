@@ -70,6 +70,7 @@ for file in files:
 				h1_fitqual_atL3.Fill(ophelia_fitqual[event])
 				h2_npe_vs_zenith_atL3.Fill(np.cos(ophelia_zenith[event]),np.log10(portia_npe[event]))
 				h2_npe_vs_fitqual_atL3.Fill(ophelia_fitqual[event],np.log10(portia_npe[event]))
+	file_in.close()
 
 		
 
