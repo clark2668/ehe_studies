@@ -227,20 +227,22 @@ print_L4=True
 if(print_L4):
 
 	#first make the L3 plots with the L4 cuts superimposed
-	xvals_coszenith = np.cos(np.linspace(0,180,181))
+	xvals_zenith = np.radians(np.linspace(0,180,181))
 	func = np.vectorize(ehe_utils.get_lognpecut_by_zenith)
-	yvals_lognpe = func(xvals_coszenith)
-	gr_L4_cut = ROOT.TGraph(len(xvals_coszenith),xvals_coszenith,yvals_lognpe)
+	yvals_lognpe = func(xvals_zenith)
+	for x,y in zip(xvals_zenith, yvals_lognpe):
+		print("{}, {}".format(x,y))
+	gr_L4_cut = ROOT.TGraph(len(xvals_zenith),np.cos(xvals_zenith),yvals_lognpe)
 
 	#h2 npe vs cos(zenith) at L3
 	c_npe_vs_zenith_L3wcut = ROOT.TCanvas("c_npe_vs_zenith_L3wcut","c_npe_vs_zenith_L3wcut",1100,850)
 	c_npe_vs_zenith_L3wcut.cd()
-	h2_npe_vs_fitqual_atL3.Draw("colz")
-	h2_npe_vs_fitqual_atL3.SetTitle("L3;#chi^{2}/NDF Fit Qual;log_{10}(NPE);Number of Events")
+	h2_npe_vs_zenith_atL3.Draw("colz")
+	h2_npe_vs_zenith_atL3.SetTitle("L3;cos(#theta);log_{10}(NPE);Number of Events")
 	gr_L4_cut.Draw("sameL")
 	gPad.SetLogz()
 	gPad.SetRightMargin(0.15)
-	c_npe_vs_zenith_L3wcut.SaveAs('ehe_h2_npe_vs_zenith_L3wcut_{:d}events.pdf'.format(int(h1_npe_atL4.GetEntries())))
+	c_npe_vs_zenith_L3wcut.SaveAs('ehe_h2_npe_vs_zenith_L3wcut_{:d}events.pdf'.format(int(h1_npe_atL3.GetEntries())))
 
 	# h1 npe at L4
 	c_npe_L4 = ROOT.TCanvas("c_npe_L4","c_npe_L4",1100,850)
