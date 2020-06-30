@@ -138,7 +138,7 @@ def get_lognpecut_by_zenith(zenith):
 		Ophelia zenith
 	"""
 	
-	assert abs(zenith)<np.pi, \
+	assert abs(zenith)<1.01*np.pi, \
 		'zenith angle is larger than pi; check that zenith is in radians'
 
 	lognpe_cut = 1e30 #ridiculously large number
@@ -230,7 +230,7 @@ def pass_L4(npe, zenith):
 	assert npe>0, \
 		'npe is less than or equal to zero'
 
-	assert abs(zenith)<np.pi, \
+	assert abs(zenith)<1.01*np.pi, \
 		'zenith angle is larger than pi; check that zenith is in radians'
 	
 	lognpe_cut = get_lognpecut_by_zenith(fitqual)
