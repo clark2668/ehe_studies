@@ -1,4 +1,4 @@
-# offbrand_ehe
+# ehe_studies
 
 The easiest way to get going is to first get the relevant variables:
 
