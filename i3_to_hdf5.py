@@ -1,5 +1,5 @@
-#!/bin/sh /cvmfs/icecube.opensciencegrid.org/py3-v4.1.0/icetray-start
-#METAPROJECT combo/V00-00-03
+#!/bin/sh /cvmfs/icecube.opensciencegrid.org/py3-v4.1.1/icetray-start
+#METAPROJECT combo/V01-00-02
 
 
 # python imports
@@ -49,8 +49,10 @@ for file in input_files:
 	file_in = dataio.I3File(file)
 
 	i = 0
+	frameId=0
 	maxEvents=5e6 # big number
 	while file_in.more() and i<maxEvents:
+		frameId+=1
 		try:
 			frame = file_in.pop_physics()
 		except:
@@ -63,7 +65,9 @@ for file in input_files:
 
 		if ehe_utils.has_ehe_objects(frame):
 
+			print(frameId)
 			event_id = header.event_id
+			print("event id{}".format(event_id))
 			subevent_id = header.sub_event_id
 			portia_npe, portia_nchan = ehe_utils.get_portia_pulses_and_chans(frame)
 			ophelia_zenith = ehe_utils.get_ophelia_zenith(frame)
