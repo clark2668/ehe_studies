@@ -1,7 +1,6 @@
 #!/bin/sh /cvmfs/icecube.opensciencegrid.org/py3-v4.1.1/icetray-start
 #METAPROJECT combo/V01-00-02
 
-
 # python imports
 import argparse
 import h5py
@@ -12,7 +11,7 @@ from icecube import icetray, dataio
 
 # custom imports
 import utils.utils_ehe as ehe_utils # original ehe utilities
-import utils.utils_ob as ob_utils # off brand (ob) ehe utilities
+import utils.utils_ob as ob_utils # hese utilities
 import utils.utils_io as fh
 
 parser = argparse.ArgumentParser()
@@ -35,6 +34,7 @@ npe=[]
 chans=[]
 zeniths=[]
 homog_qtots=[]
+# causal_qtots=[]
 fit_quals=[]
 runs=[]
 subruns=[]
@@ -73,16 +73,18 @@ for file in input_files:
 			ophelia_zenith = ehe_utils.get_ophelia_zenith(frame)
 			ophelia_fitqual = ehe_utils.get_ophelia_fitqual(frame)
 			homogenized_qtot = ob_utils.get_homogenized_qtot(frame)
+			# causal_qtot = ob_utils.get_causal_qtot(frame)
 
 			if(verbose_mode):		
-				print("Particle {:5}: NPE = {:10.2f} , NChan = {:3}, Zenith = {:.3f}, FitQual = {:.3f}. Homogonized Qtot = {:10.2f}"
-					.format(i, portia_npe, int(portia_nchan), ophelia_zenith, ophelia_fitqual, homogenized_qtot))
+				print("Particle {:5}: NPE = {:10.2f} , NChan = {:3}, Zenith = {:.3f}, FitQual = {:.3f}, Homogonized Qtot = {:10.2f}, Causal Qtot = {:10.2f}"
+					.format(i, portia_npe, int(portia_nchan), ophelia_zenith, ophelia_fitqual, homogenized_qtot, causal_qtot))
 
 			npe.append(portia_npe)
 			chans.append(portia_nchan)
 			zeniths.append(ophelia_zenith)
 			fit_quals.append(ophelia_fitqual)
 			homog_qtots.append(homogenized_qtot)
+			causal_qtots.append(causal_qtot)
 
 			runs.append(run)
 			subruns.append(subrun)
@@ -97,6 +99,7 @@ npe = np.asarray(npe)
 chans = np.asarray(chans)
 zeniths = np.asarray(zeniths)
 homog_qtots = np.asarray(homog_qtots)
+# causal_qtots = np.asarray(causal_qtots)
 fit_quals = np.asarray(fit_quals)
 runs = np.asarray(runs)
 subruns = np.asarray(subruns)
@@ -114,6 +117,7 @@ data.create_dataset("portia_nchan",data=chans)
 data.create_dataset("ophelia_zenith",data=zeniths)
 data.create_dataset("ophelia_fitqual",data=fit_quals)
 data.create_dataset("homogenized_qtot",data=homog_qtots)
+# data.create_dataset("causal_qtot",data=causal_qtots)
 data.create_dataset("runs",data=runs)
 data.create_dataset("subruns",data=subruns)
 data.create_dataset("parts",data=parts)
