@@ -1,8 +1,87 @@
-from icecube import icetray, dataclasses
+from icecube import icetray, dataclasses, portia
 from icecube.icetray import I3Units
 from icecube.phys_services.which_split import which_split
 from I3Tray import Inf
 
+# useful for helping to define the time of arrival of the biggest pulse
+def find_time_of_largest_pulse(portia_pulse_map):
+	biggest_pulse = 0.
+	biggeset_pulse_time = 0.
+	for omkey, pulses in portia_pulse_map:
+		this_npe = pulses.GetEstimatedNPE()
+		this_t10 = pulses.GetRecoPulse().time
+		if this_npe > biggest_pulse:
+			biggest_pulse = this_npe
+			biggeset_pulse_time = this_t10
+	return biggeset_pulse_time
+
+# get pulse value, and also allow for window cleaning
+def get_pulse_values(portia_pulse, largest_time, window_start, window_end, enforce_window):
+	npe = portia_pulse.GetEstimatedNPE()
+	t10 = portia_pulse.GetRecoPulse().time
+	npe_out = 0
+	if enforce_window and ((t10 - largest_time >= window_start) and (t10 - largest_time <= window_end)):
+		npe_out = npe
+	else:
+		npe_out = npe
+	return npe_out
+
+# loop over the portia pulses
+def LoopPortiaPulses(frame, doBTW=True):
+	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
+		return False
+
+	# the way it is *actually* calculated in Portia 
+	# https://code.icecube.wisc.edu/projects/icecube/browser/IceCube/meta-projects/combo/trunk/portia/private/portia/I3Portia.cxx#L604
+	# using the realtime and L2 scripts has makeBestPulse enabled
+	# so starting from an L1->L2 file, we actually want to compare EHEFADCPortiaPulses
+	# to EHEBestPortiaPulse, where the latter is the "stitched together" FADC
+	# and ATWD pulses; if you try and compare to EHEATWDPortiaPulse
+	# you do not get the right answer, because the realtime and L2 filters
+	# use makeBestPulse=True
+	splitted_dom_map = frame.Get('splittedDOMMap')
+	fadc_pulse_map = frame.Get('EHEFADCPortiaPulse')
+	best_pulse_map = frame.Get('EHEBestPortiaPulse')
+
+	# now set up window for cleaning
+	largest_time_fadc = find_time_of_largest_pulse(fadc_pulse_map)
+	largest_time_best = find_time_of_largest_pulse(best_pulse_map)
+	largest_time = max(largest_time_fadc, largest_time_best)
+	start_time_btw = -4400.0*I3Units.ns
+	end_time_btw = 6400.0*I3Units.ns
+
+
+	best_npe = 0.
+	omkey_npe_map = {}
+
+	for omkey, launches in splitted_dom_map:
+		
+		# fadc estimate for this event
+		this_fadc = 0
+		if omkey in fadc_pulse_map:
+			fadc_pulse = fadc_pulse_map[omkey]
+			this_fadc = get_pulse_values(fadc_pulse, largest_time, 
+				start_time_btw, end_time_btw, True)
+
+		# "best" estimate for this event
+		this_best = 0
+		if omkey in best_pulse_map:
+			best_pulse = best_pulse_map[omkey]
+			this_best = get_pulse_values(best_pulse, largest_time, 
+				start_time_btw, end_time_btw, True)
+
+		this_npe = 0
+		if this_fadc > this_best:
+			this_npe += this_fadc
+		elif this_best > this_fadc:
+			this_npe += this_best
+
+		# add the contribution of this dom to the total
+		omkey_npe_map[omkey] = this_npe
+		best_npe += this_npe
+
+	print("Best npe estimate {}".format(best_npe))
+	# return omkey_npe_map
 
 def get_hit_map(frame,pulse_mask_name):
 	if type(frame[pulse_mask_name]) == dataclasses.I3RecoPulseSeriesMap:
@@ -32,12 +111,12 @@ def calc_q(calibration, status, vertex_time, causality_window, hit_map, max_q_pe
 				charge_this_dom+=p.charge
 		if dom_cal.relative_dom_eff > 1.1:
 			print("{}, eff {}, charge {:.2f}".format(omkey, dom_cal.relative_dom_eff, charge_this_dom))
-			# continue				
+			continue				
 		if charge_this_dom < max_q_per_dom:
 			hqtot+=charge_this_dom
 	return hqtot
 
-def LoopPulses(frame, pulses):
+def LoopHESEPulses(frame, pulses):
 	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
 		return False
 
