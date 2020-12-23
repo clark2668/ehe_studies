@@ -1,5 +1,7 @@
-##!/bin/sh /cvmfs/icecube.opensciencegrid.org/py3-v4.1.1/icetray-start
-##METAPROJECT combo/V01-00-02
+# what I'm going to try and demonstrate in this code is how to loop over an I3 file
+# get out the interesting information (in this case, the npe and zeniths)
+# and write that to an hdf5 file that you can analyze later
+# this is only one way to tackle this--we can discuss others once you have the idea of it
 
 # python imports
 import argparse
@@ -109,7 +111,7 @@ subevent_ids = np.asarray(subevent_ids)
 
 
 # and now, we will right them to an output file
-output_file_path = "{}/output.hdf5".format(ouput_dir, run, subrun, part)
+output_file_path = "{}/output.hdf5".format(ouput_dir)
 file_out = h5py.File(output_file_path, "w")
 
 data = file_out.create_group("data")
