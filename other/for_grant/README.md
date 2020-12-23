@@ -29,3 +29,5 @@ Then, we can take that file as an input and read the results back out. This is w
 ```
 python plot_from_hdf5.py -f output.hdf5
 ```
+
+I have put a sample data file on the HPCC at this location: `/mnt/research/IceCube/ehe/sample_set`. See if you can start with the I3 file in that location.
