@@ -3,7 +3,7 @@ from I3Tray import I3Tray
 
 from icecube.phys_services.which_split import which_split
 from icecube.frame_object_diff.segments import uncompress
-from filter import HeseFilter, LoopHESEPulses, LoopPortiaPulses
+from filter import HeseFilter, LoopHESEPulses, LoopEHEPulses
 
 # this starts from L2, and specifically the event file I made
 # that already has the GCD file prepended
@@ -18,16 +18,14 @@ tray.AddModule("I3Reader", filename='134777_8912764_L2.i3.zst')
 # 	If = (which_split(split_name = 'InIceSplit')) # "check if the header.sub_event_stream == InIceSplit"
 # 	)
 
-# tray.AddModule(LoopHESEPulses, "LoopPulses",
-# 	pulses='SplitInIceDSTPulses',
-# 	Streams=[icetray.I3Frame.Physics]
-# 	)
-
-tray.AddModule(LoopPortiaPulses, "LoopPortiaPulses",
+tray.AddModule(LoopHESEPulses, "LoopPulses",
+	pulses='SplitInIceDSTPulses',
 	Streams=[icetray.I3Frame.Physics]
 	)
 
-# tray.AddModule(TesterModule, 'tester', Streams=[icetray.I3Frame.DAQ])
-# tray.Add("Dump")
+tray.AddModule(LoopEHEPulses, "LoopPortiaPulses",
+	Streams=[icetray.I3Frame.Physics]
+	)
+
 tray.Add("I3Writer", filename="quick.i3.zst")
 tray.Execute()

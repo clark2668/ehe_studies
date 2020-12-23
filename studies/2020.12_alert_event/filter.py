@@ -75,7 +75,7 @@ def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map, 
 	
 	return best_npe, omkey_npe_dict
 
-def LoopPortiaPulses(frame, doBTW=True):
+def LoopEHEPulses(frame, doBTW=True):
 	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
 		return False
 
@@ -94,7 +94,7 @@ def LoopPortiaPulses(frame, doBTW=True):
 	best_npe, portia_omkey_npe_dict = get_portia_omkey_npe_dict(splitted_dom_map, 
 		fadc_pulse_map, best_pulse_map)
 
-	print("Best npe estimate {}".format(best_npe))
+	print("Portia NPE is {:.2f}".format(best_npe))
 	# return omkey_npe_map
 
 def get_hit_map(frame,pulse_mask_name):
@@ -104,8 +104,11 @@ def get_hit_map(frame,pulse_mask_name):
 		hit_map = frame[pulse_mask_name].apply(frame)
 	return hit_map
 
-def calc_q(calibration, status, vertex_time, causality_window, hit_map, max_q_per_dom):
-	hqtot=0.;
+def get_casaulqtot_omkey_npe_dict(calibration, status, vertex_time, causality_window, hit_map, max_q_per_dom):
+	
+	causal_qtot=0.;
+	omkey_npe_dict = {};
+	
 	for omkey, pulses in hit_map.items():
 		if not omkey in calibration.dom_cal:
 			print("omkey {} not in dom_cal".format(omkey))
@@ -115,20 +118,27 @@ def calc_q(calibration, status, vertex_time, causality_window, hit_map, max_q_pe
 			continue
 		dom_cal = calibration.dom_cal[omkey]
 
-		# skip deep core by checking both strings and checking dom efficiency
-		string = omkey.string
-		if string in [79, 80, 81, 82, 83, 84, 85, 86]:
-			continue
-		charge_this_dom=0.;
+		charge_this_dom = 0.
+
+		# loop pulses
 		for p in pulses:
 			if (p.time >= vertex_time and p.time < vertex_time+causality_window):
 				charge_this_dom+=p.charge
+		omkey_npe_dict[omkey] = charge_this_dom
+
+		# now, to actual compute causal_qtot, we exclude deep core
+		# and, exclude any dom with high efficiency
+		# and, exclude any DOM which contributes more than max_q_per_dom
+
+		string = omkey.string
+		if string in [79, 80, 81, 82, 83, 84, 85, 86]:
+			continue
 		if dom_cal.relative_dom_eff > 1.1:
-			print("{}, eff {}, charge {:.2f}".format(omkey, dom_cal.relative_dom_eff, charge_this_dom))
 			continue				
 		if charge_this_dom < max_q_per_dom:
-			hqtot+=charge_this_dom
-	return hqtot
+			causal_qtot+=charge_this_dom
+
+	return causal_qtot, omkey_npe_dict
 
 def LoopHESEPulses(frame, pulses):
 	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
@@ -140,28 +150,14 @@ def LoopHESEPulses(frame, pulses):
 	calibration = frame['I3Calibration']
 	status = frame['I3DetectorStatus']
 
-	hqtot = 0.
 	vertex_time = frame.Get('HESE_VHESelfVetoVertexTime').value #I3Double is funky
 	causality_window = 5000. * I3Units.ns
 	hit_map = get_hit_map(frame, pulses)
-	hqtot = calc_q(calibration, status, vertex_time, causality_window, hit_map, Inf)
-	# hqtot = calc_q(calibration, status, vertex_time, causality_window, hit_map, hqtot/2.)
-	print("Causal qtot including high eff DOMs is {:.2f}".format(hqtot))
+	causal_qtot, causalqtot_omkey_npe_dict = get_casaulqtot_omkey_npe_dict(calibration, 
+		status, vertex_time, causality_window, hit_map, Inf)
+	
+	print("Causal Qtot is {:.2f}".format(causal_qtot))
 
-
-# essentially create a I3Map<OMKey, I3PulseSeries> from a I3PulseSeriesMapMask
-# the former is needed for reconstructors like the HomogenizedQtot of HESE
-# pulse_series_name is the name of the map, final_name is the name you want it to hav in the end
-def PutPulsesFromPulseMaskIntoFrame(frame, pulse_mask_name, final_name):
-	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
-		return False
-	else:
-		if type(frame[pulse_mask_name]) == dataclasses.I3RecoPulseSeriesMap:
-			hit_map = frame.Get(pulse_mask_name)
-		elif type(frame[pulse_mask_name]) == dataclasses.I3RecoPulseSeriesMapMask:
-			hit_map = frame[pulse_mask_name].apply(frame)
-		frame.Put(final_name, hit_map)
-		return True	
 
 @icetray.traysegment
 def HeseFilter(tray, name, pulses='RecoPulses', If = lambda f: True):
@@ -189,3 +185,30 @@ def HeseFilter(tray, name, pulses='RecoPulses', If = lambda f: True):
 		Pulses=pulses,
 		Output='HESE_CausalQTot_Redo',
 		If = If_with_triggers)
+
+################################################################
+################################################################
+################################################################
+################################################################
+
+#							GRAVEYARD						   #
+
+################################################################
+################################################################
+################################################################
+################################################################
+
+
+# essentially create a I3Map<OMKey, I3PulseSeries> from a I3PulseSeriesMapMask
+# the former is needed for reconstructors like the HomogenizedQtot of HESE
+# pulse_series_name is the name of the map, final_name is the name you want it to hav in the end
+def PutPulsesFromPulseMaskIntoFrame(frame, pulse_mask_name, final_name):
+	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
+		return False
+	else:
+		if type(frame[pulse_mask_name]) == dataclasses.I3RecoPulseSeriesMap:
+			hit_map = frame.Get(pulse_mask_name)
+		elif type(frame[pulse_mask_name]) == dataclasses.I3RecoPulseSeriesMapMask:
+			hit_map = frame[pulse_mask_name].apply(frame)
+		frame.Put(final_name, hit_map)
+		return True	
