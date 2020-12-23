@@ -3,6 +3,9 @@ from icecube.icetray import I3Units
 from icecube.phys_services.which_split import which_split
 from I3Tray import Inf
 
+import numpy as np
+import h5py as h5py
+
 # useful for helping to define the time of arrival of the biggest pulse
 def find_time_of_largest_pulse(portia_pulse_map):
 	biggest_pulse = 0.
@@ -107,7 +110,8 @@ def get_hit_map(frame,pulse_mask_name):
 def get_casaulqtot_omkey_npe_dict(calibration, status, vertex_time, causality_window, hit_map, max_q_per_dom):
 	
 	causal_qtot=0.;
-	omkey_npe_dict = {};
+	omkey_npe_dict = {}; # for all the DOMs
+	omkey_npe_dict_noDC = {}; # for DOMs that are not in DC, high QE, or saturated
 	
 	for omkey, pulses in hit_map.items():
 		if not omkey in calibration.dom_cal:
@@ -136,9 +140,10 @@ def get_casaulqtot_omkey_npe_dict(calibration, status, vertex_time, causality_wi
 		if dom_cal.relative_dom_eff > 1.1:
 			continue				
 		if charge_this_dom < max_q_per_dom:
+			omkey_npe_dict_noDC[omkey] = charge_this_dom
 			causal_qtot+=charge_this_dom
 
-	return causal_qtot, omkey_npe_dict
+	return causal_qtot, omkey_npe_dict, omkey_npe_dict_noDC
 
 def LoopHESEPulses(frame, pulses):
 	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
@@ -153,7 +158,7 @@ def LoopHESEPulses(frame, pulses):
 	vertex_time = frame.Get('HESE_VHESelfVetoVertexTime').value #I3Double is funky
 	causality_window = 5000. * I3Units.ns
 	hit_map = get_hit_map(frame, pulses)
-	causal_qtot, causalqtot_omkey_npe_dict = get_casaulqtot_omkey_npe_dict(calibration, 
+	causal_qtot, causalqtot_omkey_npe_dict, causalqtot_omkey_npe_dict_noDC = get_casaulqtot_omkey_npe_dict(calibration, 
 		status, vertex_time, causality_window, hit_map, Inf)
 	
 	print("Causal Qtot is {:.2f}".format(causal_qtot))
@@ -172,7 +177,7 @@ def Compare_HESE_EHE(frame, hese_pulses):
 	vertex_time = frame.Get('HESE_VHESelfVetoVertexTime').value #I3Double is funky
 	causality_window = 5000. * I3Units.ns
 	hit_map = get_hit_map(frame, hese_pulses)
-	causal_qtot, causalqtot_omkey_npe_dict = get_casaulqtot_omkey_npe_dict(calibration, 
+	causal_qtot, causalqtot_omkey_npe_dict,  causalqtot_omkey_npe_dict_noDC= get_casaulqtot_omkey_npe_dict(calibration, 
 		status, vertex_time, causality_window, hit_map, Inf)
 
 	# now, EHE
@@ -183,11 +188,50 @@ def Compare_HESE_EHE(frame, hese_pulses):
 	best_npe, portia_omkey_npe_dict = get_portia_omkey_npe_dict(splitted_dom_map, 
 		fadc_pulse_map, best_pulse_map)
 
-	for omkey, portia_npe in portia_omkey_npe_dict.items():
-		if omkey in causalqtot_omkey_npe_dict:
-			causalqtot_npe = causalqtot_omkey_npe_dict[omkey]
-			print("Portia npe {}, Causal {}".format(portia_npe, causalqtot_npe))
 
+	# check the overlap
+	missing_in_hese = []
+	missing_in_ehe = []
+	num_hese_chans=0
+	for omkey, portia_npe in portia_omkey_npe_dict.items():
+		if omkey not in causalqtot_omkey_npe_dict_noDC:
+			missing_in_hese.append(portia_npe)
+
+	for omkey, hese_npe in causalqtot_omkey_npe_dict_noDC.items():
+		if omkey not in portia_omkey_npe_dict:
+			missing_in_ehe.append(hese_npe)
+	missing_in_hese = np.asarray(missing_in_hese)
+	missing_in_ehe = np.asarray(missing_in_ehe)
+
+	# save the overlapping data to an hdf5 file
+	hese_overlap = []
+	ehe_overlap = []
+	strings = []
+	doms = []
+	for omkey, portia_npe in portia_omkey_npe_dict.items():
+		if omkey in causalqtot_omkey_npe_dict_noDC:
+			strings.append(omkey.string)
+			doms.append(omkey.om)
+			hese_npe = causalqtot_omkey_npe_dict_noDC[omkey]
+			hese_overlap.append(hese_npe)
+			ehe_overlap.append(portia_npe)
+
+	hese_overlap = np.asarray(hese_overlap)
+	ehe_overlap = np.asarray(ehe_overlap)
+	strings = np.asarray(strings)
+	doms = np.asarray(doms)
+
+	file_out = h5py.File('comparison_overlap.hdf5', 'w')
+	data_overlap = file_out.create_group('data_overlap')
+	data_overlap.create_dataset('hese_overlap', data=hese_overlap)
+	data_overlap.create_dataset('ehe_overlap', data=ehe_overlap)
+	data_overlap.create_dataset('strings', data=strings)
+	data_overlap.create_dataset('doms', data=doms)
+
+	data_exclusion = file_out.create_group('data_exclusion')
+	data_exclusion.create_dataset('missing_in_hese', data=missing_in_hese)
+	data_exclusion.create_dataset('missing_in_ehe',data=missing_in_ehe)
+	file_out.close()
 
 @icetray.traysegment
 def HeseFilter(tray, name, pulses='RecoPulses', If = lambda f: True):
