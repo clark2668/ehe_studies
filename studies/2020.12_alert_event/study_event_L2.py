@@ -3,7 +3,7 @@ from I3Tray import I3Tray
 
 from icecube.phys_services.which_split import which_split
 from icecube.frame_object_diff.segments import uncompress
-from filter import HeseFilter, LoopHESEPulses, LoopPortiaPulses, LoopPortiaPulses2
+from filter import HeseFilter, LoopHESEPulses, LoopPortiaPulses
 
 # this starts from L2, and specifically the event file I made
 # that already has the GCD file prepended

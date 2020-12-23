@@ -26,6 +26,55 @@ def get_pulse_values(portia_pulse, largest_time, window_start, window_end, enfor
 		npe_out = npe
 	return npe_out
 
+def get_portia_pulses_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map, doBTW=True):
+	'''
+	This is a roughly replication of the MakePortiaEvent function in I3Portia.xx
+	We check all of the launched omkeys in the splitted_dom_map
+	And get the FADC and ATWD pulse values for that omkey
+	And first figure out if they are inside a basetime window (BTW).
+	If they are, we figure out which is larger--the FADC or the ATWD--and use that
+	as the NPE estimate for that event.
+	We will return a dict of the omkey to the NPE estimate (the omkey_npe_dict)
+	'''
+
+	# now set up window for cleaning
+	largest_time_fadc = find_time_of_largest_pulse(fadc_pulse_map)
+	largest_time_best = find_time_of_largest_pulse(atwd_pulse_map)
+	largest_time = max(largest_time_fadc, largest_time_best)
+	start_time_btw = -4400.0*I3Units.ns
+	end_time_btw = 6400.0*I3Units.ns
+	
+	best_npe = 0.
+	omkey_npe_dict = {}
+
+	for omkey, launches in splitted_dom_map:
+		
+		# fadc estimate for this event
+		this_fadc = 0
+		if omkey in fadc_pulse_map:
+			fadc_pulse = fadc_pulse_map[omkey]
+			this_fadc = get_pulse_values(fadc_pulse, largest_time, 
+				start_time_btw, end_time_btw, doBTW)
+
+		# "best" estimate for this event
+		this_atwd = 0
+		if omkey in atwd_pulse_map:
+			atwd_pulse = atwd_pulse_map[omkey]
+			this_atwd = get_pulse_values(atwd_pulse, largest_time, 
+				start_time_btw, end_time_btw, doBTW)
+
+		this_npe = 0
+		if this_fadc > this_atwd:
+			this_npe += this_fadc
+		elif this_atwd > this_fadc:
+			this_npe += this_atwd
+
+		# add the contribution of this dom to the total
+		omkey_npe_dict[omkey] = this_npe
+		best_npe += this_npe
+	
+	return best_npe, omkey_npe_dict
+
 # loop over the portia pulses
 def LoopPortiaPulses(frame, doBTW=True):
 	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
@@ -43,42 +92,8 @@ def LoopPortiaPulses(frame, doBTW=True):
 	fadc_pulse_map = frame.Get('EHEFADCPortiaPulse')
 	best_pulse_map = frame.Get('EHEBestPortiaPulse')
 
-	# now set up window for cleaning
-	largest_time_fadc = find_time_of_largest_pulse(fadc_pulse_map)
-	largest_time_best = find_time_of_largest_pulse(best_pulse_map)
-	largest_time = max(largest_time_fadc, largest_time_best)
-	start_time_btw = -4400.0*I3Units.ns
-	end_time_btw = 6400.0*I3Units.ns
-
-
-	best_npe = 0.
-	omkey_npe_map = {}
-
-	for omkey, launches in splitted_dom_map:
-		
-		# fadc estimate for this event
-		this_fadc = 0
-		if omkey in fadc_pulse_map:
-			fadc_pulse = fadc_pulse_map[omkey]
-			this_fadc = get_pulse_values(fadc_pulse, largest_time, 
-				start_time_btw, end_time_btw, True)
-
-		# "best" estimate for this event
-		this_best = 0
-		if omkey in best_pulse_map:
-			best_pulse = best_pulse_map[omkey]
-			this_best = get_pulse_values(best_pulse, largest_time, 
-				start_time_btw, end_time_btw, True)
-
-		this_npe = 0
-		if this_fadc > this_best:
-			this_npe += this_fadc
-		elif this_best > this_fadc:
-			this_npe += this_best
-
-		# add the contribution of this dom to the total
-		omkey_npe_map[omkey] = this_npe
-		best_npe += this_npe
+	best_npe, portia_omkey_npe_dict = get_portia_pulses_omkey_npe_dict(splitted_dom_map, 
+		fadc_pulse_map, best_pulse_map)
 
 	print("Best npe estimate {}".format(best_npe))
 	# return omkey_npe_map
