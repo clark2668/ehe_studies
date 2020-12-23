@@ -158,6 +158,36 @@ def LoopHESEPulses(frame, pulses):
 	
 	print("Causal Qtot is {:.2f}".format(causal_qtot))
 
+def Compare_HESE_EHE(frame, hese_pulses):
+	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
+		return False
+
+	# first, HESE
+	if not 'I3Calibration' in frame or not 'I3DetectorStatus' in frame:
+		icetray.logging.log_fatal('I3Calibration or I3Detector status not in frame')
+
+	calibration = frame['I3Calibration']
+	status = frame['I3DetectorStatus']
+	
+	vertex_time = frame.Get('HESE_VHESelfVetoVertexTime').value #I3Double is funky
+	causality_window = 5000. * I3Units.ns
+	hit_map = get_hit_map(frame, hese_pulses)
+	causal_qtot, causalqtot_omkey_npe_dict = get_casaulqtot_omkey_npe_dict(calibration, 
+		status, vertex_time, causality_window, hit_map, Inf)
+
+	# now, EHE
+	splitted_dom_map = frame.Get('splittedDOMMap')
+	fadc_pulse_map = frame.Get('EHEFADCPortiaPulse')
+	best_pulse_map = frame.Get('EHEBestPortiaPulse')
+
+	best_npe, portia_omkey_npe_dict = get_portia_omkey_npe_dict(splitted_dom_map, 
+		fadc_pulse_map, best_pulse_map)
+
+	for omkey, portia_npe in portia_omkey_npe_dict.items():
+		if omkey in causalqtot_omkey_npe_dict:
+			causalqtot_npe = causalqtot_omkey_npe_dict[omkey]
+			print("Portia npe {}, Causal {}".format(portia_npe, causalqtot_npe))
+
 
 @icetray.traysegment
 def HeseFilter(tray, name, pulses='RecoPulses', If = lambda f: True):
