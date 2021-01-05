@@ -5,6 +5,7 @@ import utils.utils_ehe as ehe_utils # original ehe utilities
 
 import ROOT
 from ROOT import gStyle, gPad
+from ROOT import kRed
 
 gStyle.SetOptStat(0)
 
@@ -15,6 +16,8 @@ parser.add_argument("-f", type=str, nargs='+',
 
 args = parser.parse_args()
 files = args.input_files
+
+
 
 h1_npe = ROOT.TH1D("h1_npe","h1_npe",40,1,8)
 h1_nchan = ROOT.TH1D("h1_nchan","h1_nchan",100,0,500)
@@ -42,6 +45,12 @@ h2_npe_vs_zenith_atL4 = ROOT.TH2D("h2_npe_vs_zenith_atL4","h2_npe_vs_zenith_atL4
 h2_npe_vs_fitqual_atL4 = ROOT.TH2D("h2_npe_vs_fitqual_atL4","h2_npe_vs_fitqual_atL4",100,0,200,40,4,8)
 
 
+print_L1=True
+print_L2=False
+print_L3=False
+print_L4=False
+
+
 
 for file in files:
 	print(file)
@@ -58,39 +67,38 @@ for file in files:
 		h1_nchan.Fill(portia_nchan[event])
 		h1_fitqual.Fill(ophelia_fitqual[event])
 
-		# L2 cuts are a cut on NPE, Nchan, and fit quality
-		if(ehe_utils.pass_L2(portia_npe[event], portia_nchan[event], ophelia_fitqual[event])):
+		# # L2 cuts are a cut on NPE, Nchan, and fit quality
+		# if(ehe_utils.pass_L2(portia_npe[event], portia_nchan[event], ophelia_fitqual[event])):
 			
-			h1_npe_atL2.Fill(np.log10(portia_npe[event]))
-			h1_zenith_atL2.Fill(np.cos(ophelia_zenith[event]))
-			h1_fitqual_atL2.Fill(ophelia_fitqual[event])
-			h2_npe_vs_zenith_atL2.Fill(np.cos(ophelia_zenith[event]),np.log10(portia_npe[event]))
-			h2_npe_vs_fitqual_atL2.Fill(ophelia_fitqual[event],np.log10(portia_npe[event]))
+		# 	h1_npe_atL2.Fill(np.log10(portia_npe[event]))
+		# 	h1_zenith_atL2.Fill(np.cos(ophelia_zenith[event]))
+		# 	h1_fitqual_atL2.Fill(ophelia_fitqual[event])
+		# 	h2_npe_vs_zenith_atL2.Fill(np.cos(ophelia_zenith[event]),np.log10(portia_npe[event]))
+		# 	h2_npe_vs_fitqual_atL2.Fill(ophelia_fitqual[event],np.log10(portia_npe[event]))
 
-			# L3 cuts are cut on fit quality and NPE
-			if(ehe_utils.pass_L3(portia_npe[event], portia_nchan[event])):
+		# 	# L3 cuts are cut on fit quality and NPE
+		# 	if(ehe_utils.pass_L3(portia_npe[event], portia_nchan[event])):
 				
-				h1_npe_atL3.Fill(np.log10(portia_npe[event]))
-				h1_zenith_atL3.Fill(np.cos(ophelia_zenith[event]))
-				h1_fitqual_atL3.Fill(ophelia_fitqual[event])
-				h2_npe_vs_zenith_atL3.Fill(np.cos(ophelia_zenith[event]),np.log10(portia_npe[event]))
-				h2_npe_vs_fitqual_atL3.Fill(ophelia_fitqual[event],np.log10(portia_npe[event]))
+		# 		h1_npe_atL3.Fill(np.log10(portia_npe[event]))
+		# 		h1_zenith_atL3.Fill(np.cos(ophelia_zenith[event]))
+		# 		h1_fitqual_atL3.Fill(ophelia_fitqual[event])
+		# 		h2_npe_vs_zenith_atL3.Fill(np.cos(ophelia_zenith[event]),np.log10(portia_npe[event]))
+		# 		h2_npe_vs_fitqual_atL3.Fill(ophelia_fitqual[event],np.log10(portia_npe[event]))
 
-				# L4 cuts are cut on cos(zenith) and NPE
-				if(ehe_utils.pass_L4(portia_npe[event], ophelia_zenith[event])):
+		# 		# L4 cuts are cut on cos(zenith) and NPE
+		# 		if(ehe_utils.pass_L4(portia_npe[event], ophelia_zenith[event])):
 				
-					h1_npe_atL4.Fill(np.log10(portia_npe[event]))
-					h1_zenith_atL4.Fill(np.cos(ophelia_zenith[event]))
-					h1_fitqual_atL4.Fill(ophelia_fitqual[event])
-					h2_npe_vs_zenith_atL4.Fill(np.cos(ophelia_zenith[event]),np.log10(portia_npe[event]))
-					h2_npe_vs_fitqual_atL4.Fill(ophelia_fitqual[event],np.log10(portia_npe[event]))
+		# 			h1_npe_atL4.Fill(np.log10(portia_npe[event]))
+		# 			h1_zenith_atL4.Fill(np.cos(ophelia_zenith[event]))
+		# 			h1_fitqual_atL4.Fill(ophelia_fitqual[event])
+		# 			h2_npe_vs_zenith_atL4.Fill(np.cos(ophelia_zenith[event]),np.log10(portia_npe[event]))
+		# 			h2_npe_vs_fitqual_atL4.Fill(ophelia_fitqual[event],np.log10(portia_npe[event]))
 
 
 	file_in.close()
 		
 
 # first, the "all data" plots
-print_L1=True
 if(print_L1):
 
 	# h1 npe all data
@@ -99,7 +107,11 @@ if(print_L1):
 	h1_npe.Draw("hist")
 	h1_npe.SetTitle("L1;log_{10}(NPE);Number of Events")
 	gPad.SetLogy()
-	c_npe.SaveAs('ehe_h1_npe_L1_{:d}events.pdf'.format(int(h1_npe.GetEntries())))
+	l_npe_cut = ROOT.TLine(np.log10(25e3),0,np.log10(25e3),h1_npe.GetMaximum())
+	l_npe_cut.Draw("same")
+	l_npe_cut.SetLineColor(kRed)
+	l_npe_cut.SetLineStyle(9)
+	c_npe.SaveAs('./ehe_h1_npe_L1_{:d}events.pdf'.format(int(h1_npe.GetEntries())))
 
 	# h1 nchan all data
 	c_nchan = ROOT.TCanvas("c_npe","c_npe",1100,850)
@@ -107,6 +119,10 @@ if(print_L1):
 	h1_nchan.Draw("hist")
 	h1_nchan.SetTitle("L1;Nchan;Number of Events")
 	gPad.SetLogy()
+	l_nchan_cut = ROOT.TLine(100,0,100,h1_nchan.GetMaximum())
+	l_nchan_cut.Draw("same")
+	l_nchan_cut.SetLineColor(kRed)
+	l_nchan_cut.SetLineStyle(9)
 	c_nchan.SaveAs('ehe_h1_nchan_L1_{:d}events.pdf'.format(int(h1_nchan.GetEntries())))
 
 	# h1 fit qual all data
@@ -115,9 +131,12 @@ if(print_L1):
 	h1_fitqual.Draw("hist")
 	h1_fitqual.SetTitle("L1;#chi^{2}/NDF Fit Qual;Number of Events")
 	gPad.SetLogy()
-	c_fitqual.SaveAs('ehe_h1_fitqual_L1_{:d}events.pdf'.format(int(h1_npe.GetEntries())))
+	l_fitqual_cut = ROOT.TLine(30,0,30,h1_fitqual.GetMaximum())
+	l_fitqual_cut.Draw("same")
+	l_fitqual_cut.SetLineColor(kRed)
+	l_fitqual_cut.SetLineStyle(9)
+	c_fitqual.SaveAs('ehe_h1_fitqual_L1_{:d}events.pdf'.format(int(h1_fitqual.GetEntries())))
 
-print_L2=True
 if(print_L2):
 
 	# h1 npe at L2
@@ -162,7 +181,6 @@ if(print_L2):
 	gPad.SetRightMargin(0.15)
 	c_npe_vs_fitqual.SaveAs('ehe_h2_npe_vs_fitqual_L2_{:d}events.pdf'.format(int(h1_npe_atL2.GetEntries())))
 
-print_L3=True
 if(print_L3):
 
 	#first make the L2 plots with the L3 cuts superimposed
@@ -223,15 +241,12 @@ if(print_L3):
 	gPad.SetRightMargin(0.15)
 	c_npe_vs_fitqual_L3.SaveAs('ehe_h2_npe_vs_fitqual_L3_{:d}events.pdf'.format(int(h1_npe_atL3.GetEntries())))
 
-print_L4=True
 if(print_L4):
 
 	#first make the L3 plots with the L4 cuts superimposed
 	xvals_zenith = np.radians(np.linspace(0,180,181))
 	func = np.vectorize(ehe_utils.get_lognpecut_by_zenith)
 	yvals_lognpe = func(xvals_zenith)
-	for x,y in zip(xvals_zenith, yvals_lognpe):
-		print("{}, {}".format(x,y))
 	gr_L4_cut = ROOT.TGraph(len(xvals_zenith),np.cos(xvals_zenith),yvals_lognpe)
 
 	#h2 npe vs cos(zenith) at L3
@@ -285,10 +300,6 @@ if(print_L4):
 	gPad.SetLogz()
 	gPad.SetRightMargin(0.15)
 	c_npe_vs_fitqual_L4.SaveAs('ehe_h2_npe_vs_fitqual_L4_{:d}events.pdf'.format(int(h1_npe_atL4.GetEntries())))
-
-
-
-
 
 
 
