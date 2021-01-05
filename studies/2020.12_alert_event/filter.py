@@ -26,7 +26,7 @@ def get_portia_pulse_values(portia_pulse, largest_time, window_start, window_end
 	if enforce_window and ((t10 - largest_time >= window_start) and (t10 - largest_time <= window_end)):
 		npe_out = npe
 	else:
-		npe_out = npe
+		npe_out = 0
 	return npe_out
 
 def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map, doBTW=True):
