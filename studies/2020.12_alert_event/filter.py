@@ -29,7 +29,26 @@ def get_portia_pulse_values(portia_pulse, largest_time, window_start, window_end
 		npe_out = 0
 	return npe_out
 
-def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map, doBTW=True):
+def get_portia_omkey_baseline_dict(splitted_dom_map, pulse_map):
+	'''
+	Get the baseline values for each omkey
+	splitted_dom_map is the launched omkeys
+	the pulse_map is a map of Portia pulses--can be fadc, atwd, or "best"
+	'''
+
+	omkey_baseline_dict = {}
+	for omkey, launches in splitted_dom_map:
+
+		if omkey in pulse_map:
+			pulse = pulse_map[omkey]
+			baseline = pulse.GetBaseLine()
+			# print("Omkey {}, baseline {}".format(omkey, baseline))
+			omkey_baseline_dict[omkey] = baseline
+
+	return omkey_baseline_dict
+
+def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map, 
+	high_qe_doms = [], doBTW=True, excludeFADC=False):
 	'''
 	This is a roughly replication of the MakePortiaEvent function in I3Portia.xx
 	We check all of the launched omkeys in the splitted_dom_map
@@ -51,6 +70,10 @@ def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map, 
 	omkey_npe_dict = {}
 
 	for omkey, launches in splitted_dom_map:
+
+		# skip the high qe doms
+		if omkey in high_qe_doms:
+			continue
 		
 		# fadc estimate for this event
 		this_fadc = 0
@@ -67,7 +90,9 @@ def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map, 
 				start_time_btw, end_time_btw, doBTW)
 
 		this_npe = 0
-		if this_fadc > this_atwd:
+		if excludeFADC:
+			this_npe += this_atwd
+		elif this_fadc > this_atwd:
 			this_npe += this_fadc
 		elif this_atwd > this_fadc:
 			this_npe += this_atwd
@@ -78,9 +103,98 @@ def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map, 
 	
 	return best_npe, omkey_npe_dict
 
-def LoopEHEPulses(frame, doBTW=True):
+def get_digitizer_baselines_dict(calibration, pulse_map, splitted_dom_map):
+	'''
+	Get dict of digitizer baselines
+	'''
+	dict_digitizer_baselines = {}
+
+	for omkey, launch_times in splitted_dom_map:
+		if omkey in pulse_map:
+
+			this_omkey_baselines = [] # order will be [atwd0-ch0 ch1 ch2] [atwd1-ch0 ch1 ch2] [portia]
+
+			# first, atwd
+			calib = calibration.dom_cal[omkey]
+			for atwd in range(2):
+				for channel in range(3):
+					beacon_baseline = calib.atwd_beacon_baseline[(atwd,channel)]
+					# print("Omkey {}, atwd {}, chan {}: {}".format(omkey, atwd, channel, beacon_baseline))
+					this_omkey_baselines.append(beacon_baseline)
+			
+			# then portia
+			pulse = pulse_map[omkey]
+			portia_baseline = pulse.GetBaseLine() #/I3Units.millivolt
+			# print("Omkey {} portia baseline {}".format(omkey, portia_baseline))
+			this_omkey_baselines.append(portia_baseline)
+
+			dict_digitizer_baselines[omkey] = this_omkey_baselines
+
+		print("Omkey {}, baselines {}".format(omkey, this_omkey_baselines))
+
+	return dict_digitizer_baselines
+
+	# # loop over omkeys in the *splitted dom map* (that already passed portia cleaning)
+	# for omkey, launches in launch_map:
+	# 	if omkey in launch_map:
+			
+	# 		# loop over launches
+	# 		launches = launch_map[omkey]
+	# 		for ilaunch, launch in enumerate(launches):
+	# 			if launch.lc_bit: # if the lc bit latched
+
+	# 				# get the om calibration
+	# 				calib = calibration.dom_cal[omkey]
+	# 				atwd_id = launch.which_atwd
+	# 				beacon_00 = calib.atwd_beacon_baseline[(0,0)]*I3Units.mV
+
+	# 				print(beacon_00)
+
+	# 				# atwd_id = launch.which_atwd
+	# 				# for atwd_chan in range(3):
+	# 				# 	baseline = calibration.get_atwd_beacon_baseline(atwd_id, atwd_chan)
+	# 				# 	print('Baseline is {}'.format(baseline))						
+	# 				# print("Omkey {}, Launch {}, awtd is {}".format(omkey, ilaunch, atwd_id))
+	# 				# baseline = calibration.cal.GetATWDBeaconBaseline(atwd_id)
+
+
+	# 				# trace = launc.raw_atwd[atwd_chan]
+	# 				# bins = launch.raw_atwd[atwd_chan]
+	# 				# for bin in bins:
+	# 				# 	channel = bin.channel
+	# 				# 	print('Bin {}, channel {}'.format(bin, channel))
+
+
+	# 				# # loop over atwd channels (there are 3, 0->2)
+	# 				# for atwd_chan in range(3):
+
+	# 				# 	# how many bins did that channel record?
+	# 				# 	nbins = len(launch.raw_atwd[atwd_chan])
+	# 				# 	if nbins > 0:
+
+
+def find_high_qe_doms(calibration):
+
+	high_qe_doms = []
+
+	for omkey in calibration.dom_cal.keys():
+		dom_cal = calibration.dom_cal[omkey]
+		if dom_cal.relative_dom_eff > 1.1:
+			high_qe_doms.append(omkey)
+
+	return high_qe_doms
+
+def LoopEHEPulses(frame, doBTW=True, excludeHighQE=False, excludeFADC=False):
 	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
 		return False
+	
+	high_qe_doms = []
+	if excludeHighQE:
+		if not 'I3Calibration' in frame or not 'I3DetectorStatus' in frame:
+			icetray.logging.log_fatal('I3Calibration or I3Detector status not in frame, but excludeHighQE=True')
+
+		calibration = frame['I3Calibration']
+		high_qe_doms = find_high_qe_doms(calibration)
 
 	# the way it is *actually* calculated in Portia 
 	# https://code.icecube.wisc.edu/projects/icecube/browser/IceCube/meta-projects/combo/trunk/portia/private/portia/I3Portia.cxx#L604
@@ -92,13 +206,77 @@ def LoopEHEPulses(frame, doBTW=True):
 	# use makeBestPulse=True
 	splitted_dom_map = frame.Get('splittedDOMMap')
 	fadc_pulse_map = frame.Get('EHEFADCPortiaPulse')
+	atwd_pulse_map = frame.Get('EHEATWDPortiaPulse')
 	best_pulse_map = frame.Get('EHEBestPortiaPulse')
 
+	which_atwd_pulses = best_pulse_map
+	if excludeFADC:
+		which_atwd_pulses=atwd_pulse_map
+
 	best_npe, portia_omkey_npe_dict = get_portia_omkey_npe_dict(splitted_dom_map, 
-		fadc_pulse_map, best_pulse_map)
+		fadc_pulse_map, which_atwd_pulses, high_qe_doms=high_qe_doms, excludeFADC=excludeFADC)
 
 	print("Portia NPE is {:.2f}".format(best_npe))
-	# return omkey_npe_map
+
+	# if not 'I3Calibration' in frame or not 'I3DetectorStatus' in frame:
+	# 	icetray.logging.log_fatal('I3Calibration or I3Detector status not in frame')
+
+	# if not 'HLCOfflineCleanInIceRawDataWODC' in frame:
+	# 	icetray.logging.log_fatal('HLCOfflineCleanInIceRawDataWODC ism not in the frame')
+
+	# calibration = frame['I3Calibration']
+	# launch_series_map = frame['HLCOfflineCleanInIceRawDataWODC']
+	# dict_omkey_baselines = get_digitizer_baselines_dict(calibration, atwd_pulse_map, splitted_dom_map)
+
+
+	# portia_omkey_baseline_fadc_dict = get_portia_omkey_baseline_dict(splitted_dom_map, 
+	# 	fadc_pulse_map)
+
+	# portia_omkey_baseline_best_dict = get_portia_omkey_baseline_dict(splitted_dom_map, 
+	# 	best_pulse_map)
+
+
+	# write to disk
+	# atwd_0_0 = []
+	# atwd_0_1 = []
+	# atwd_0_2 = []
+	# atwd_1_0 = []
+	# atwd_1_1 = []
+	# atwd_1_2 = []
+	# portia = []
+	# strings = []
+	# doms = []
+	# for omkey, container in dict_omkey_baselines.items():
+	# 		strings.append(omkey.string)
+	# 		doms.append(omkey.om)
+	# 		atwd_0_0.append(container[0])
+	# 		atwd_0_1.append(container[1])
+	# 		atwd_0_2.append(container[2])
+	# 		atwd_1_0.append(container[3])
+	# 		atwd_1_1.append(container[4])
+	# 		atwd_1_2.append(container[5])
+	# 		portia.append(container[6])
+	# atwd_0_0 = np.asarray(atwd_0_0)
+	# atwd_0_1 = np.asarray(atwd_0_1)
+	# atwd_0_2 = np.asarray(atwd_0_2)
+	# atwd_1_0 = np.asarray(atwd_1_0)
+	# atwd_1_1 = np.asarray(atwd_1_1)
+	# atwd_1_2 = np.asarray(atwd_1_2)
+	# portia = np.asarray(portia)
+
+	# file_out = h5py.File('compare_baselines.hdf5', 'w')
+	# data_overlap = file_out.create_group('baselines')
+	# data_overlap.create_dataset('atwd_0_0', data=atwd_0_0)
+	# data_overlap.create_dataset('atwd_0_1', data=atwd_0_1)
+	# data_overlap.create_dataset('atwd_0_2', data=atwd_0_2)
+	# data_overlap.create_dataset('atwd_1_0', data=atwd_1_0)
+	# data_overlap.create_dataset('atwd_1_1', data=atwd_1_1)
+	# data_overlap.create_dataset('atwd_1_2', data=atwd_1_2)
+	# data_overlap.create_dataset('portia', data=portia)
+	# data_overlap.create_dataset('strings', data=strings)
+	# data_overlap.create_dataset('doms', data=doms)
+	# file_out.close()
+
 
 def get_hit_map(frame,pulse_mask_name):
 	if type(frame[pulse_mask_name]) == dataclasses.I3RecoPulseSeriesMap:
@@ -107,7 +285,9 @@ def get_hit_map(frame,pulse_mask_name):
 		hit_map = frame[pulse_mask_name].apply(frame)
 	return hit_map
 
-def get_casaulqtot_omkey_npe_dict(calibration, status, vertex_time, causality_window, hit_map, max_q_per_dom):
+def get_casaulqtot_omkey_npe_dict(calibration, status, vertex_time, 
+	causality_window, hit_map, max_q_per_dom,
+	exclude_high_qe_doms = True):
 	
 	causal_qtot=0.;
 	omkey_npe_dict = {}; # for all the DOMs
@@ -126,6 +306,7 @@ def get_casaulqtot_omkey_npe_dict(calibration, status, vertex_time, causality_wi
 
 		# loop pulses
 		for p in pulses:
+			# print(p.flags)
 			if (p.time >= vertex_time and p.time < vertex_time+causality_window):
 				charge_this_dom+=p.charge
 		omkey_npe_dict[omkey] = charge_this_dom
@@ -137,7 +318,7 @@ def get_casaulqtot_omkey_npe_dict(calibration, status, vertex_time, causality_wi
 		string = omkey.string
 		if string in [79, 80, 81, 82, 83, 84, 85, 86]:
 			continue
-		if dom_cal.relative_dom_eff > 1.1:
+		if dom_cal.relative_dom_eff > 1.1 and exclude_high_qe_doms:
 			continue				
 		if charge_this_dom < max_q_per_dom:
 			omkey_npe_dict_noDC[omkey] = charge_this_dom
@@ -163,7 +344,8 @@ def LoopHESEPulses(frame, pulses):
 	
 	print("Causal Qtot is {:.2f}".format(causal_qtot))
 
-def Compare_HESE_EHE(frame, hese_pulses):
+def Compare_HESE_EHE(frame, hese_pulses, table_name=None, exclude_fadc=False):
+
 	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
 		return False
 
@@ -183,11 +365,15 @@ def Compare_HESE_EHE(frame, hese_pulses):
 	# now, EHE
 	splitted_dom_map = frame.Get('splittedDOMMap')
 	fadc_pulse_map = frame.Get('EHEFADCPortiaPulse')
+	atwd_pulse_map = frame.Get('EHEATWDPortiaPulse')
 	best_pulse_map = frame.Get('EHEBestPortiaPulse')
 
-	best_npe, portia_omkey_npe_dict = get_portia_omkey_npe_dict(splitted_dom_map, 
-		fadc_pulse_map, best_pulse_map)
+	which_atwd_pulses = best_pulse_map
+	if exclude_fadc:
+		which_atwd_pulses=atwd_pulse_map
 
+	best_npe, portia_omkey_npe_dict = get_portia_omkey_npe_dict(splitted_dom_map, 
+		fadc_pulse_map, which_atwd_pulses, excludeFADC=exclude_fadc)
 
 	# check the overlap
 	missing_in_hese = []
@@ -221,7 +407,9 @@ def Compare_HESE_EHE(frame, hese_pulses):
 	strings = np.asarray(strings)
 	doms = np.asarray(doms)
 
-	file_out = h5py.File('comparison_overlap.hdf5', 'w')
+	if table_name is None:
+		table_name='comparison_overlap_{}.hdf5'.format(hese_pulses)
+	file_out = h5py.File(table_name, 'w')
 	data_overlap = file_out.create_group('data_overlap')
 	data_overlap.create_dataset('hese_overlap', data=hese_overlap)
 	data_overlap.create_dataset('ehe_overlap', data=ehe_overlap)

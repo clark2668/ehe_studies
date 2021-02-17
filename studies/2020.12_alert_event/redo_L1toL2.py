@@ -63,5 +63,5 @@ tray.AddSegment(HitCleaningEHE, 'eheclean',
 
 # tray.AddModule(TesterModule, 'tester', Streams=[icetray.I3Frame.DAQ])
 # tray.Add("Dump")
-tray.Add("I3Writer", filename="134777_8912764_L2.i3.zst")
+tray.Add("I3Writer", filename="134777_8912764_L2_noFADC.i3.zst")
 tray.Execute()
