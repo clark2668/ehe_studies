@@ -48,7 +48,7 @@ def get_portia_omkey_baseline_dict(splitted_dom_map, pulse_map):
 	return omkey_baseline_dict
 
 def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map, 
-	high_qe_doms = [], doBTW=True, excludeFADC=False):
+	high_qe_doms = [], doBTW=True, excludeFADC=False, excludeATWD=False):
 	'''
 	This is a roughly replication of the MakePortiaEvent function in I3Portia.xx
 	We check all of the launched omkeys in the splitted_dom_map
@@ -58,6 +58,8 @@ def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map,
 	as the NPE estimate for that event.
 	We will return a dict of the omkey to the NPE estimate (the omkey_npe_dict)
 	'''
+	if excludeFADC and excludeATWD:
+		icetray.logging.log_fatal("excludeFADC={} and excludeATWD={}, which doesn't make sense. Abort!".format(excludeFADC, excludeATWD))
 
 	# now set up window for cleaning
 	largest_time_fadc = find_time_of_largest_pulse(fadc_pulse_map)
@@ -92,6 +94,9 @@ def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map,
 		this_npe = 0
 		if excludeFADC:
 			this_npe += this_atwd
+		elif excludeATWD:
+			# print('Omkey {}, portia fadc {}'.format(omkey, this_fadc))
+			this_npe += this_fadc
 		elif this_fadc > this_atwd:
 			this_npe += this_fadc
 		elif this_atwd > this_fadc:
@@ -306,6 +311,7 @@ def get_casaulqtot_omkey_npe_dict(calibration, status, vertex_time,
 
 		# loop pulses
 		for p in pulses:
+			# print("omkey {}, pulse charge {}".format(omkey, p.charge))
 			# print(p.flags)
 			if (p.time >= vertex_time and p.time < vertex_time+causality_window):
 				charge_this_dom+=p.charge
@@ -344,7 +350,7 @@ def LoopHESEPulses(frame, pulses):
 	
 	print("Causal Qtot is {:.2f}".format(causal_qtot))
 
-def Compare_HESE_EHE(frame, hese_pulses, table_name=None, exclude_fadc=False):
+def Compare_HESE_EHE(frame, hese_pulses, table_name=None, exclude_fadc=False, exclude_atwd=False):
 
 	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
 		return False
@@ -373,7 +379,7 @@ def Compare_HESE_EHE(frame, hese_pulses, table_name=None, exclude_fadc=False):
 		which_atwd_pulses=atwd_pulse_map
 
 	best_npe, portia_omkey_npe_dict = get_portia_omkey_npe_dict(splitted_dom_map, 
-		fadc_pulse_map, which_atwd_pulses, excludeFADC=exclude_fadc)
+		fadc_pulse_map, which_atwd_pulses, excludeFADC=exclude_fadc, excludeATWD=exclude_atwd)
 
 	# check the overlap
 	missing_in_hese = []
