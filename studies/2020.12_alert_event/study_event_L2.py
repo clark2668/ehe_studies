@@ -9,7 +9,7 @@ from filter import HeseFilter, LoopHESEPulses, LoopEHEPulses, Compare_HESE_EHE
 # that already has the GCD file prepended
 
 use_fadc=True
-use_atwd=False
+use_atwd=True
 hese_pulses = 'SplitInIcePulses'
 
 tray = I3Tray()
@@ -28,19 +28,21 @@ tray.AddModule("I3Reader", filename='134777_8912764_L2_FADC_{}_ATWD_{}.i3.zst'.f
 # 	Streams=[icetray.I3Frame.Physics]
 # 	)
 
-# tray.AddModule(LoopEHEPulses, "LoopPortiaPulses",
-# 	excludeHighQE=True,
-# 	excludeFADC=not use_fadc,
-# 	Streams=[icetray.I3Frame.Physics]
-# 	)
-
-tray.AddModule(Compare_HESE_EHE, "Compare",
-	hese_pulses=hese_pulses,
-	exclude_fadc= not use_fadc,
-	exclude_atwd= not use_atwd,
-	table_name='comparison_overlap_{}_FADC_{}_ATWD_{}.hdf5'.format(hese_pulses, use_fadc, use_atwd),
+tray.AddModule(LoopEHEPulses, "LoopPortiaPulses",
+	excludeHighQE=True,
+	excludeFADC=not use_fadc,
+	excludeATWD=not use_atwd,
+	writeBaselines=True,
 	Streams=[icetray.I3Frame.Physics]
 	)
+
+# tray.AddModule(Compare_HESE_EHE, "Compare",
+# 	hese_pulses=hese_pulses,
+# 	exclude_fadc= not use_fadc,
+# 	exclude_atwd= not use_atwd,
+# 	table_name='comparison_overlap_{}_FADC_{}_ATWD_{}.hdf5'.format(hese_pulses, use_fadc, use_atwd),
+# 	Streams=[icetray.I3Frame.Physics]
+# 	)
 
 # tray.Add("I3Writer", filename="quick.i3.zst")
 tray.Execute()

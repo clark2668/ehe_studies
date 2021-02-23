@@ -108,34 +108,39 @@ def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map,
 	
 	return best_npe, omkey_npe_dict
 
-def get_digitizer_baselines_dict(calibration, pulse_map, splitted_dom_map):
+def get_digitizer_baselines_dict(calibration, splitted_dom_map, best_pulse_map, atwd_pulse_map, fadc_pulse_map):
 	'''
 	Get dict of digitizer baselines
 	'''
 	dict_digitizer_baselines = {}
 
 	for omkey, launch_times in splitted_dom_map:
-		if omkey in pulse_map:
 
-			this_omkey_baselines = [] # order will be [atwd0-ch0 ch1 ch2] [atwd1-ch0 ch1 ch2] [portia]
+		this_omkey_baselines = {}
+		this_omkey_baselines['beacon'] = []
+		# first, the atwd
+		# order will be [atwd0 ch0, atwd0 ch1, atwd0 ch2, atwd1 ch0, atwd1 ch1, atwd2 ch2]
+		calib = calibration.dom_cal[omkey]
+		for atwd in range(2): # first, the atwds
+			for channel in range(3):
+				beacon_baseline = calib.atwd_beacon_baseline[(atwd,channel)]
+				this_omkey_baselines['beacon'].append(beacon_baseline)
+		this_omkey_baselines['beacon'].append(calib.fadc_beacon_baseline) # and the fadc
 
-			# first, atwd
-			calib = calibration.dom_cal[omkey]
-			for atwd in range(2):
-				for channel in range(3):
-					beacon_baseline = calib.atwd_beacon_baseline[(atwd,channel)]
-					# print("Omkey {}, atwd {}, chan {}: {}".format(omkey, atwd, channel, beacon_baseline))
-					this_omkey_baselines.append(beacon_baseline)
-			
-			# then portia
-			pulse = pulse_map[omkey]
-			portia_baseline = pulse.GetBaseLine() #/I3Units.millivolt
-			# print("Omkey {} portia baseline {}".format(omkey, portia_baseline))
-			this_omkey_baselines.append(portia_baseline)
 
-			dict_digitizer_baselines[omkey] = this_omkey_baselines
+		# then, portia
+		# order will be [best, atwd, fadc]
+		this_omkey_baselines['portia'] = [-1e15, -1e15, -1e15] # some enormous and unphysical number so I can tag it later
+		if omkey in best_pulse_map:
+			this_omkey_baselines['portia'][0] = best_pulse_map[omkey].GetBaseLine()
+		if omkey in atwd_pulse_map:
+			this_omkey_baselines['portia'][1] = atwd_pulse_map[omkey].GetBaseLine()
+		if omkey in fadc_pulse_map:
+			this_omkey_baselines['portia'][2] = fadc_pulse_map[omkey].GetBaseLine()
 
-		print("Omkey {}, baselines {}".format(omkey, this_omkey_baselines))
+
+		# store the dict
+		dict_digitizer_baselines[omkey] = this_omkey_baselines
 
 	return dict_digitizer_baselines
 
@@ -189,7 +194,7 @@ def find_high_qe_doms(calibration):
 
 	return high_qe_doms
 
-def LoopEHEPulses(frame, doBTW=True, excludeHighQE=False, excludeFADC=False):
+def LoopEHEPulses(frame, doBTW=True, excludeHighQE=False, excludeFADC=False, excludeATWD=False, writeBaselines=False):
 	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
 		return False
 	
@@ -219,68 +224,87 @@ def LoopEHEPulses(frame, doBTW=True, excludeHighQE=False, excludeFADC=False):
 		which_atwd_pulses=atwd_pulse_map
 
 	best_npe, portia_omkey_npe_dict = get_portia_omkey_npe_dict(splitted_dom_map, 
-		fadc_pulse_map, which_atwd_pulses, high_qe_doms=high_qe_doms, excludeFADC=excludeFADC)
-
-	print("Portia NPE is {:.2f}".format(best_npe))
-
-	# if not 'I3Calibration' in frame or not 'I3DetectorStatus' in frame:
-	# 	icetray.logging.log_fatal('I3Calibration or I3Detector status not in frame')
-
-	# if not 'HLCOfflineCleanInIceRawDataWODC' in frame:
-	# 	icetray.logging.log_fatal('HLCOfflineCleanInIceRawDataWODC ism not in the frame')
-
-	# calibration = frame['I3Calibration']
-	# launch_series_map = frame['HLCOfflineCleanInIceRawDataWODC']
-	# dict_omkey_baselines = get_digitizer_baselines_dict(calibration, atwd_pulse_map, splitted_dom_map)
+		fadc_pulse_map, which_atwd_pulses, high_qe_doms=high_qe_doms, 
+		excludeFADC=excludeFADC, excludeATWD=excludeATWD)
 
 
-	# portia_omkey_baseline_fadc_dict = get_portia_omkey_baseline_dict(splitted_dom_map, 
-	# 	fadc_pulse_map)
+	if writeBaselines:
 
-	# portia_omkey_baseline_best_dict = get_portia_omkey_baseline_dict(splitted_dom_map, 
-	# 	best_pulse_map)
+		if not 'I3Calibration' in frame or not 'I3DetectorStatus' in frame:
+			icetray.logging.log_fatal('I3Calibration or I3Detector status not in frame')
+
+		if not 'HLCOfflineCleanInIceRawDataWODC' in frame:
+			icetray.logging.log_fatal('HLCOfflineCleanInIceRawDataWODC ism not in the frame')
+
+		calibration = frame['I3Calibration']
+		launch_series_map = frame['HLCOfflineCleanInIceRawDataWODC']
+		dict_omkey_baselines = get_digitizer_baselines_dict(calibration=calibration, 
+			splitted_dom_map = splitted_dom_map,
+			best_pulse_map = best_pulse_map, 
+			atwd_pulse_map = atwd_pulse_map, 
+			fadc_pulse_map = fadc_pulse_map)
+
+		# portia_omkey_baseline_fadc_dict = get_portia_omkey_baseline_dict(splitted_dom_map, 
+		# 	fadc_pulse_map)
+
+		# portia_omkey_baseline_best_dict = get_portia_omkey_baseline_dict(splitted_dom_map, 
+		# 	best_pulse_map)
+
+		# write to disk
+		beacon_atwd_0_0 = []
+		beacon_atwd_0_1 = []
+		beacon_atwd_0_2 = []
+		beacon_atwd_1_0 = []
+		beacon_atwd_1_1 = []
+		beacon_atwd_1_2 = []
+		beacon_fadc = []
+		portia_best = []
+		portia_atwd = []
+		portia_fadc = []
+		strings = []
+		doms = []
+		for omkey, container in dict_omkey_baselines.items():
+				strings.append(omkey.string)
+				doms.append(omkey.om)
+				# beacon
+				beacon_atwd_0_0.append(container['beacon'][0])
+				beacon_atwd_0_1.append(container['beacon'][1])
+				beacon_atwd_0_2.append(container['beacon'][2])
+				beacon_atwd_1_0.append(container['beacon'][3])
+				beacon_atwd_1_1.append(container['beacon'][4])
+				beacon_atwd_1_2.append(container['beacon'][5])
+				beacon_fadc.append(container['beacon'][6])
+				# portia
+				portia_best.append(container['portia'][0])
+				portia_atwd.append(container['portia'][1])
+				portia_fadc.append(container['portia'][2])
+		beacon_atwd_0_0 = np.asarray(beacon_atwd_0_0)
+		beacon_atwd_0_1 = np.asarray(beacon_atwd_0_1)
+		beacon_atwd_0_2 = np.asarray(beacon_atwd_0_2)
+		beacon_atwd_1_0 = np.asarray(beacon_atwd_1_0)
+		beacon_atwd_1_1 = np.asarray(beacon_atwd_1_1)
+		beacon_atwd_1_2 = np.asarray(beacon_atwd_1_2)
+		beacon_fadc = np.asarray(beacon_fadc)
+		portia_best = np.asarray(portia_best)
+		portia_atwd = np.asarray(portia_atwd)
+		portia_fadc = np.asarray(portia_fadc)
 
 
-	# write to disk
-	# atwd_0_0 = []
-	# atwd_0_1 = []
-	# atwd_0_2 = []
-	# atwd_1_0 = []
-	# atwd_1_1 = []
-	# atwd_1_2 = []
-	# portia = []
-	# strings = []
-	# doms = []
-	# for omkey, container in dict_omkey_baselines.items():
-	# 		strings.append(omkey.string)
-	# 		doms.append(omkey.om)
-	# 		atwd_0_0.append(container[0])
-	# 		atwd_0_1.append(container[1])
-	# 		atwd_0_2.append(container[2])
-	# 		atwd_1_0.append(container[3])
-	# 		atwd_1_1.append(container[4])
-	# 		atwd_1_2.append(container[5])
-	# 		portia.append(container[6])
-	# atwd_0_0 = np.asarray(atwd_0_0)
-	# atwd_0_1 = np.asarray(atwd_0_1)
-	# atwd_0_2 = np.asarray(atwd_0_2)
-	# atwd_1_0 = np.asarray(atwd_1_0)
-	# atwd_1_1 = np.asarray(atwd_1_1)
-	# atwd_1_2 = np.asarray(atwd_1_2)
-	# portia = np.asarray(portia)
-
-	# file_out = h5py.File('compare_baselines.hdf5', 'w')
-	# data_overlap = file_out.create_group('baselines')
-	# data_overlap.create_dataset('atwd_0_0', data=atwd_0_0)
-	# data_overlap.create_dataset('atwd_0_1', data=atwd_0_1)
-	# data_overlap.create_dataset('atwd_0_2', data=atwd_0_2)
-	# data_overlap.create_dataset('atwd_1_0', data=atwd_1_0)
-	# data_overlap.create_dataset('atwd_1_1', data=atwd_1_1)
-	# data_overlap.create_dataset('atwd_1_2', data=atwd_1_2)
-	# data_overlap.create_dataset('portia', data=portia)
-	# data_overlap.create_dataset('strings', data=strings)
-	# data_overlap.create_dataset('doms', data=doms)
-	# file_out.close()
+		file_out = h5py.File('compare_baselines.hdf5', 'w')
+		data_overlap = file_out.create_group('baselines')
+		data_overlap.create_dataset('beacon_atwd_0_0', data=beacon_atwd_0_0)
+		data_overlap.create_dataset('beacon_atwd_0_1', data=beacon_atwd_0_1)
+		data_overlap.create_dataset('beacon_atwd_0_2', data=beacon_atwd_0_2)
+		data_overlap.create_dataset('beacon_atwd_1_0', data=beacon_atwd_1_0)
+		data_overlap.create_dataset('beacon_atwd_1_1', data=beacon_atwd_1_1)
+		data_overlap.create_dataset('beacon_atwd_1_2', data=beacon_atwd_1_2)
+		data_overlap.create_dataset('beacon_fadc', data=beacon_fadc)
+		data_overlap.create_dataset('portia_best', data=portia_best)
+		data_overlap.create_dataset('portia_atwd', data=portia_atwd)
+		data_overlap.create_dataset('portia_fadc', data=portia_fadc)
+		data_overlap.create_dataset('strings', data=strings)
+		data_overlap.create_dataset('doms', data=doms)
+		file_out.close()
 
 
 def get_hit_map(frame,pulse_mask_name):

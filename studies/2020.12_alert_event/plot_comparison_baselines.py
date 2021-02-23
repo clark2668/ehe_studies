@@ -2,12 +2,11 @@ import numpy as np
 import h5py as h5py
 import matplotlib.pyplot as plt
 
-which_atwd = 'atwd_0_1'
-
+which_atwd = 'beacon_atwd_0_1'
 file_in = h5py.File('compare_baselines.hdf5', 'r')
 data = file_in['baselines']
 atwd_0_0 = np.asarray(data[which_atwd])
-portia = np.asarray(data['portia'])
+portia = np.asarray(data['portia_atwd'])
 strings = np.asarray(data['strings'])
 doms = np.asarray(data['doms'])
 
