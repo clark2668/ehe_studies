@@ -123,20 +123,25 @@ def get_digitizer_baselines_dict(calibration, splitted_dom_map, best_pulse_map, 
 		calib = calibration.dom_cal[omkey]
 		for atwd in range(2): # first, the atwds
 			for channel in range(3):
-				beacon_baseline = calib.atwd_beacon_baseline[(atwd,channel)]
-				this_omkey_baselines['beacon'].append(beacon_baseline)
-		this_omkey_baselines['beacon'].append(calib.fadc_beacon_baseline) # and the fadc
+				atwd_gain = calib.atwd_gain[channel]
+				atwd_beacon_baseline = calib.atwd_beacon_baseline[(atwd,channel)]/I3Units.V
+				this_omkey_baselines['beacon'].append(atwd_gain*atwd_beacon_baseline) # the atwd (should be mV?)
+		
+		# second, the fadc (there is only one of these)
+		fadc_gain = calib.fadc_gain
+		fadc_beacon_baseline = calib.fadc_beacon_baseline/I3Units.V #need this for units to work right
+		this_omkey_baselines['beacon'].append(fadc_gain*fadc_beacon_baseline) # and the fadc (should be mV)
 
 
 		# then, portia
 		# order will be [best, atwd, fadc]
 		this_omkey_baselines['portia'] = [-1e15, -1e15, -1e15] # some enormous and unphysical number so I can tag it later
 		if omkey in best_pulse_map:
-			this_omkey_baselines['portia'][0] = best_pulse_map[omkey].GetBaseLine()
+			this_omkey_baselines['portia'][0] = best_pulse_map[omkey].GetBaseLine()/I3Units.mV
 		if omkey in atwd_pulse_map:
-			this_omkey_baselines['portia'][1] = atwd_pulse_map[omkey].GetBaseLine()
+			this_omkey_baselines['portia'][1] = atwd_pulse_map[omkey].GetBaseLine()/I3Units.mV
 		if omkey in fadc_pulse_map:
-			this_omkey_baselines['portia'][2] = fadc_pulse_map[omkey].GetBaseLine()
+			this_omkey_baselines['portia'][2] = fadc_pulse_map[omkey].GetBaseLine()/I3Units.mV
 
 
 		# store the dict
@@ -205,6 +210,7 @@ def LoopEHEPulses(frame, doBTW=True, excludeHighQE=False, excludeFADC=False, exc
 
 		calibration = frame['I3Calibration']
 		high_qe_doms = find_high_qe_doms(calibration)
+	high_qe_doms = []
 
 	# the way it is *actually* calculated in Portia 
 	# https://code.icecube.wisc.edu/projects/icecube/browser/IceCube/meta-projects/combo/trunk/portia/private/portia/I3Portia.cxx#L604
@@ -226,6 +232,8 @@ def LoopEHEPulses(frame, doBTW=True, excludeHighQE=False, excludeFADC=False, exc
 	best_npe, portia_omkey_npe_dict = get_portia_omkey_npe_dict(splitted_dom_map, 
 		fadc_pulse_map, which_atwd_pulses, high_qe_doms=high_qe_doms, 
 		excludeFADC=excludeFADC, excludeATWD=excludeATWD)
+
+	print("Best NPE is {}".format(best_npe))
 
 
 	if writeBaselines:

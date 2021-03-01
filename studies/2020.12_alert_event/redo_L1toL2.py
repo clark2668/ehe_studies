@@ -8,9 +8,10 @@ from icecube.filterscripts.offlineL2.level2_HitCleaning_EHE import HitCleaningEH
 from icecube.filterscripts.offlineL2.Globals import ehe_wg, ehe_wg_Qstream
 
 from icecube.phys_services.which_split import which_split
+# icetray.set_log_level(icetray.I3LogLevel.LOG_TRACE)
 
 tray = I3Tray()
-tray.AddModule("I3Reader", filenamelist=['data/Level2_IC86.2020_data_Run00134777_1209_80_564_GCD.i3.zst', '134777_8912764_L1.i3']) #GCD first
+tray.AddModule("I3Reader", filenamelist=['data/Level2_IC86.2020_data_Run00134777_1209_80_564_GCD.i3.zst', 'data/134777_8912764_L1.i3']) #GCD first
 
 # we are following closely the official L2 scripts
 # https://github.com/icecube/IceTrayCombo/blob/d4cff8945bb5f369bc4268b0c6189881129d235c/filterscripts/python/offlineL2/level2_all_filters.py
@@ -64,7 +65,12 @@ tray.AddSegment(HitCleaningEHE, 'eheclean',
 # tray.AddModule(TesterModule, 'tester', Streams=[icetray.I3Frame.DAQ])
 # tray.Add("Dump")
 # tray.Add("I3Writer", filename="134777_8912764_L2_standard.i3.zst")
-# tray.Add("I3Writer", filename="134777_8912764_L2_FADC_True_ATWD_True.i3.zst")
+# tray.Add("I3Writer", filename="134777_8912764_L2_beacon_fadc.i3.zst")
 # tray.Add("I3Writer", filename="134777_8912764_L2_FADC_True_ATWD_False.i3.zst")
-tray.Add("I3Writer", filename="134777_8912764_L2_FADC_False_ATWD_True.i3.zst")
+# tray.Add("I3Writer", filename="134777_8912764_L2_FADC_False_ATWD_True.i3.zst")
+# tray.Add("I3Writer", filename="134777_8912764_L2_FADC_True_ATWD_True_FADCBeacon_False_NoiseCut_False.i3.zst")
+# tray.Add("I3Writer", filename="134777_8912764_L2_FADC_True_ATWD_True_FADCBeacon_True_NoiseCut_False.i3.zst")
+tray.Add("I3Writer", filename="134777_8912764_L2_FADC_True_ATWD_True_FADCBeacon_True_NoiseCut_True.i3.zst")
+# tray.Add("I3Writer", filename="messy.i3.zst")
+
 tray.Execute()
