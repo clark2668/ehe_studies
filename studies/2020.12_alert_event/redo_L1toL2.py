@@ -58,7 +58,8 @@ tray.AddSegment(EHECalibration, 'ehecalib',
 
 # EHE Hit Cleaning
 tray.AddSegment(HitCleaningEHE, 'eheclean',
-	inATWD='EHECalibratedATWD_Wave', inFADC = 'EHECalibratedFADC_Wave',
+	# inATWD='EHECalibratedATWD_Wave', inFADC = 'EHECalibratedFADC_Wave',
+	inATWD='CalibratedWaveforms_ATWD', inFADC = 'CalibratedWaveforms_FADC',
 	If=which_split(split_name='InIceSplit') & (lambda f: ehe_wg(f))
 	)
 
@@ -70,7 +71,8 @@ tray.AddSegment(HitCleaningEHE, 'eheclean',
 # tray.Add("I3Writer", filename="134777_8912764_L2_FADC_False_ATWD_True.i3.zst")
 # tray.Add("I3Writer", filename="134777_8912764_L2_FADC_True_ATWD_True_FADCBeacon_False_NoiseCut_False.i3.zst")
 # tray.Add("I3Writer", filename="134777_8912764_L2_FADC_True_ATWD_True_FADCBeacon_True_NoiseCut_False.i3.zst")
-tray.Add("I3Writer", filename="134777_8912764_L2_FADC_True_ATWD_True_FADCBeacon_True_NoiseCut_True.i3.zst")
+# tray.Add("I3Writer", filename="134777_8912764_L2_FADC_True_ATWD_True_FADCBeacon_True_NoiseCut_True_EHEWave_True.i3.zst")
+tray.Add("I3Writer", filename="134777_8912764_L2_FADC_True_ATWD_True_FADCBeacon_True_NoiseCut_True_EHEWave_False.i3.zst")
 # tray.Add("I3Writer", filename="messy.i3.zst")
 
 tray.Execute()

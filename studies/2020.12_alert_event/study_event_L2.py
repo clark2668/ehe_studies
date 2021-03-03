@@ -13,14 +13,15 @@ use_fadc=True
 use_atwd=True
 beacon_fadc=True
 noise_cut=True
-do_causal_qtot=True
+do_causal_qtot=False
+use_ehewave=True
 
 tray = I3Tray()
 # tray.AddModule("I3Reader", filename='134777_8912764_gcd.i3.zst')
 # tray.AddModule("I3Reader", filename='134777_8912764_L2_noFADC.i3.zst')
 # tray.AddModule("I3Reader", filename='134777_8912764_L2_FADC_{}_ATWD_{}.i3.zst'.format(use_fadc,use_atwd))
 # tray.AddModule("I3Reader", filename='134777_8912764_L2_FADC_{}_ATWD_{}_use_beacon_fadc.i3.zst'.format(use_fadc,use_atwd))
-tray.AddModule("I3Reader", filename='134777_8912764_L2_FADC_{}_ATWD_{}_FADCBeacon_{}_NoiseCut_{}.i3.zst'.format(use_fadc, use_atwd, beacon_fadc, noise_cut))
+tray.AddModule("I3Reader", filename='134777_8912764_L2_FADC_{}_ATWD_{}_FADCBeacon_{}_NoiseCut_{}_EHEWave_{}.i3.zst'.format(use_fadc, use_atwd, beacon_fadc, noise_cut, use_ehewave))
 
 
 # then run the HESE filter on it
@@ -32,7 +33,7 @@ tray.AddModule("I3Reader", filename='134777_8912764_L2_FADC_{}_ATWD_{}_FADCBeaco
 # tray.AddModule(LoopHESEPulses, "LoopPulses",
 # 	pulses=hese_pulses,
 # 	do_causal = do_causal_qtot,
-# 	do_comparison=True,
+# 	do_comparison=False,
 # 	Streams=[icetray.I3Frame.Physics]
 # 	)
 
@@ -41,7 +42,7 @@ tray.AddModule("I3Reader", filename='134777_8912764_L2_FADC_{}_ATWD_{}_FADCBeaco
 # 	excludeFADC=not use_fadc,
 # 	excludeATWD=not use_atwd,
 # 	writeBaselines=False,
-# 	doBTW=False,
+# 	doBTW=True,
 # 	Streams=[icetray.I3Frame.Physics]
 # 	)
 
@@ -50,7 +51,7 @@ tray.AddModule(Compare_HESE_EHE, "Compare",
 	exclude_fadc= not use_fadc,
 	exclude_atwd= not use_atwd,
 	do_causal=do_causal_qtot,
-	table_name='comparison_overlap_HESE_{}_FADC_{}_ATWD_{}_FADCBeacon_{}_NoiseCut_{}_CausalQtot_{}.hdf5'.format(hese_pulses, use_fadc, use_atwd, beacon_fadc, noise_cut, do_causal_qtot),
+	table_name='comparison_overlap_HESE_{}_FADC_{}_ATWD_{}_FADCBeacon_{}_NoiseCut_{}_CausalQtot_{}_EHEWave_{}.hdf5'.format(hese_pulses, use_fadc, use_atwd, beacon_fadc, noise_cut, do_causal_qtot, use_ehewave),
 	# table_name='comparison_overlap_standard.hdf5',	
 	Streams=[icetray.I3Frame.Physics]
 	)

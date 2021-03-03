@@ -22,6 +22,10 @@ def find_time_of_largest_pulse(portia_pulse_map):
 def get_portia_pulse_values(portia_pulse, largest_time, window_start, window_end, enforce_window):
 	npe = portia_pulse.GetEstimatedNPE()
 	t10 = portia_pulse.GetRecoPulse().time
+	# print('t10 is {}'.format(t10))
+	# print('largest time {}'.format(largest_time))
+	# print('window start {}'.format(window_start))
+	# print('window end {}'.format(window_end))
 	npe_out = npe
 	if enforce_window and not ((t10 - largest_time >= window_start) and (t10 - largest_time <= window_end)):
 		print("Skip adding npe {}".format(npe))
@@ -64,8 +68,9 @@ def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map,
 	largest_time_fadc = find_time_of_largest_pulse(fadc_pulse_map)
 	largest_time_best = find_time_of_largest_pulse(atwd_pulse_map)
 	largest_time = max(largest_time_fadc, largest_time_best)
-	start_time_btw = -4400.0*I3Units.ns
-	end_time_btw = 6400.0*I3Units.ns
+	print("Largest time is {}".format(largest_time))
+	start_time_btw = -4400.0#*I3Units.ns
+	end_time_btw = 6400.0#*I3Units.ns
 	
 	best_npe = 0.
 	omkey_npe_dict = {}
@@ -327,6 +332,7 @@ def get_homogqtot_omkey_npe_dict(calibration, status, vertex_time,
 	causal_qtot=0.;
 	omkey_npe_dict = {}; # for all the DOMs
 	omkey_npe_dict_noDC = {}; # for DOMs that are not in DC, high QE, or saturated
+	# print("Vertex time is {}".format(vertex_time))
 	
 	for omkey, pulses in hit_map.items():
 		if not omkey in calibration.dom_cal:

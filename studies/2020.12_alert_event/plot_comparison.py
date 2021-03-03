@@ -12,11 +12,12 @@ use_atwd=bool(int(sys.argv[2]))
 beacon_fadc=bool(int(sys.argv[3])) #True
 noise_cut=bool(int(sys.argv[4])) #True
 causal_qtot=bool(int(sys.argv[5]))
+ehewave =bool(int(sys.argv[6]))
 
-print("HESE Pulses: {}, Use FADC {}, Use ATWD {}, Beacon FADC {}, Noise Cut {}, Causal Qtot {}".format(hese_pulses, use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot))
+print("HESE Pulses: {}, Use FADC {}, Use ATWD {}, Beacon FADC {}, Noise Cut {}, Causal Qtot {}, EHE Wave {}".format(hese_pulses, use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot, ehewave))
 print("----------------------------")
 
-plot_causal_homog_comparison=True
+plot_causal_homog_comparison=False
 if plot_causal_homog_comparison:
 
 	data_homoq = h5py.File('comparison_overlap_HESE_SplitInIcePulses_FADC_True_ATWD_True_FADCBeacon_True_NoiseCut_True_CausalQtot_False.hdf5', 'r')
@@ -256,10 +257,10 @@ if plot_baseline_stuff:
 	del fig, axs
 
 
-plot_ehe_and_hese_comparison=False
+plot_ehe_and_hese_comparison=True
 if plot_ehe_and_hese_comparison:
 
-	file_in = h5py.File('comparison_overlap_HESE_{}_FADC_{}_ATWD_{}_FADCBeacon_{}_NoiseCut_{}_CausalQtot_{}.hdf5'.format(hese_pulses, use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot), 'r')
+	file_in = h5py.File('comparison_overlap_HESE_{}_FADC_{}_ATWD_{}_FADCBeacon_{}_NoiseCut_{}_CausalQtot_{}_EHEWave_{}.hdf5'.format(hese_pulses, use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot, ehewave), 'r')
 	data_overlap = file_in['data_overlap']
 	hese_npe = np.asarray(data_overlap['hese_overlap'])
 	ehe_npe = np.asarray(data_overlap['ehe_overlap'])
@@ -275,8 +276,9 @@ if plot_ehe_and_hese_comparison:
 		rel_diff = (this_hese - this_ehe)/this_ehe
 		this_ratio = this_hese/this_ehe
 		# print("({}, {}): EHE {:.2f}, HESE {:.2f}, rel dif {:.2f}".format(string, dom, this_ehe, this_hese, rel_diff))	
-		if this_ratio > 1.15:
-			# print("({}, {}): EHE {:.2f}, HESE {:.2f}, dif {:.2f}, ratio {:.2f}".format(string, dom, this_ehe, this_hese, this_hese-this_ehe, this_hese/this_ehe))
+		# if this_ratio > 1.15:
+		if this_hese - this_ehe > 1:
+			print("({}, {}): HESE {:6.2f}, EHE {:6.2f}, dif {:6.2f}".format(string, dom, this_hese, this_ehe, this_hese-this_ehe))
 			big_ehe.append(this_ehe)
 			big_hese.append(this_hese)
 		diff.append(rel_diff)
@@ -295,7 +297,7 @@ if plot_ehe_and_hese_comparison:
 	axs.set_ylabel('HESE NPE ({})'.format(hese_pulses))
 	axs.plot([0,300],[0,300],'--', label='1-1 line')
 	# axs.set_title('FADC = {}, ATWD = {}, FADC Beacon Baselines {}, Noise Cut'.format(use_fadc, use_atwd, beacon_fadc, noise_cut))
-	axs.set_title('Use FADC = {}, Use ATWD = {}, \nUse FADC Beacon Baselines={}, \n Use FADC Noise Cut={}, Causal Qtot={}'.format(use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot), size=10)
+	axs.set_title('Use FADC = {}, Use ATWD = {}, \nUse FADC Beacon Baselines={}, \n Use FADC Noise Cut={}, Causal Qtot={}, \nEHE Calibrated Waves {}'.format(use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot, ehewave), size=10)
 	axs.legend()
 	# axs.plot(big_ehe, big_hese, 'o', alpha=0.5, color='red')
 
@@ -303,14 +305,14 @@ if plot_ehe_and_hese_comparison:
 	print("Total charge in overlapping DOMs in EHE  is {:.2f}".format(np.sum(ehe_npe)))
 
 
-	do_log = False
+	do_log = True
 	if not do_log:
 		axs.set_xlim([-10, 300])
 		axs.set_ylim([-10, 300])
 		axs.set_aspect('equal')
 		axs.legend()
 		plt.tight_layout()
-		fig.savefig('ehenpe_vs_hesenpe_HESE_{}_FADC_{}_ATWD_{}_FADCBeacon_{}_NoiseCut_{}_CausalQtot_{}.png'.format(hese_pulses, use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot), dpi=300)
+		fig.savefig('ehenpe_vs_hesenpe_HESE_{}_FADC_{}_ATWD_{}_FADCBeacon_{}_NoiseCut_{}_CausalQtot_{}_EHEWave_{}.png'.format(hese_pulses, use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot, ehewave), dpi=300)
 		plt.close(fig)
 		del fig, axs
 	else:
@@ -320,9 +322,27 @@ if plot_ehe_and_hese_comparison:
 		axs.set_ylim([0.1, 300])
 		axs.set_aspect('equal')
 		plt.tight_layout()
-		fig.savefig('ehenpe_vs_hesenpe_HESE_{}_FADC_{}_ATWD_{}_FADCBeacon_{}_NoiseCut_{}_CausalQtot_{}_log.png'.format(hese_pulses, use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot), dpi=300)
+		fig.savefig('ehenpe_vs_hesenpe_HESE_{}_FADC_{}_ATWD_{}_FADCBeacon_{}_NoiseCut_{}_CausalQtot_{}_EHEWave_{}_log.png'.format(hese_pulses, use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot, ehewave), dpi=300)
 		plt.close(fig)
 		del fig, axs
+
+	# plot of the differences
+	# bins = np.linspace(0,25,26)
+	# bins=50
+	bins = np.linspace(-20,20,51)
+	fig, axs = plt.subplots(1,1,figsize=(5,5))
+	axs.hist(hese_npe - ehe_npe, bins=bins, alpha=0.5, label='N={}'.format(len(ratio)))#, histtype='step')
+	# axs.set_yscale('log')
+	axs.set_xlabel('HESE - EHE [pe]'.format(hese_pulses))
+	axs.set_ylabel('Number of DOMs')
+	# axs.set_xlim([-1.0, 1.0])
+	axs.set_title('Use FADC = {}, Use ATWD = {}, \nUse FADC Beacon Baselines={}, \n Use FADC Noise Cut={}, Causal Qtot={}, \nEHE Calibrated Waves {}'.format(use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot, ehewave), size=10)
+	axs.set_yscale('log')
+	axs.legend()
+	plt.tight_layout()
+	fig.savefig('ehenpe_hese_diff_HESE_{}_FADC_{}_ATWD_{}_FADCBeacon_{}_NoiseCut_{}_CausalQtot_{}_EHEWave_{}.png'.format(hese_pulses, use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot, ehewave), dpi=300)
+	del fig, axs
+
 
 	bins = np.linspace(0,25,26)
 	fig, axs = plt.subplots(1,1,figsize=(5,5))
@@ -331,14 +351,14 @@ if plot_ehe_and_hese_comparison:
 	axs.set_xlabel('EHE/HESE  [HESE={}]'.format(hese_pulses))
 	axs.set_ylabel('Number of DOMs')
 	# axs.set_xlim([-1.0, 1.0])
-	axs.set_title('Use FADC = {}, Use ATWD = {}, \nUse FADC Beacon Baselines={}, \n Use FADC Noise Cut={}, Causal Qtot={}'.format(use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot), size=10)
+	axs.set_title('Use FADC = {}, Use ATWD = {}, \nUse FADC Beacon Baselines={}, \n Use FADC Noise Cut={}, Causal Qtot={}, \nEHE Calibrated Waves {}'.format(use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot, ehewave), size=10)
 	# axs.set_ylim([0,60])
 	# axs.plot([0,250],[0,250],'--', label='1-1 line')
 	axs.set_yscale('log')
 	axs.legend()
 	plt.tight_layout()
 	# fig.savefig('ehe_over_hese_{}_FADC_{}_ATWD_{}_forcezero_{}.png'.format(hese_pulses, use_fadc, use_atwd, force_zero), dpi=300)
-	fig.savefig('ehenpe_over_hese_HESE_{}_FADC_{}_ATWD_{}_FADCBeacon_{}_NoiseCut_{}_CausalQtot_{}.png'.format(hese_pulses, use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot), dpi=300)
+	fig.savefig('ehenpe_over_hese_HESE_{}_FADC_{}_ATWD_{}_FADCBeacon_{}_NoiseCut_{}_CausalQtot_{}_EHEWave_{}.png'.format(hese_pulses, use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot, ehewave), dpi=300)
 	del fig, axs
 
 	##############################
@@ -351,13 +371,13 @@ if plot_ehe_and_hese_comparison:
 	axs.set_ylabel('Number of DOMs')
 	# axs.set_xlim([-1.0, 1.0])
 	axs.set_yscale('log')
-	axs.set_title('Use FADC = {}, Use ATWD = {}, \nUse FADC Beacon Baselines={}, \n Use FADC Noise Cut={}, Causal Qtot={}'.format(use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot), size=10)
+	axs.set_title('Use FADC = {}, Use ATWD = {}, \nUse FADC Beacon Baselines={}, \n Use FADC Noise Cut={}, Causal Qtot={}, \nEHE Calibrated Waves {}'.format(use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot, ehewave), size=10)
 	# axs.set_ylim([0,60])
 	# axs.plot([0,250],[0,250],'--', label='1-1 line')
 	axs.legend()
 	plt.tight_layout()
 	# fig.savefig('ehe_vs_hese_rel_diff_{}_FADC_{}_ATWD_{}_forcezero_{}.png'.format(hese_pulses, use_fadc, use_atwd, force_zero), dpi=300)
-	fig.savefig('ehe_vs_hese_reldiff_HESE_{}_FADC_{}_ATWD_{}_FADCBeacon_{}_NoiseCut_{}_CausalQtot_{}.png'.format(hese_pulses, use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot), dpi=300)
+	fig.savefig('ehe_vs_hese_reldiff_HESE_{}_FADC_{}_ATWD_{}_FADCBeacon_{}_NoiseCut_{}_CausalQtot_{}_EHEWave_{}.png'.format(hese_pulses, use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot, ehewave), dpi=300)
 
 	##############################
 	##############################	
@@ -371,9 +391,9 @@ if plot_ehe_and_hese_comparison:
 	fig, axs = plt.subplots(1,1,figsize=(5,5))
 	# bins = range(-10,1000+10,10)
 	bins = np.logspace(np.log10(0.1), np.log10(1e2), 50)
-	# stuff = axs.hist(missing_in_hese, bins=bins, alpha=0.5, label='Missing in HESE ({:.2f} PE)'.format(np.sum(missing_in_hese)))#, histtype='step')
+	stuff = axs.hist(missing_in_hese, bins=bins, alpha=0.5, label='Missing in HESE ({:.2f} PE)'.format(np.sum(missing_in_hese)))#, histtype='step')
 	stuff2 = axs.hist(missing_in_ehe, bins=bins, alpha=0.5, label='Missing in EHE ({:.2f} PE in {} DOMs)'.format(np.sum(missing_in_ehe), len(missing_in_ehe[mask])))#, histtype='step')
-	axs.set_title('Use FADC = {}, Use ATWD = {}, \nUse FADC Beacon Baselines={}, \n Use FADC Noise Cut={}, Causal Qtot={}'.format(use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot), size=10)
+	axs.set_title('Use FADC = {}, Use ATWD = {}, \nUse FADC Beacon Baselines={}, \n Use FADC Noise Cut={}, Causal Qtot={}, \nEHE Calibrated Waves {}'.format(use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot, ehewave), size=10)
 	axs.set_xlabel('NPE')
 	axs.set_ylabel('Number of DOMs')
 	axs.set_yscale('log')
@@ -382,5 +402,5 @@ if plot_ehe_and_hese_comparison:
 	axs.legend()
 	plt.tight_layout()
 	# fig.savefig('ehe_vs_hese_missing_{}_FADC_{}_ATWD_{}_forcezero_{}.png'.format(hese_pulses, use_fadc, use_atwd, force_zero), dpi=300)
-	fig.savefig('ehe_vs_hese_missing_reldiff_HESE_{}_FADC_{}_ATWD_{}_FADCBeacon_{}_NoiseCut_{}_CausalQtot_{}.png'.format(hese_pulses, use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot), dpi=300)
+	fig.savefig('ehe_vs_hese_missing_reldiff_HESE_{}_FADC_{}_ATWD_{}_FADCBeacon_{}_NoiseCut_{}_CausalQtot_{}_EHEWave_{}.png'.format(hese_pulses, use_fadc, use_atwd, beacon_fadc, noise_cut, causal_qtot, ehewave), dpi=300)
 
