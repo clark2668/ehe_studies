@@ -22,10 +22,9 @@ def find_time_of_largest_pulse(portia_pulse_map):
 def get_portia_pulse_values(portia_pulse, largest_time, window_start, window_end, enforce_window):
 	npe = portia_pulse.GetEstimatedNPE()
 	t10 = portia_pulse.GetRecoPulse().time
-	npe_out = 0
-	if enforce_window and ((t10 - largest_time >= window_start) and (t10 - largest_time <= window_end)):
-		npe_out = npe
-	else:
+	npe_out = npe
+	if enforce_window and not ((t10 - largest_time >= window_start) and (t10 - largest_time <= window_end)):
+		print("Skip adding npe {}".format(npe))
 		npe_out = 0
 	return npe_out
 
@@ -210,7 +209,6 @@ def LoopEHEPulses(frame, doBTW=True, excludeHighQE=False, excludeFADC=False, exc
 
 		calibration = frame['I3Calibration']
 		high_qe_doms = find_high_qe_doms(calibration)
-	high_qe_doms = []
 
 	# the way it is *actually* calculated in Portia 
 	# https://code.icecube.wisc.edu/projects/icecube/browser/IceCube/meta-projects/combo/trunk/portia/private/portia/I3Portia.cxx#L604
@@ -230,7 +228,7 @@ def LoopEHEPulses(frame, doBTW=True, excludeHighQE=False, excludeFADC=False, exc
 		which_atwd_pulses=atwd_pulse_map
 
 	best_npe, portia_omkey_npe_dict = get_portia_omkey_npe_dict(splitted_dom_map, 
-		fadc_pulse_map, which_atwd_pulses, high_qe_doms=high_qe_doms, 
+		fadc_pulse_map, which_atwd_pulses, doBTW=doBTW, high_qe_doms=high_qe_doms, 
 		excludeFADC=excludeFADC, excludeATWD=excludeATWD)
 
 	print("Best NPE is {}".format(best_npe))
@@ -322,9 +320,9 @@ def get_hit_map(frame,pulse_mask_name):
 		hit_map = frame[pulse_mask_name].apply(frame)
 	return hit_map
 
-def get_casaulqtot_omkey_npe_dict(calibration, status, vertex_time, 
+def get_homogqtot_omkey_npe_dict(calibration, status, vertex_time, 
 	causality_window, hit_map, max_q_per_dom,
-	exclude_high_qe_doms = True):
+	exclude_high_qe_doms = True, do_causal = False):
 	
 	causal_qtot=0.;
 	omkey_npe_dict = {}; # for all the DOMs
@@ -343,9 +341,11 @@ def get_casaulqtot_omkey_npe_dict(calibration, status, vertex_time,
 
 		# loop pulses
 		for p in pulses:
-			# print("omkey {}, pulse charge {}".format(omkey, p.charge))
 			# print(p.flags)
-			if (p.time >= vertex_time and p.time < vertex_time+causality_window):
+			if do_causal:			
+				if (p.time >= vertex_time and p.time < vertex_time+causality_window):
+					charge_this_dom+=p.charge
+			else:
 				charge_this_dom+=p.charge
 		omkey_npe_dict[omkey] = charge_this_dom
 
@@ -364,7 +364,7 @@ def get_casaulqtot_omkey_npe_dict(calibration, status, vertex_time,
 
 	return causal_qtot, omkey_npe_dict, omkey_npe_dict_noDC
 
-def LoopHESEPulses(frame, pulses):
+def LoopHESEPulses(frame, pulses, do_causal=False, do_comparison=False, table_name=None):
 	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
 		return False
 
@@ -377,12 +377,55 @@ def LoopHESEPulses(frame, pulses):
 	vertex_time = frame.Get('HESE_VHESelfVetoVertexTime').value #I3Double is funky
 	causality_window = 5000. * I3Units.ns
 	hit_map = get_hit_map(frame, pulses)
-	causal_qtot, causalqtot_omkey_npe_dict, causalqtot_omkey_npe_dict_noDC = get_casaulqtot_omkey_npe_dict(calibration, 
-		status, vertex_time, causality_window, hit_map, Inf)
-	
-	print("Causal Qtot is {:.2f}".format(causal_qtot))
+	causal_qtot, causalqtot_omkey_npe_dict, causalqtot_omkey_npe_dict_noDC = get_homogqtot_omkey_npe_dict(calibration, 
+		status, vertex_time, causality_window, hit_map, Inf, do_causal=do_causal)
 
-def Compare_HESE_EHE(frame, hese_pulses, table_name=None, exclude_fadc=False, exclude_atwd=False):
+	print("Qtot (Causal={}) is {:.2f}".format(do_causal, causal_qtot))
+
+	if do_comparison:
+
+		# causal
+		causal_qtot, causalqtot_omkey_npe_dict, causalqtot_omkey_npe_dict_noDC = get_homogqtot_omkey_npe_dict(calibration, 
+			status, vertex_time, causality_window, hit_map, Inf, do_causal=True)
+
+		# homogenized
+		homog_qtot, homogqtot_omkey_npe_dict, homogqtot_omkey_npe_dict_noDC = get_homogqtot_omkey_npe_dict(calibration, 
+			status, vertex_time, causality_window, hit_map, Inf, do_causal=False)
+
+		# save the overlapping data to an hdf5 file
+		causal_pe = []
+		homog_pe = []
+		strings = []
+		doms = []
+		for omkey, causal_q in homogqtot_omkey_npe_dict_noDC.items():
+			strings.append(omkey.string)
+			doms.append(omkey.om)
+			homog_pe.append(homogqtot_omkey_npe_dict_noDC[omkey]) # always store HomogQtot
+			if omkey in causalqtot_omkey_npe_dict_noDC:
+				# if causal Qtot found something, store it
+				causal_pe.append(causalqtot_omkey_npe_dict_noDC[omkey])
+			else:
+				# otherwise, zero
+				causal_pe.append(0.)
+
+		causal_pe = np.asarray(causal_pe)
+		homog_pe = np.asarray(homog_pe)
+		strings = np.asarray(strings)
+		doms = np.asarray(doms)
+
+		if table_name is None:
+			table_name='comparison_causal_homog_qtot_{}.hdf5'.format(pulses)
+		file_out = h5py.File(table_name, 'w')
+		data_overlap = file_out.create_group('charge')
+		data_overlap.create_dataset('causal_pe', data=causal_pe)
+		data_overlap.create_dataset('homog_pe', data=homog_pe)
+		data_overlap.create_dataset('strings', data=strings)
+		data_overlap.create_dataset('doms', data=doms)
+		file_out.close()
+
+	
+
+def Compare_HESE_EHE(frame, hese_pulses, table_name=None, exclude_fadc=False, exclude_atwd=False, do_causal=False):
 
 	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
 		return False
@@ -397,8 +440,8 @@ def Compare_HESE_EHE(frame, hese_pulses, table_name=None, exclude_fadc=False, ex
 	vertex_time = frame.Get('HESE_VHESelfVetoVertexTime').value #I3Double is funky
 	causality_window = 5000. * I3Units.ns
 	hit_map = get_hit_map(frame, hese_pulses)
-	causal_qtot, causalqtot_omkey_npe_dict,  causalqtot_omkey_npe_dict_noDC= get_casaulqtot_omkey_npe_dict(calibration, 
-		status, vertex_time, causality_window, hit_map, Inf)
+	causal_qtot, causalqtot_omkey_npe_dict,  causalqtot_omkey_npe_dict_noDC= get_homogqtot_omkey_npe_dict(calibration, 
+		status, vertex_time, causality_window, hit_map, Inf, do_causal=do_causal)
 
 	# now, EHE
 	splitted_dom_map = frame.Get('splittedDOMMap')
@@ -415,17 +458,25 @@ def Compare_HESE_EHE(frame, hese_pulses, table_name=None, exclude_fadc=False, ex
 
 	# check the overlap
 	missing_in_hese = []
+	missing_in_hese_keys = []
 	missing_in_ehe = []
+	missing_in_ehe_keys = []
 	num_hese_chans=0
 	for omkey, portia_npe in portia_omkey_npe_dict.items():
 		if omkey not in causalqtot_omkey_npe_dict_noDC:
 			missing_in_hese.append(portia_npe)
+			missing_in_hese_keys.append([omkey.string, omkey.om])
 
 	for omkey, hese_npe in causalqtot_omkey_npe_dict_noDC.items():
 		if omkey not in portia_omkey_npe_dict:
 			missing_in_ehe.append(hese_npe)
+			missing_in_ehe_keys.append([omkey.string, omkey.om])
+	
 	missing_in_hese = np.asarray(missing_in_hese)
 	missing_in_ehe = np.asarray(missing_in_ehe)
+	missing_in_hese_keys = np.asarray(missing_in_hese_keys)
+	missing_in_ehe_keys = np.asarray(missing_in_ehe_keys)
+
 
 	# save the overlapping data to an hdf5 file
 	hese_overlap = []
@@ -446,7 +497,7 @@ def Compare_HESE_EHE(frame, hese_pulses, table_name=None, exclude_fadc=False, ex
 	doms = np.asarray(doms)
 
 	if table_name is None:
-		table_name='comparison_overlap_{}.hdf5'.format(hese_pulses)
+		table_name='comparison_overlap_{}_causal_{}.hdf5'.format(hese_pulses, do_causal)
 	file_out = h5py.File(table_name, 'w')
 	data_overlap = file_out.create_group('data_overlap')
 	data_overlap.create_dataset('hese_overlap', data=hese_overlap)
@@ -457,6 +508,8 @@ def Compare_HESE_EHE(frame, hese_pulses, table_name=None, exclude_fadc=False, ex
 	data_exclusion = file_out.create_group('data_exclusion')
 	data_exclusion.create_dataset('missing_in_hese', data=missing_in_hese)
 	data_exclusion.create_dataset('missing_in_ehe',data=missing_in_ehe)
+	data_exclusion.create_dataset('missing_in_hese_keys', data=missing_in_hese_keys)
+	data_exclusion.create_dataset('missing_in_ehe_keys',data=missing_in_ehe_keys)
 	file_out.close()
 
 @icetray.traysegment
