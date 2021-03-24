@@ -31,8 +31,8 @@ for temp_f in args.input_files[1:]:
 	times = np.concatenate((times,temp_times))
 
 
-plot the charge in histogram
-NB: by construction, this probably excludes balloon DOMs, which might be interesting...
+# plot the charge in histogram
+# NB: by construction, this probably excludes balloon DOMs, which might be interesting...
 fig, axs = plt.subplots(1,1,figsize=(5,5))
 axs.hist(charges, bins=100,alpha=0.5)
 axs.set_yscale('log')
@@ -45,9 +45,12 @@ del fig, axs
 
 plt.ticklabel_format(axis="x", style="plain") # reset
 
+# and as a 2D plot
+
+mask = charges > 0.0e5 # mask "small" charge events
 fig, axs = plt.subplots(1,1,figsize=(7,5))
 my_map = plt.cm.plasma
-counts, xedges, yedges, im = axs.hist2d(times, charges,
+counts, xedges, yedges, im = axs.hist2d(times[mask], charges[mask],
 	bins=500,
 	cmap = my_map,
 	norm=colors.LogNorm(),
