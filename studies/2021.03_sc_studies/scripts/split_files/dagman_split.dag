@@ -1,0 +1,19 @@
+CONFIG config.dagman
+
+JOB job_1 job.sub
+VARS job_1 year="2015" candle="2" filter = "1" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/split_by_filter"
+
+JOB job_2 job.sub
+VARS job_2 year="2015" candle="2" filter = "2" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/split_by_filter"
+
+JOB job_3 job.sub
+VARS job_3 year="2015" candle="2" filter = "3" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/split_by_filter"
+
+JOB job_4 job.sub
+VARS job_4 year="2015" candle="2" filter = "4" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/split_by_filter"
+
+JOB job_5 job.sub
+VARS job_5 year="2015" candle="2" filter = "5" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/split_by_filter"
+
+JOB job_6 job.sub
+VARS job_6 year="2015" candle="2" filter = "6" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/split_by_filter"
