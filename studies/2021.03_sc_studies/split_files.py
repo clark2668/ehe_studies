@@ -66,8 +66,7 @@ tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf',
 
 tray.Add("I3Writer", 
 	filename=output_location+"/"+'y{}_c{}_f{}.i3.bz2'.format(year,candle,filter),
-	Streams=[icetray.I3Frame.TrayInfo, icetray.I3Frame.DAQ, icetray.I3Frame.Physics]
-	# DropOrphanStreams=[icetray.I3Frame.DAQ]
+	Streams=[icetray.I3Frame.DAQ, icetray.I3Frame.Physics]
 	)
 
 tray.Execute()
