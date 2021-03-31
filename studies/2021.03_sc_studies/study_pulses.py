@@ -27,7 +27,7 @@ filename = args.input_files
 pulse_name='SplitInIcePulses'
 
 frameId = 0
-maxEvents = 120
+maxEvents = 10
 
 scdata = '/misc/disk15/data/IceCube/RealData/86strings/standardcandle/2015/sc2/'
 gcdfile = 'Level2_IC86.2014_data_Run00125920_0116_0_138_GCD.i3.gz'
@@ -96,7 +96,7 @@ while file_in.more() and frameId < maxEvents:
 			fig, axs = plt.subplots(1,1,figsize=(20,10))
 			
 			axs.scatter(plot_strings[~hit_doms], plot_depths[~hit_doms],
-				marker='x', s=1, c='grey')
+				marker='o', s=1, c='grey')
 
 			sc = axs.scatter(plot_strings[hit_doms], plot_depths[hit_doms], 
 				c=np.log10(plot_charges[hit_doms]))
