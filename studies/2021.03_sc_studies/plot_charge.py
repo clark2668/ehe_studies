@@ -4,9 +4,12 @@ from astropy.time import Time
 from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+from matplotlib.patches import Rectangle
 from matplotlib.dates import (YEARLY, DateFormatter, rrulewrapper, RRuleLocator, drange)
 import numpy as np
 import argparse
+
+import tools
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", type=str, nargs='+',
@@ -58,14 +61,25 @@ counts, xedges, yedges, im = axs.hist2d(times[mask], charges[mask],
 	)
 cbar = plt.colorbar(im, ax=axs)
 cbar.set_label('Number of Events')
-formatter = DateFormatter('%H:%M:%S')
-axs.xaxis.set_major_formatter(formatter)
+# formatter = DateFormatter('%H:%M:%S')
+# axs.xaxis.set_major_formatter(formatter)
 axs.xaxis.set_tick_params(rotation=45, labelsize=7)
 axs.set_ylabel('HomogenizedQTot [NPE]')
 axs.set_xlabel('Time [Hour:Min:Sec]')
+axs.grid(which='both')
+# axs.set_ylim([0,1e5])
 plt.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
 plt.tight_layout()
-fig.savefig('charge_vs_time.png', dpi=300)
+axs.set_ylim(0E5,8E5)
+
+
+for i in range(1,7,1):
+	start, stop, qmin, qmax = tools.get_start_stop(2015, 2, i)
+	rect = Rectangle((start, qmin), (stop-start), (qmax-qmin),
+		linewidth=1, edgecolor='r', facecolor='None',linestyle='--')
+	axs.add_patch(rect)
+
+fig.savefig('charge_vs_time.png'.format(filter), dpi=300)
 
 # might be helpful later: https://github.com/toej93/thesis_work_daily/blob/master/2021_Mar18_CoordSystemSourceSearch.ipynb
 
