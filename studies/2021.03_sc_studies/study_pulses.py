@@ -69,7 +69,15 @@ while file_in.more() and frameId < maxEvents:
 		pulse_series = tools.get_pulse_series(frame, pulse_name)
 		launches = frame.Get('CleanInIceRawData')
 
-		plot_panopticon = True
+		plot_waveforms = True
+		if plot_waveforms:
+			tools.print_waveforms(frame, "./plots",
+				waveform_name='CalibratedWaveforms_FADC',
+				string=55, dom=44
+				)
+
+		
+		plot_panopticon = False
 		if plot_panopticon:
 			omkey_npe_dict = tools.get_homogqtot_omkey_npe_dict(pulse_series)
 
@@ -86,6 +94,8 @@ while file_in.more() and frameId < maxEvents:
 				if omkey in omkey_npe_dict:
 					this_charge = omkey_npe_dict[omkey]
 				plot_charges.append(this_charge)
+				# if omkey.string == 55 and omkey in omkey_npe_dict:
+				# 	print("OMKey {}, Depth {:.2f}".format(omkey, geo[omkey].position.z))
 
 			plot_strings = np.asarray(plot_strings)
 			plot_depths = np.asarray(plot_depths)
@@ -93,23 +103,28 @@ while file_in.more() and frameId < maxEvents:
 
 			hit_doms = plot_charges > 0
 
+
+			# make a plot
 			fig, axs = plt.subplots(1,1,figsize=(20,10))
 			
 			axs.scatter(plot_strings[~hit_doms], plot_depths[~hit_doms],
 				marker='o', s=1, c='grey')
 
-			sc = axs.scatter(plot_strings[hit_doms], plot_depths[hit_doms], 
+			sc2 = tools.get_sc_location(2)
+			axs.plot(sc2['string'], sc2['z'], 'rx')
+
+			this_ax = axs.scatter(plot_strings[hit_doms], plot_depths[hit_doms], 
 				c=np.log10(plot_charges[hit_doms]))
-			cbar = plt.colorbar(sc)
-			cbar.set_label(r'$log_{10}$(NPE)')
-			
+			cbar = plt.colorbar(this_ax)
+			cbar.set_label(r'$log_{10}$(NPE)')			
 
 			axs.set_xlabel('String Number')
 			axs.set_ylabel('Depth')
 			axs.grid()
 			# axs.set_ylim([-2800, -1200])
 			plt.tight_layout()
-			fig.savefig('om_map_{}.png'.format(frameId))
+			fig.savefig('om_map_{}_{}_{}.png'.format(header.run_id, header.event_id, frameId))
+			print("------")
 
 		plot_time_diff = False
 		if plot_time_diff:

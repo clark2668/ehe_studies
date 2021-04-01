@@ -1,4 +1,8 @@
 from icecube import icetray, dataio, dataclasses
+from icecube.icetray import OMKey, I3Units
+import matplotlib.pyplot as plt
+import numpy as np
+import os
 
 # return the MJD of the time windows
 def get_start_stop(year, candle, filter):
@@ -75,3 +79,60 @@ def get_homogqtot_omkey_npe_dict(pulse_series):
 			charge_this_dom += p.charge
 		omkey_npe_dict[omkey] = charge_this_dom
 	return omkey_npe_dict
+
+# see https://github.com/icecube/icetray/blob/main/clsim/python/StandardCandleFlasherPulseSeriesGenerator.py#L75
+def get_sc_location(candle):
+	if candle==1:
+		return {"x": 544.07, "y": 55.89,"z": 136.86, "string": 40}
+	elif candle==2:
+		return {"x": 11.87, "y": 179.19,"z": -205.64, "string": 55}
+
+def print_waveforms(frame, outputdir, waveform_name, string, dom):
+
+	header = frame['I3EventHeader']
+	key = OMKey(string, dom)
+	try:
+		waveform_series = frame.Get(waveform_name)[key]
+	except:
+		print('no waveforms found for this dom. skip')
+		return
+
+	# make plots
+	fig, ax = plt.subplots()
+	ax.legend(loc='best')
+	ax.set_xlabel(r'Time / ns')
+
+	min_time = 0
+	for waveform in waveform_series:
+		wf_vect = np.array(waveform.waveform) / I3Units.mV
+		start_time = waveform.time
+		bin_width = waveform.bin_width
+		if min_time==0:
+			min_time = start_time
+
+		# Skip possible second launches
+		if len(wf_vect) == 128:
+			if start_time > min_time + 5000:
+				continue
+		elif len(wf_vect) == 256:
+			if start_time > min_time + 20000:
+				continue
+
+		time = np.linspace(start_time, start_time + bin_width * len(wf_vect), len(wf_vect))
+
+		ax.plot(time, wf_vect, label=waveform_name)
+		if len(wf_vect) == 128:
+			ax.set_ylabel(r'ATWD Voltage / mV')
+		elif len(wf_vect) == 256:
+			ax.set_ylabel('FADC Voltage / mV')
+
+	filename = os.path.join(
+		outputdir,
+		f'run{header.run_id}_evt{header.event_id}_str{string}_dom{dom}.png')
+	if len(wf_vect) == 256:
+		filename = filename.replace('.png', '_fadc.png')
+	print(filename)
+	fig.savefig(filename)
+
+
+
