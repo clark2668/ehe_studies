@@ -1,3 +1,7 @@
+#!/bin/sh /cvmfs/icecube.opensciencegrid.org/py3-v4.1.1/icetray-start
+#METAPROJECT /home/brian/IceCube/modified_icetray/bld/
+
+
 from icecube import icetray
 from icecube.icetray import I3Units
 from I3Tray import I3Tray
@@ -62,7 +66,7 @@ tray.AddModule("Delete", 'deleter',
 	Keys=['InIceDSTPulses', 'IceTopDSTPulses', 'CleanInIceRawData', 'CleanIceTopRawData',
 	'CalibratedWaveformRange', 'ReextractedInIcePulses', 'ReextractedInIcePulsesTimeRange',
 	'ReextractedIceTopPulses', 'IceTopHLCPulseInfo', 'ReextractedIceTopPulses_SLC',
-	'InIcePulses', 'IceTopPulses']
+	'InIcePulses', 'IceTopPulses', 'RehydrateNInIcePFrames', 'NFramesIsDifferent']
 	)
 tray.AddModule("Delete", 'deleter2',
 	Keys=['CalibrationErrata', 'SaturationWindows']
