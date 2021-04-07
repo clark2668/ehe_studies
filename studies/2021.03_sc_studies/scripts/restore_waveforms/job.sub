@@ -1,0 +1,16 @@
+log = /misc/disk15/scratch/brian/trash/restore_y$(year)_c$(candle)_f$(filter).log
+output = /misc/disk15/scratch/brian/trash/restore_y$(year)_c$(candle)_f$(filter).out
+error = /misc/disk15/scratch/brian/trash/restore_y$(year)_c$(candle)_f$(filter).err
+
+request_cpus = 1
+request_memory = 5GB
+request_disk = 20GB
+Universe = vanilla
+getenv = true
+should_transfer_files = YES
++TransferOutput = ""
+
+executable = job.sh
+arguments = $(year) $(candle) $(filter) $(outputdir)
+
+queue
