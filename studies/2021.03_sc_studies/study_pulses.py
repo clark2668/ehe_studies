@@ -16,6 +16,18 @@ parser.add_argument("-i", type=str,
 	dest="input_files",required=True,
 	help="full path to the input file",
 	)
+parser.add_argument("-y", type=int,
+	dest="year", default=2015,
+	help="Which year of standard candle, e.g. 2015"
+	)
+parser.add_argument("-c", type=int,
+	dest="candle", default=2,
+	help="Which candle, e.g. 2"
+	)
+parser.add_argument("-f", type=int,
+	dest="filter_setting", required=True,
+	help="Which standard candle filter setting, e.g. 0, 1, 2, ..."
+	)
 # parser.add_argument("-o", type=str, 
 # 	dest="output_dir",required=True,
 # 	help="directory where the output should be written to"
@@ -72,8 +84,9 @@ while file_in.more() and frameId < maxEvents:
 		plot_waveforms = True
 		if plot_waveforms:
 			tools.print_waveforms(frame, "./plots",
-				waveform_name='CalibratedWaveforms_FADC',
-				string=55, dom=44
+				waveform_name='CalibratedWaveforms_ATWD',
+				string=55, dom=44,
+				title_mod=f'{args.year}_SC{args.candle}_F{args.filter_setting}'
 				)
 
 		

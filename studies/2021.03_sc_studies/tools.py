@@ -87,7 +87,8 @@ def get_sc_location(candle):
 	elif candle==2:
 		return {"x": 11.87, "y": 179.19,"z": -205.64, "string": 55}
 
-def print_waveforms(frame, outputdir, waveform_name, string, dom):
+def print_waveforms(frame, outputdir, waveform_name, string, dom,
+	title_mod=None):
 
 	header = frame['I3EventHeader']
 	key = OMKey(string, dom)
@@ -99,7 +100,7 @@ def print_waveforms(frame, outputdir, waveform_name, string, dom):
 
 	# make plots
 	fig, ax = plt.subplots()
-	ax.legend(loc='best')
+	# ax.legend(loc='best')
 	ax.set_xlabel(r'Time / ns')
 
 	min_time = 0
@@ -122,13 +123,15 @@ def print_waveforms(frame, outputdir, waveform_name, string, dom):
 
 		ax.plot(time, wf_vect, label=waveform_name)
 		if len(wf_vect) == 128:
-			ax.set_ylabel(r'ATWD Voltage / mV')
+			ax.set_ylabel(r'Voltage / mV')
 		elif len(wf_vect) == 256:
-			ax.set_ylabel('FADC Voltage / mV')
+			ax.set_ylabel('Voltage / mV')
+
+	ax.set_title(f'String {string}, OM {dom}, {waveform_name} ({title_mod})')
 
 	filename = os.path.join(
 		outputdir,
-		f'run{header.run_id}_evt{header.event_id}_str{string}_dom{dom}.png')
+		f'run{header.run_id}_evt{header.event_id}_str{string}_dom{dom}_{title_mod}.png')
 	if len(wf_vect) == 256:
 		filename = filename.replace('.png', '_fadc.png')
 	print(filename)
