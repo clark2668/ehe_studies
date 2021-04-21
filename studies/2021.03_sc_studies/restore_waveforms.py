@@ -66,10 +66,8 @@ tray.AddModule("Delete", 'deleter',
 	Keys=['InIceDSTPulses', 'IceTopDSTPulses', 'CleanInIceRawData', 'CleanIceTopRawData',
 	'CalibratedWaveformRange', 'ReextractedInIcePulses', 'ReextractedInIcePulsesTimeRange',
 	'ReextractedIceTopPulses', 'IceTopHLCPulseInfo', 'ReextractedIceTopPulses_SLC',
-	'InIcePulses', 'IceTopPulses', 'RehydrateNInIcePFrames', 'NFramesIsDifferent', 'IceTopErrata']
-	)
-tray.AddModule("Delete", 'deleter2',
-	Keys=['CalibrationErrata', 'SaturationWindows']
+	'InIcePulses', 'IceTopPulses', 'RehydrateNInIcePFrames', 'NFramesIsDifferent', 'IceTopErrata',
+	'CalibrationErrata', 'SaturationWindows']
 	)
 
 # do rehydration
@@ -115,20 +113,21 @@ tray.AddModule('HomogenizedQTot', 'qtot_total',
 	Output='HomogenizedQTot'
 	)
 
-# # EHE Calibration
-# tray.AddSegment(EHECalibration, 'ehecalib',
-# 	inPulses='CleanInIceRawData',
-# 	outATWD='EHECalibratedATWD_Wave',
-# 	outFADC='EHECalibratedFADC_Wave',
-# 	# If=lambda f: ehe_wg_Qstream(f)
-# 	)
+# EHE Calibration
+tray.AddSegment(EHECalibration, 'ehecalib',
+	inPulses='CleanInIceRawData',
+	outATWD='EHECalibratedATWD_Wave',
+	outFADC='EHECalibratedFADC_Wave',
+	# If=lambda f: ehe_wg_Qstream(f)
+	)
 
-# # EHE Hit Cleaning
-# tray.AddSegment(HitCleaningEHE, 'eheclean',
-# 	inATWD='EHECalibratedATWD_Wave', inFADC = 'EHECalibratedFADC_Wave',
-# 	# inATWD='CalibratedWaveforms_ATWD', inFADC = 'CalibratedWaveforms_FADC',
-# 	If=which_split(split_name='InIceSplit') #& (lambda f: ehe_wg(f))
-# 	)
+# EHE Hit Cleaning
+tray.AddSegment(HitCleaningEHE, 'eheclean',
+	inATWD='EHECalibratedATWD_Wave', inFADC = 'EHECalibratedFADC_Wave',
+	# inATWD='CalibratedWaveforms_ATWD', inFADC = 'CalibratedWaveforms_FADC',
+	If=which_split(split_name='InIceSplit') #& (lambda f: ehe_wg(f))
+	)
+
 
 # tray.Add("Dump")
 tray.Add("I3Writer", 
@@ -136,4 +135,4 @@ tray.Add("I3Writer",
 	Streams=[icetray.I3Frame.DAQ, icetray.I3Frame.Physics]
 	)
 
-tray.Execute(100)
+tray.Execute()
