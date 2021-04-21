@@ -100,7 +100,6 @@ def print_waveforms(frame, outputdir, waveform_name, string, dom,
 
 	# make plots
 	fig, ax = plt.subplots()
-	# ax.legend(loc='best')
 	ax.set_xlabel(r'Time / ns')
 
 	min_time = 0
@@ -121,17 +120,20 @@ def print_waveforms(frame, outputdir, waveform_name, string, dom,
 
 		time = np.linspace(start_time, start_time + bin_width * len(wf_vect), len(wf_vect))
 
-		ax.plot(time, wf_vect, label=waveform_name)
+		ax.plot(time, wf_vect, label=f'{waveform.source}, Ch {waveform.channel}')
 		if len(wf_vect) == 128:
 			ax.set_ylabel(r'Voltage / mV')
 		elif len(wf_vect) == 256:
 			ax.set_ylabel('Voltage / mV')
 
-	ax.set_title(f'String {string}, OM {dom}, {waveform_name} ({title_mod})')
+	ax.set_title(f'({string}, {dom}), Ev {header.event_id}.{header.sub_event_id}, {waveform_name} ({title_mod})')
 
+	ax.legend(loc='best')
+	if len(wf_vect) == 128:
+		ax.set_ylim([-50,7000])
 	filename = os.path.join(
 		outputdir,
-		f'run{header.run_id}_evt{header.event_id}_str{string}_dom{dom}_{title_mod}.png')
+		f'run{header.run_id}_evt{header.event_id}_sevt_{header.sub_event_id}_str{string}_dom{dom}_{title_mod}.png')
 	if len(wf_vect) == 256:
 		filename = filename.replace('.png', '_fadc.png')
 	print(filename)

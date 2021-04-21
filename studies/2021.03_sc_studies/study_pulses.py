@@ -72,14 +72,9 @@ while file_in.more() and frameId < maxEvents:
 	except:
 		continue
 
-	if frame.Stop == icetray.I3Frame.Physics:
+	if frame.Stop == icetray.I3Frame.DAQ:
 
 		header = frame.Get('I3EventHeader')
-		if header.sub_event_stream!='InIceSplit':
-			continue
-
-		pulse_series = tools.get_pulse_series(frame, pulse_name)
-		launches = frame.Get('CleanInIceRawData')
 
 		plot_waveforms = True
 		if plot_waveforms:
@@ -88,7 +83,19 @@ while file_in.more() and frameId < maxEvents:
 				string=55, dom=44,
 				title_mod=f'{args.year}_SC{args.candle}_F{args.filter_setting}'
 				)
+			tools.print_waveforms(frame, "./plots",
+				waveform_name='CalibratedWaveforms_FADC',
+				string=55, dom=44,
+				title_mod=f'{args.year}_SC{args.candle}_F{args.filter_setting}'
+				)
 
+	if frame.Stop == icetray.I3Frame.Physics:
+		header = frame.Get('I3EventHeader')
+		if header.sub_event_stream!='InIceSplit':
+			continue
+
+		pulse_series = tools.get_pulse_series(frame, pulse_name)
+		launches = frame.Get('CleanInIceRawData')
 		
 		plot_panopticon = False
 		if plot_panopticon:
@@ -107,8 +114,8 @@ while file_in.more() and frameId < maxEvents:
 				if omkey in omkey_npe_dict:
 					this_charge = omkey_npe_dict[omkey]
 				plot_charges.append(this_charge)
-				# if omkey.string == 55 and omkey in omkey_npe_dict:
-				# 	print("OMKey {}, Depth {:.2f}".format(omkey, geo[omkey].position.z))
+				if omkey.string == 55 and omkey in omkey_npe_dict:
+					print("OMKey {}, Depth {:.2f}".format(omkey, geo[omkey].position.z))
 
 			plot_strings = np.asarray(plot_strings)
 			plot_depths = np.asarray(plot_depths)
@@ -135,6 +142,7 @@ while file_in.more() and frameId < maxEvents:
 			axs.set_ylabel('Depth')
 			axs.grid()
 			# axs.set_ylim([-2800, -1200])
+			axs.set_title(f'Ev {header.event_id}.{header.sub_event_id}, Year {args.year}, SC {args.candle}, Filter {args.filter_setting}')
 			plt.tight_layout()
 			fig.savefig('om_map_{}_{}_{}.png'.format(header.run_id, header.event_id, frameId))
 			print("------")
