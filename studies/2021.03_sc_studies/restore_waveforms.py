@@ -128,6 +128,22 @@ tray.AddSegment(HitCleaningEHE, 'eheclean',
 	If=which_split(split_name='InIceSplit') #& (lambda f: ehe_wg(f))
 	)
 
+# make the files small again
+tray.AddModule("Delete", 'deleter2', 
+	Keys=['EHECalibratedATWD_Wave', 'EHECalibratedFADC_Wave',
+	'CalibratedWaveforms', 'CalibratedWaveforms_ATWD', 
+	'CalibratedWaveforms_FADC','CalibratedWaveforms_SLC',
+	'HLCOfflineCleanInIceRawData', 'SLCOfflineCleanInIceRawData',
+	'EHEHLCCalibratedWaveforms', 'CleanIceTopRawData_EHE',
+	'HLCOfflineCleanInIceRawDataWODC', 'CleanInIceRawData', 
+	'CleanInIceRawData' ]
+	)
+
+tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
+	Output="{}/y{}_c{}_f{}_waves.hdf5".format(args.output_dir, args.year, args.candle, args.filter_setting), 
+	Keys=['I3EventHeader', 'HomogenizedQTot', 'EHEPortiaEventSummarySRT'], 
+	SubEventStreams=['InIceSplit']
+	)
 
 # tray.Add("Dump")
 tray.Add("I3Writer", 

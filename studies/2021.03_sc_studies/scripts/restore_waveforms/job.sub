@@ -1,6 +1,6 @@
-log = /misc/disk15/scratch/brian/trash/restore_y$(year)_c$(candle)_f$(filter).log
-output = /misc/disk15/scratch/brian/trash/restore_y$(year)_c$(candle)_f$(filter).out
-error = /misc/disk15/scratch/brian/trash/restore_y$(year)_c$(candle)_f$(filter).err
+log = /misc/disk15/scratch/brian/trash/restore_y$(year)_c$(candle)_f$(filter)_$(Process).log
+output = /misc/disk15/scratch/brian/trash/restore_y$(year)_c$(candle)_f$(filter)_$(Process).out
+error = /misc/disk15/scratch/brian/trash/restore_y$(year)_c$(candle)_f$(filter)_$(Process).err
 
 request_cpus = 1
 request_memory = 5GB
