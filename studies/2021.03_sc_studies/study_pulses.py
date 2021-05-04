@@ -37,6 +37,7 @@ filename = args.input_files
 # output_location = args.output_dir
 
 pulse_name='SplitInIcePulses'
+# pulse_name='EHEBestPortiaPulseSRT'
 
 frameId = 0
 maxEvents = 10
@@ -76,7 +77,7 @@ while file_in.more() and frameId < maxEvents:
 
 		header = frame.Get('I3EventHeader')
 
-		plot_waveforms = True
+		plot_waveforms = False
 		if plot_waveforms:
 			tools.print_waveforms(frame, "./plots",
 				waveform_name='CalibratedWaveforms_ATWD',
@@ -95,9 +96,10 @@ while file_in.more() and frameId < maxEvents:
 			continue
 
 		pulse_series = tools.get_pulse_series(frame, pulse_name)
-		launches = frame.Get('CleanInIceRawData')
+		# print(pulse_series.keys())
+		# exit(1)
 		
-		plot_panopticon = False
+		plot_panopticon = True
 		if plot_panopticon:
 			omkey_npe_dict = tools.get_homogqtot_omkey_npe_dict(pulse_series)
 
@@ -144,11 +146,12 @@ while file_in.more() and frameId < maxEvents:
 			# axs.set_ylim([-2800, -1200])
 			axs.set_title(f'Ev {header.event_id}.{header.sub_event_id}, Year {args.year}, SC {args.candle}, Filter {args.filter_setting}')
 			plt.tight_layout()
-			fig.savefig('om_map_{}_{}_{}.png'.format(header.run_id, header.event_id, frameId))
+			fig.savefig('om_map_{}_{}_{}_{}.png'.format(header.run_id, header.event_id, frameId, pulse_name))
 			print("------")
 
 		plot_time_diff = False
 		if plot_time_diff:
+			launches = frame.Get('CleanInIceRawData')
 			diffs = []
 			for omkey, pulses in pulse_series.items():
 				first_pulse_time = pulses[0].time
