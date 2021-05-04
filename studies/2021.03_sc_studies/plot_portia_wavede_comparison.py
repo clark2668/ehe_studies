@@ -18,14 +18,16 @@ args = parser.parse_args()
 
 hqtot_key = 'HomogenizedQTot'
 hqtot_key = 'HomogenziedQtot_SplitInIcePulses'
-hqtot_key = 'HomogenziedQtot_SplitInIcePulses_ExcludeCalibrationErrata'
+# hqtot_key = 'HomogenziedQtot_SplitInIcePulses_ExcludeCalibrationErrata'
 
 
 # start the list
 f = h5py.File(args.input_files[0], 'r')
 charges = f[hqtot_key]['value']
 times = f['I3EventHeader']['time_start_mjd']
+events = f['I3EventHeader']['Event']
 portia_charges = f['EHEPortiaEventSummarySRT']['bestNPEbtw']
+print(f['I3EventHeader'].dtype.names)
 f.close()
 
 # loop over the remaining files
@@ -35,17 +37,26 @@ for temp_f in args.input_files[1:]:
 	temp_charges = f[hqtot_key]['value']
 	temp_times = f['I3EventHeader']['time_start_mjd']
 	temp_portia_charges = f['EHEPortiaEventSummarySRT']['bestNPEbtw']
+	temp_events = f['I3EventHeader']['Event']
 	charges = np.concatenate((charges, temp_charges))
 	times = np.concatenate((times,temp_times))
 	portia_charges = np.concatenate((portia_charges,temp_portia_charges))
+	events = np.concatenate((events,temp_events))
 
-mask = portia_charges > 4E4
+# mask = portia_charges > 4E4
 # mask = portia_charges > 0
+# portia_charges = portia_charges[mask]
+# charges = charges[mask]
+
+
+## quick study of the "flatline" events (evts with portia Q by not Homog Q)
+mask = charges < 10000
 portia_charges = portia_charges[mask]
 charges = charges[mask]
-
-# for p, h in zip(portia_charges[-30:], charges[-30:]):
-# 	print("Portia {:.2f}, Hqtot {:.2f}, H/P {:.2f}".format(p, h, h/p))
+events = events[mask]
+for p, h, e in zip(portia_charges, charges, events):
+	if p > 20000:
+		print("Ev {}, Portia {:.2f}, Hqtot {:.2f}, H/P {:.2f}".format(e, p, h, h/p))
 
 log_portia_charges = np.log10(portia_charges)
 log_charges = np.log10(charges)
@@ -70,12 +81,12 @@ if do_hist:
 	fig.savefig('hist_of_charge_portia_homogqtot.png', dpi=300)
 	del fig, axs
 
-# plt.ticklabel_format(axis="x", style="plain") # reset
+	# plt.ticklabel_format(axis="x", style="plain") # reset
 
 do_scatter = True
 if do_scatter:
 
-	do_log = True
+	do_log = False
 
 	# and as a scatter plot
 
@@ -93,8 +104,8 @@ if do_scatter:
 		axs.set_ylabel(r'Homogenized Q Tot [NPE]')
 		axs.set_xlabel(r'Portia Best NPE BTW [NPE]')
 		# axs.set_yscale('log')
-		axs.set_xlim([0, 1E6])
-		axs.set_ylim([0, 1E6])
+		axs.set_xlim([0, 50000])
+		axs.set_ylim([0, 50000])
 	axs.set_title(hqtot_key, fontsize=8)
 	axs.set_aspect('equal')
 	axs.legend()
