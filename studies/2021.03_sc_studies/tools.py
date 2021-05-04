@@ -1,4 +1,4 @@
-from icecube import icetray, dataio, dataclasses
+from icecube import icetray, dataio, dataclasses, recclasses
 from icecube.icetray import OMKey, I3Units
 import matplotlib.pyplot as plt
 import numpy as np
@@ -65,18 +65,28 @@ def cut_by_config(frame, start, stop, qmin, qmax):
 	return keeper
 
 def get_pulse_series(frame,pulse_mask_name):
+	hit_map = None
 	if type(frame[pulse_mask_name]) == dataclasses.I3RecoPulseSeriesMap:
 		hit_map = frame.Get(pulse_mask_name)
 	elif type(frame[pulse_mask_name]) == dataclasses.I3RecoPulseSeriesMapMask:
 		hit_map = frame[pulse_mask_name].apply(frame)
+	else:
+		# just get something, the user better deal with it...
+		hit_map = frame.Get(pulse_mask_name)
 	return hit_map
+
 
 def get_homogqtot_omkey_npe_dict(pulse_series):
 	omkey_npe_dict = {}
 	for omkey, pulses in pulse_series:
 		charge_this_dom = 0
+		if type(pulses) == recclasses.I3PortiaPulse:
+			pulses = [pulses] # put this into a list, just in case it's a PortiaPulse
 		for p in pulses:
-			charge_this_dom += p.charge
+			if type(p) == dataclasses.I3RecoPulse:
+				charge_this_dom += p.charge
+			elif type(p) == recclasses.I3PortiaPulse:
+				charge_this_dom += p.GetEstimatedNPE()
 		omkey_npe_dict[omkey] = charge_this_dom
 	return omkey_npe_dict
 
