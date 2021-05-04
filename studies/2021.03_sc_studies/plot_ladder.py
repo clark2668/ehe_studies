@@ -6,77 +6,85 @@ import matplotlib.pyplot as plt
 import numpy as np
 import argparse
 
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("-i", type=str,
+	dest="file_location", default='/Users/brianclark/Documents/work/IceCube/ehe/step4_files',
+	help="path to the hdf5 file locations with HQtot etc saved out",
+	)
+parser.add_argument("-y", type=int,
+	dest="year", default=2015,
+	help="Which year of standard candle, e.g. 2015"
+	)
+parser.add_argument("-c", type=int,
+	dest="candle", default=2,
+	help="Which candle, e.g. 2"
+	)
+args = parser.parse_args()
+
 hqtot_key = 'HomogenizedQTot'
 hqtot_key = 'HomogenziedQtot_SplitInIcePulses'
 # hqtot_key = 'HomogenziedQtot_SplitInIcePulses_ExcludeCalibrationErrata'
 
 #https://wiki.icecube.wisc.edu/index.php/Standard_Candle#Frequently_asked_questions
 filter_settings = [1, 2, 3, 4, 5, 6]
-filter_brightness = [1.4, 2.92, 8.4, 26, 37.2, 100] 
+filter_brightness = [1.4, 2.92, 8.4, 26, 37.2, 100]
+brightness_dict = {}
+for i, j in zip(filter_settings, filter_brightness):
+	brightness_dict[i] = j * 1E-2
+
+def get_predicted_brightness(original_brightness, filter_setting):
+	return original_brightness * brightness_dict[filter_setting]
+
+setting_charge_dict = {}
 
 for f in filter_settings:
-	f = h5py.File()
+	file = h5py.File(args.file_location + '/' + f'y{args.year}_c{args.candle}_f{f}_hqtot_splitinnicepulses.hdf5', 'r')
+	charges = file[hqtot_key]['value']
+	file.close()
+	new_charges = []
+	for charge in charges:
+		if charge > 1E4:
+			new_charges.append(charge)
+	setting_charge_dict[f] = new_charges
 
-# start the list
-f = h5py.File(args.input_files[0], 'r')
-charges = f[hqtot_key]['value']
-times = f['I3EventHeader']['time_start_mjd']
-events = f['I3EventHeader']['Event']
-portia_charges = f['EHEPortiaEventSummarySRT']['bestNPEbtw']
-print(f['I3EventHeader'].dtype.names)
-f.close()
+# start with filter setting 1, which is the "bottom" rung of the brightness ladder
+fig, axs = plt.subplots(1,1,figsize=(5,5))
+bins = np.linspace(4.75,4.95,50)
+filter_1_brightness = np.average(setting_charge_dict[1])
+original_brightness = filter_1_brightness/brightness_dict[1]
+print('Original brightness {}'.format(original_brightness))
+axs.hist(np.log10(setting_charge_dict[1]), bins=bins, alpha=0.5, label='Filter Setting 1')
+axs.vlines(np.log10(filter_1_brightness), 0.1, 1E3, label='Mean')
+axs.set_yscale('log')
+axs.set_ylabel('Number of Events')
+axs.set_xlabel('Charge')
+axs.legend()
+plt.tight_layout()
+fig.savefig('ladder_plots/hist_of_q_brightness_1.png', dpi=300)
+del fig, axs
 
-# loop over the remaining files
-for temp_f in args.input_files[1:]:
-	print("File {}".format(temp_f))
-	f = h5py.File(temp_f,'r')
-	temp_charges = f[hqtot_key]['value']
-	temp_times = f['I3EventHeader']['time_start_mjd']
-	temp_portia_charges = f['EHEPortiaEventSummarySRT']['bestNPEbtw']
-	temp_events = f['I3EventHeader']['Event']
-	charges = np.concatenate((charges, temp_charges))
-	times = np.concatenate((times,temp_times))
-	portia_charges = np.concatenate((portia_charges,temp_portia_charges))
-	events = np.concatenate((events,temp_events))
+# calculate predicted brightness assuming no saturatione effects
+predicted_brightness_dict = {}
+for i in filter_settings:
+	predicted_brightness_dict[i] = get_predicted_brightness(original_brightness, i)
 
-# mask = portia_charges > 4E4
-# mask = portia_charges > 0
-# portia_charges = portia_charges[mask]
-# charges = charges[mask]
+colors = ['C0', 'C1', 'C2', 'C3', 'C4', 'C5']
 
 
-## quick study of the "flatline" events (evts with portia Q by not Homog Q)
-mask = charges < 10000
-portia_charges = portia_charges[mask]
-charges = charges[mask]
-events = events[mask]
-for p, h, e in zip(portia_charges, charges, events):
-	if p > 20000:
-		print("Ev {}, Portia {:.2f}, Hqtot {:.2f}, H/P {:.2f}".format(e, p, h, h/p))
+# now, plot the first 3
+fig, axs = plt.subplots(1,1,figsize=(5,5))
+bins = np.linspace(4.5,6.5,100)
+for i, f in enumerate(filter_settings[:3]):
+	a = axs.hist(np.log10(setting_charge_dict[f]), bins=bins, color=colors[i], alpha=0.5, label='Filter {}'.format(f))
+	axs.vlines(np.log10(predicted_brightness_dict[f]), 0.1, 1E3, color=colors[i])
+axs.set_yscale('log')
+axs.set_ylabel('Number of Events')
+axs.set_xlabel('Charge')
+axs.legend()
+plt.tight_layout()
+fig.savefig('ladder_plots/hist_of_q_brightness_multi.png', dpi=300)
+del fig, axs
 
-log_portia_charges = np.log10(portia_charges)
-log_charges = np.log10(charges)
-
-do_hist = False
-if do_hist:
-
-	# plot the charge in histogram
-	# NB: by construction, this probably excludes balloon DOMs, which might be interesting...
-	fig, axs = plt.subplots(1,1,figsize=(5,5))
-	bins = np.linspace(4.5, 6, 250)
-	axs.hist(log_charges, bins=bins,alpha=0.5, label='HomogenizedQTot')
-	axs.hist(log_portia_charges, bins=bins, alpha=0.5, label='BestNPEBTW')
-	axs.set_yscale('log')
-	axs.set_ylabel('Number of Events')
-	axs.set_xlabel('Charge')
-	axs.set_ylim([0.9,3E3])
-	axs.set_title(hqtot_key, fontsize=8)
-	plt.ticklabel_format(axis="x", style="sci", scilimits=(0,0))
-	axs.legend()
-	plt.tight_layout()
-	fig.savefig('hist_of_charge_portia_homogqtot.png', dpi=300)
-	del fig, axs
-
-	# plt.ticklabel_format(axis="x", style="plain") # reset
 
 
