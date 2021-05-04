@@ -18,6 +18,8 @@ args = parser.parse_args()
 
 hqtot_key = 'HomogenizedQTot'
 hqtot_key = 'HomogenziedQtot_SplitInIcePulses'
+hqtot_key = 'HomogenziedQtot_SplitInIcePulses_ExcludeCalibrationErrata'
+
 
 # start the list
 f = h5py.File(args.input_files[0], 'r')
@@ -38,13 +40,17 @@ for temp_f in args.input_files[1:]:
 	portia_charges = np.concatenate((portia_charges,temp_portia_charges))
 
 mask = portia_charges > 4E4
+# mask = portia_charges > 0
 portia_charges = portia_charges[mask]
 charges = charges[mask]
+
+# for p, h in zip(portia_charges[-30:], charges[-30:]):
+# 	print("Portia {:.2f}, Hqtot {:.2f}, H/P {:.2f}".format(p, h, h/p))
 
 log_portia_charges = np.log10(portia_charges)
 log_charges = np.log10(charges)
 
-do_hist = True
+do_hist = False
 if do_hist:
 
 	# plot the charge in histogram
@@ -57,6 +63,7 @@ if do_hist:
 	axs.set_ylabel('Number of Events')
 	axs.set_xlabel('Charge')
 	axs.set_ylim([0.9,3E3])
+	axs.set_title(hqtot_key, fontsize=8)
 	plt.ticklabel_format(axis="x", style="sci", scilimits=(0,0))
 	axs.legend()
 	plt.tight_layout()
@@ -65,7 +72,7 @@ if do_hist:
 
 # plt.ticklabel_format(axis="x", style="plain") # reset
 
-do_scatter = False
+do_scatter = True
 if do_scatter:
 
 	do_log = True
@@ -88,9 +95,13 @@ if do_scatter:
 		# axs.set_yscale('log')
 		axs.set_xlim([0, 1E6])
 		axs.set_ylim([0, 1E6])
+	axs.set_title(hqtot_key, fontsize=8)
 	axs.set_aspect('equal')
 	axs.legend()
 	plt.tight_layout()
-	fig.savefig('portia_vs_homogqtot.png', dpi=300)
+	if do_log:
+		fig.savefig('portia_vs_homogqtot_log.png', dpi=300)
+	else:
+		fig.savefig('portia_vs_homogqtot.png', dpi=300)
 	del fig, axs
 
