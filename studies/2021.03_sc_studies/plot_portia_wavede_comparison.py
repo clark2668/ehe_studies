@@ -50,13 +50,13 @@ for temp_f in args.input_files[1:]:
 
 
 ## quick study of the "flatline" events (evts with portia Q by not Homog Q)
-mask = charges < 10000
-portia_charges = portia_charges[mask]
-charges = charges[mask]
-events = events[mask]
-for p, h, e in zip(portia_charges, charges, events):
-	if p > 20000:
-		print("Ev {}, Portia {:.2f}, Hqtot {:.2f}, H/P {:.2f}".format(e, p, h, h/p))
+# mask = charges < 10000
+# portia_charges = portia_charges[mask]
+# charges = charges[mask]
+# events = events[mask]
+# for p, h, e in zip(portia_charges, charges, events):
+# 	if p > 20000:
+# 		print("Ev {}, Portia {:.2f}, Hqtot {:.2f}, H/P {:.2f}".format(e, p, h, h/p))
 
 log_portia_charges = np.log10(portia_charges)
 log_charges = np.log10(charges)
@@ -86,7 +86,7 @@ if do_hist:
 do_scatter = True
 if do_scatter:
 
-	do_log = False
+	do_log = True
 
 	# and as a scatter plot
 
