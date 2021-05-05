@@ -37,10 +37,10 @@ tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf',
 	SubEventStreams=['InIceSplit']
 	)
 
-tray.AddModule("I3Writer", "write",
-	filename=f'{args.output_file}.i3.bz2',
-	Streams=[icetray.I3Frame.DAQ, icetray.I3Frame.Physics],
-	DropOrphanStreams=[icetray.I3Frame.Calibration, icetray.I3Frame.DAQ]
-	)
+# tray.AddModule("I3Writer", "write",
+# 	filename=f'{args.output_file}.i3.bz2',
+# 	Streams=[icetray.I3Frame.DAQ, icetray.I3Frame.Physics],
+# 	DropOrphanStreams=[icetray.I3Frame.Calibration, icetray.I3Frame.DAQ]
+# 	)
 
 tray.Execute()
