@@ -16,6 +16,10 @@ parser.add_argument("-o", type=str,
 	help='''full path to the output file, without file extention. 
 			That is, provide "test" not "test.i3.bz2"''',
 	)
+parser.add_argument("-s", type=bool,
+	dest="save_i3file",required=False, default=False,
+	help='should save i3 file',
+	)
 args = parser.parse_args()
 
 
@@ -37,10 +41,11 @@ tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf',
 	SubEventStreams=['InIceSplit']
 	)
 
-# tray.AddModule("I3Writer", "write",
-# 	filename=f'{args.output_file}.i3.bz2',
-# 	Streams=[icetray.I3Frame.DAQ, icetray.I3Frame.Physics],
-# 	DropOrphanStreams=[icetray.I3Frame.Calibration, icetray.I3Frame.DAQ]
-# 	)
+if args.save_i3file:
+	tray.AddModule("I3Writer", "write",
+		filename=f'{args.output_file}.i3.bz2',
+		Streams=[icetray.I3Frame.DAQ, icetray.I3Frame.Physics],
+		DropOrphanStreams=[icetray.I3Frame.Calibration, icetray.I3Frame.DAQ]
+		)
 
 tray.Execute()
