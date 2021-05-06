@@ -43,7 +43,7 @@ tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf',
 
 if args.save_i3file:
 	tray.AddModule("I3Writer", "write",
-		filename=f'{args.output_file}.i3.bz2',
+		filename=f'{args.output_file}.i3.zst',
 		Streams=[icetray.I3Frame.DAQ, icetray.I3Frame.Physics],
 		DropOrphanStreams=[icetray.I3Frame.Calibration, icetray.I3Frame.DAQ]
 		)
