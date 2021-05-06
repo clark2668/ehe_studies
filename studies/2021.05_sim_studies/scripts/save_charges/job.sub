@@ -1,0 +1,16 @@
+log    = /scratch/brianclark/IceCube/trash/$(infile).log
+output = /scratch/brianclark/IceCube/trash/$(infile).out
+err    = /scratch/brianclark/IceCube/trash/$(infile).err
+
+request_cpus = 1
+request_memory = 2GB
+request_disk = 2GB
+Universe = vanilla
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
++AccountingGroup="quicktest.$ENV(USER)"
+
+executable = job.sh
+arguments = $(indir) $(infile) $(outdir) $(outfile)
+
+queue
