@@ -81,16 +81,16 @@ def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map,
 	
 	return best_npe, omkey_npe_dict
 
-def CalcPortiaCharge(frame, DOMsToExclude = None):
+def CalcPortiaCharge(frame, DOMsToExclude = []):
 	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
 		return False
 
-	splitted_dom_map = frame.Get('splittedDOMMap')
-	fadc_pulse_map = frame.Get('EHEFADCPortiaPulse')
-	atwd_pulse_map = frame.Get('EHEATWDPortiaPulse')
-	best_pulse_map = frame.Get('EHEBestPortiaPulse')
+	splitted_dom_map = frame.Get('splittedDOMMapSRT')
+	fadc_pulse_map = frame.Get('EHEFADCPortiaPulseSRT')
+	atwd_pulse_map = frame.Get('EHEATWDPortiaPulseSRT')
+	best_pulse_map = frame.Get('EHEBestPortiaPulseSRT')
 
-	best_npe, _ = utils_pulses.get_portia_omkey_npe_dict(splittedDOMMap,
+	best_npe, _ = get_portia_omkey_npe_dict(splitted_dom_map,
 		fadc_pulse_map, best_pulse_map, doBTW=True, excluded_doms=DOMsToExclude)
 
-	print('Best NPE {}'.format(best_npe))
+	print('Best NPE {:.2f}'.format(best_npe))
