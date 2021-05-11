@@ -67,7 +67,7 @@ tray.AddModule("Delete", 'deleter',
 	'CalibratedWaveformRange', 'ReextractedInIcePulses', 'ReextractedInIcePulsesTimeRange',
 	'ReextractedIceTopPulses', 'IceTopHLCPulseInfo', 'ReextractedIceTopPulses_SLC',
 	'InIcePulses', 'IceTopPulses', 'RehydrateNInIcePFrames', 'NFramesIsDifferent', 'IceTopErrata',
-	'CalibrationErrata', 'SaturationWindows']
+	'CalibrationErrata', 'SaturationWindows', 'CalibratedSLC']
 	)
 
 # do rehydration
@@ -129,21 +129,21 @@ tray.AddSegment(HitCleaningEHE, 'eheclean',
 	)
 
 # make the files small again
-tray.AddModule("Delete", 'deleter2', 
-	Keys=['EHECalibratedATWD_Wave', 'EHECalibratedFADC_Wave',
-	'CalibratedWaveforms', 'CalibratedWaveforms_ATWD', 
-	'CalibratedWaveforms_FADC','CalibratedWaveforms_SLC',
-	'HLCOfflineCleanInIceRawData', 'SLCOfflineCleanInIceRawData',
-	'EHEHLCCalibratedWaveforms', 'CleanIceTopRawData_EHE',
-	'HLCOfflineCleanInIceRawDataWODC', 'CleanInIceRawData', 
-	'CleanInIceRawData' ]
-	)
+# tray.AddModule("Delete", 'deleter2', 
+# 	Keys=['EHECalibratedATWD_Wave', 'EHECalibratedFADC_Wave',
+# 	'CalibratedWaveforms', 'CalibratedWaveforms_ATWD', 
+# 	'CalibratedWaveforms_FADC','CalibratedWaveforms_SLC',
+# 	'HLCOfflineCleanInIceRawData', 'SLCOfflineCleanInIceRawData',
+# 	'EHEHLCCalibratedWaveforms', 'CleanIceTopRawData_EHE',
+# 	'HLCOfflineCleanInIceRawDataWODC', 'CleanInIceRawData', 
+# 	'CleanInIceRawData' ]
+# 	)
 
-tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
-	Output="{}/y{}_c{}_f{}_waves.hdf5".format(args.output_dir, args.year, args.candle, args.filter_setting), 
-	Keys=['I3EventHeader', 'HomogenizedQTot', 'EHEPortiaEventSummarySRT'], 
-	SubEventStreams=['InIceSplit']
-	)
+# tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
+# 	Output="{}/y{}_c{}_f{}_waves.hdf5".format(args.output_dir, args.year, args.candle, args.filter_setting), 
+# 	Keys=['I3EventHeader', 'HomogenizedQTot', 'EHEPortiaEventSummarySRT'], 
+# 	SubEventStreams=['InIceSplit']
+# 	)
 
 # tray.Add("Dump")
 tray.Add("I3Writer", 

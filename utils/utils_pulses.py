@@ -4,6 +4,7 @@ from icecube.phys_services.which_split import which_split
 from I3Tray import Inf
 
 import numpy as np
+import operator
 
 # useful for helping to define the time of arrival of the biggest pulse
 def find_time_of_largest_pulse(portia_pulse_map):
@@ -76,7 +77,7 @@ def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map,
 			this_npe += this_atwd
 
 		# add the contribution of this dom to the total
-		# omkey_npe_dict[omkey] = this_npe
+		omkey_npe_dict[omkey] = this_npe
 		best_npe += this_npe
 	
 	return best_npe, omkey_npe_dict
@@ -90,7 +91,119 @@ def CalcPortiaCharge(frame, DOMsToExclude = []):
 	atwd_pulse_map = frame.Get('EHEATWDPortiaPulseSRT')
 	best_pulse_map = frame.Get('EHEBestPortiaPulseSRT')
 
-	best_npe, _ = get_portia_omkey_npe_dict(splitted_dom_map,
+	best_npe, omkey_dict = get_portia_omkey_npe_dict(splitted_dom_map,
 		fadc_pulse_map, best_pulse_map, doBTW=True, excluded_doms=DOMsToExclude)
 
-	print('Best NPE {:.2f}'.format(best_npe))
+	return best_npe, omkey_dict
+
+def CalcPortiaCharge_module(frame, DOMsToExclude=[]):
+	best_npe, omkey_npe_dict = CalcPortiaCharge(frame, DOMsToExclude=DOMsToExclude)
+
+def get_pulse_map(frame,pulse_mask_name):
+	if type(frame[pulse_mask_name]) == dataclasses.I3RecoPulseSeriesMap:
+		hit_map = frame.Get(pulse_mask_name)
+	elif type(frame[pulse_mask_name]) == dataclasses.I3RecoPulseSeriesMapMask:
+		hit_map = frame[pulse_mask_name].apply(frame)
+	return hit_map
+
+def get_homogqtot_omkey_npe_dict(calibration, status, vertex_time, 
+	causality_window, pulse_map, max_q_per_dom,
+	exclude_high_qe_doms = True, do_causal = False):
+	
+	causal_qtot=0.;
+	omkey_npe_dict = {}; # for all the DOMs
+	omkey_npe_dict_noDC = {}; # for DOMs that are not in DC, high QE, or saturated
+	
+	for omkey, pulses in pulse_map.items():
+		if not omkey in calibration.dom_cal:
+			print("omkey {} not in dom_cal".format(omkey))
+			continue
+		if not omkey in status.dom_status.keys():
+			print("omkey {} not in status".format(omkey))
+			continue
+		dom_cal = calibration.dom_cal[omkey]
+
+		charge_this_dom = 0.
+
+		# loop pulses
+		for p in pulses:
+			# print(p.flags)
+			if do_causal:			
+				if (p.time >= vertex_time and p.time < vertex_time+causality_window):
+					charge_this_dom+=p.charge
+			else:
+				charge_this_dom+=p.charge
+		omkey_npe_dict[omkey] = charge_this_dom
+
+		# now, to actual compute causal_qtot, we exclude deep core
+		# and, exclude any dom with high efficiency
+		# and, exclude any DOM which contributes more than max_q_per_dom
+
+		string = omkey.string
+		if string in [79, 80, 81, 82, 83, 84, 85, 86]:
+			continue
+		if dom_cal.relative_dom_eff > 1.1 and exclude_high_qe_doms:
+			continue				
+		if charge_this_dom < max_q_per_dom:
+			omkey_npe_dict_noDC[omkey] = charge_this_dom
+			causal_qtot+=charge_this_dom
+
+	return causal_qtot, omkey_npe_dict, omkey_npe_dict_noDC
+
+def CalcQTot(frame, pulses='SplitInIcePulses', do_causal=False):
+	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
+		return False
+
+	if not 'I3Calibration' in frame or not 'I3DetectorStatus' in frame:
+		icetray.logging.log_fatal('I3Calibration or I3Detector status not in frame')
+
+	calibration = frame['I3Calibration']
+	status = frame['I3DetectorStatus']
+
+	pulse_map = get_pulse_map(frame, pulses)
+
+	vertex_time = None
+	causality_window = None
+	if do_causal:
+		vertex_time = frame.Get('HESE_VHESelfVetoVertexTime').value
+		causality_window = 5000. * I3Units.ns
+
+	qtot, qtot_omkey_npe_dict, qtot_omkey_npe_dict_noDC = get_homogqtot_omkey_npe_dict(calibration, 
+		status, vertex_time, causality_window, pulse_map, Inf, do_causal=do_causal)
+	qtot, qtot_omkey_npe_dict, qtot_omkey_npe_dict_noDC = get_homogqtot_omkey_npe_dict(calibration, 
+		status, vertex_time, causality_window, pulse_map, qtot/2., do_causal=do_causal)
+
+	return qtot, qtot_omkey_npe_dict, qtot_omkey_npe_dict_noDC
+
+def CalcQTot_module(frame, pulses='SplitInIcePulses', do_causal=False):
+	CalcQTot(frame, pulses=pulses, do_causal=do_causal)
+
+def Compare_Portia_QTot(frame):
+
+	portia, portia_dict = CalcPortiaCharge(frame)
+	hqtot, hqtot_dict, hqtot_dict_noDC = CalcQTot(frame)
+	print('Porta total {:.2f}, HQtot {:.2f}'.format(portia, hqtot))
+	print('------')
+
+	# figure out what DOMs are *shared* between the two calculation methods
+	shared_doms = set(portia_dict.keys()).intersection(hqtot_dict_noDC.keys())
+	
+	# store the differences
+	diff = {}
+	for omkey in shared_doms:
+		diff[omkey] =  portia_dict[omkey] - hqtot_dict[omkey]
+
+	# sort by difference (largest to smallest)
+	# this seems to work (even though some people online disagree on if dictionaries 
+	# are even sortable at a fundamental level...)
+	sorted_diff = dict(sorted(diff.items(), key=lambda item: item[1], reverse=True))
+
+	for omkey, _ in sorted_diff.items():
+		print('OMKey {}, Portia {:.2f}, HQtot {:.2f}, Diff {:.2f}'.format(omkey,
+			portia_dict[omkey], hqtot_dict[omkey], portia_dict[omkey] - hqtot_dict[omkey]))
+
+	print("\n\n")
+
+
+
+
