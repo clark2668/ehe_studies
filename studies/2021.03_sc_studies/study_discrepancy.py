@@ -9,7 +9,7 @@ import copy
 
 from icecube import icetray, dataio, dataclasses
 from I3Tray import I3Tray
-from utils import utils_pulses
+from utils import utils_pulses, utils_waveforms
 
 import argparse
 parser = argparse.ArgumentParser()
