@@ -107,7 +107,7 @@ tray.AddModule('I3SeededRTCleaning_RecoPulseMask_Module', 'North_seededrt',
     If = which_split(split_name='InIceSplit')
 )
 
-pulses='InIcePulses'
+pulses='SplitInIcePulses'
 tray.AddModule('HomogenizedQTot', 'qtot_total', 
 	Pulses=pulses,
 	Output='HomogenizedQTot'
@@ -124,26 +124,25 @@ tray.AddSegment(EHECalibration, 'ehecalib',
 # EHE Hit Cleaning
 tray.AddSegment(HitCleaningEHE, 'eheclean',
 	inATWD='EHECalibratedATWD_Wave', inFADC = 'EHECalibratedFADC_Wave',
-	# inATWD='CalibratedWaveforms_ATWD', inFADC = 'CalibratedWaveforms_FADC',
 	If=which_split(split_name='InIceSplit') #& (lambda f: ehe_wg(f))
 	)
 
 # make the files small again
-# tray.AddModule("Delete", 'deleter2', 
-# 	Keys=['EHECalibratedATWD_Wave', 'EHECalibratedFADC_Wave',
-# 	'CalibratedWaveforms', 'CalibratedWaveforms_ATWD', 
-# 	'CalibratedWaveforms_FADC','CalibratedWaveforms_SLC',
-# 	'HLCOfflineCleanInIceRawData', 'SLCOfflineCleanInIceRawData',
-# 	'EHEHLCCalibratedWaveforms', 'CleanIceTopRawData_EHE',
-# 	'HLCOfflineCleanInIceRawDataWODC', 'CleanInIceRawData', 
-# 	'CleanInIceRawData' ]
-# 	)
+tray.AddModule("Delete", 'deleter2', 
+	Keys=['EHECalibratedATWD_Wave', 'EHECalibratedFADC_Wave',
+	'CalibratedWaveforms', 'CalibratedWaveforms_ATWD', 
+	'CalibratedWaveforms_FADC','CalibratedWaveforms_SLC',
+	'HLCOfflineCleanInIceRawData', 'SLCOfflineCleanInIceRawData',
+	'EHEHLCCalibratedWaveforms', 'CleanIceTopRawData_EHE',
+	'HLCOfflineCleanInIceRawDataWODC', 'CleanInIceRawData', 
+	'CleanInIceRawData' ]
+	)
 
-# tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
-# 	Output="{}/y{}_c{}_f{}_waves.hdf5".format(args.output_dir, args.year, args.candle, args.filter_setting), 
-# 	Keys=['I3EventHeader', 'HomogenizedQTot', 'EHEPortiaEventSummarySRT'], 
-# 	SubEventStreams=['InIceSplit']
-# 	)
+tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
+	Output="{}/y{}_c{}_f{}_waves.hdf5".format(args.output_dir, args.year, args.candle, args.filter_setting), 
+	Keys=['I3EventHeader', 'HomogenizedQTot', 'EHEPortiaEventSummarySRT'], 
+	SubEventStreams=['InIceSplit']
+	)
 
 # tray.Add("Dump")
 tray.Add("I3Writer", 
@@ -151,4 +150,4 @@ tray.Add("I3Writer",
 	Streams=[icetray.I3Frame.DAQ, icetray.I3Frame.Physics]
 	)
 
-tray.Execute()
+tray.Execute(5)
