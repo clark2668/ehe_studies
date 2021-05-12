@@ -150,4 +150,4 @@ tray.Add("I3Writer",
 	Streams=[icetray.I3Frame.DAQ, icetray.I3Frame.Physics]
 	)
 
-tray.Execute(5)
+tray.Execute()
