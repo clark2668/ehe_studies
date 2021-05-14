@@ -1,10 +1,9 @@
-log = /misc/disk15/scratch/brian/trash/run_hqtot_again_y$(year)_c$(candle)_f$(filter)_$(Process).log
-output = /misc/disk15/scratch/brian/trash/run_hqtot_again_y$(year)_c$(candle)_f$(filter)_$(Process).out
-error = /misc/disk15/scratch/brian/trash/run_hqtot_again_y$(year)_c$(candle)_f$(filter)_$(Process).err
+log = /misc/disk15/scratch/brian/trash/magsix_y$(year)_c$(candle)_f$(filter)_$(Process).log
+output = /misc/disk15/scratch/brian/trash/magsix_y$(year)_c$(candle)_f$(filter)_$(Process).out
+error = /misc/disk15/scratch/brian/trash/magsix_y$(year)_c$(candle)_f$(filter)_$(Process).err
 
 request_cpus = 1
-request_memory = 5GB
-request_disk = 20GB
+request_memory = 3GB
 Universe = vanilla
 getenv = true
 should_transfer_files = YES
