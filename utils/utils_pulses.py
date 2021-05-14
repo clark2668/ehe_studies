@@ -40,7 +40,7 @@ def get_portia_pulse_values(portia_pulse, largest_time, window_start,
 	return npe_out
 
 def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map, 
-	excluded_doms = [], doBTW=True):
+	excluded_doms = [], doBTW=True, excludeFADC=False, excludeATWD=False):
 	'''
 	This is a roughly replication of the MakePortiaEvent function in I3Portia.xx
 	We check all of the launched omkeys in the splitted_dom_map
@@ -50,6 +50,8 @@ def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map,
 	as the NPE estimate for that event.
 	We will return a dict of the omkey to the NPE estimate (the omkey_npe_dict)
 	'''
+	if excludeFADC and excludeATWD:
+		icetray.logging.log_fatal("excludeFADC={} and excludeATWD={}, which doesn't make sense. Abort!".format(excludeFADC, excludeATWD))
 
 	# now set up window for cleaning
 	largest_time_fadc = find_time_of_largest_pulse(fadc_pulse_map)
@@ -82,7 +84,11 @@ def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map,
 				start_time_btw, end_time_btw, doBTW)
 
 		this_npe = 0
-		if this_fadc > this_atwd:
+		if excludeFADC:
+			this_npe += this_atwd
+		elif excludeATWD:
+			this_npe += this_fadc
+		elif this_fadc > this_atwd:
 			this_npe += this_fadc
 		elif this_atwd > this_fadc:
 			this_npe += this_atwd
@@ -93,7 +99,7 @@ def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map,
 	
 	return best_npe, omkey_npe_dict
 
-def CalcPortiaCharge(frame, DOMsToExclude = []):
+def CalcPortiaCharge(frame, DOMsToExclude = [], exludeFADC=False, excludeATWD=False):
 	best_npe = -20.
 	omkey_dict = {}
 	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
@@ -104,22 +110,34 @@ def CalcPortiaCharge(frame, DOMsToExclude = []):
 	atwd_pulse_map = frame.Get('EHEATWDPortiaPulseSRT')
 	best_pulse_map = frame.Get('EHEBestPortiaPulseSRT')
 
+	which_atwd_pulses = best_pulse_map
+	if excludeFADC:
+		which_atwd_pulses=atwd_pulse_map
+
 	best_npe, omkey_dict = get_portia_omkey_npe_dict(splitted_dom_map,
-		fadc_pulse_map, best_pulse_map, doBTW=True, excluded_doms=DOMsToExclude)
+		fadc_pulse_map, best_pulse_map, doBTW=True, excluded_doms=DOMsToExclude,
+		excludeFADC=excludeFADC, excludeATWD=excludeATWD)
 
 	return best_npe, omkey_dict
 
-def CalcPortiaCharge_module(frame, DOMsToExclude=[]):
-	best_npe, omkey_npe_dict = CalcPortiaCharge(frame, DOMsToExclude=DOMsToExclude)
+def CalcPortiaCharge_module(frame, DOMsToExclude=[], exludeFADC=False, excludeATWD=False,
+	name='PortiaEventSummarySRT'):
+	best_npe, omkey_npe_dict = CalcPortiaCharge(frame, DOMsToExclude=DOMsToExclude,
+		excludeFADC=excludeFADC, excludeATWD=excludeATWD)
+	dummy_portia_event = recclasses.I3PortiaEvent()
+	dummy_portia_event.SetTotalBestNPEbtw(best_npe)
+	frame.Put(name, dummy_portia_event)
 
 
-def CalcPortiaCharge_DeepMagSix(frame, DOMsToExclude = []):
+
+def CalcPortiaCharge_DeepMagSix(frame, DOMsToExclude = [], exludeFADC=False, excludeATWD=False):
 	'''
 	Calculate Portia charge for the "magnificent six" strings (45, 46, 54, 56, 63, 64)
 	In the "deep" region (OM > 33)
 	See e.g. https://wiki.icecube.wisc.edu/index.php/Analysis_of_The_Standard_Candle_Luminosity#String-wise_Deep_NPE_distribution
 	'''
-	portia, portia_dict = CalcPortiaCharge(frame)
+	portia, portia_dict = CalcPortiaCharge(frame, DOMsToExclude=DOMsToExclude,
+		excludeFADC=excludeFADC, excludeATWD=excludeATWD)
 
 	magsix_charge = 0.
 	for omkey, q in portia_dict.items():
@@ -127,9 +145,10 @@ def CalcPortiaCharge_DeepMagSix(frame, DOMsToExclude = []):
 			magsix_charge += q
 	return magsix_charge
 
-def CalcPortiaCharge_DeepMagSix_module(frame, DOMsToExclude = [], name='PortiaEventSummarySRT_DeepMagSix'):
-	magsix_charge = CalcPortiaCharge_DeepMagSix(frame, DOMsToExclude=DOMsToExclude)
-	# frame.Put('PortiaBestNPE_DeepMagSix', dataclasses.I3Double(magsix_charge))
+def CalcPortiaCharge_DeepMagSix_module(frame, DOMsToExclude = [], exludeFADC=False, excludeATWD=False
+	name='PortiaEventSummarySRT_DeepMagSix'):
+	magsix_charge = CalcPortiaCharge_DeepMagSix(frame, DOMsToExclude=DOMsToExclude,
+		excludeFADC=excludeFADC, excludeATWD=excludeATWD)
 	dummy_portia_event = recclasses.I3PortiaEvent()
 	dummy_portia_event.SetTotalBestNPEbtw(magsix_charge)
 	frame.Put(name, dummy_portia_event)
