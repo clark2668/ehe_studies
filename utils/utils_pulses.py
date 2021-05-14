@@ -1,10 +1,21 @@
-from icecube import icetray, dataclasses, portia
+from icecube import icetray, dataclasses, portia, recclasses
 from icecube.icetray import I3Units
 from icecube.phys_services.which_split import which_split
 from I3Tray import Inf
 
 import numpy as np
 import operator
+
+magsix_strings = [45, 46, 54, 56, 63, 64]
+def is_magsix(omkey):
+	'''
+	Function to identify if a DOM is on a "magnificent six" string
+	'''
+	result = False
+	if omkey.string in magsix_strings:
+		if omkey.om >= 33:
+			result = True
+	return result
 
 # useful for helping to define the time of arrival of the biggest pulse
 def find_time_of_largest_pulse(portia_pulse_map):
@@ -24,7 +35,7 @@ def get_portia_pulse_values(portia_pulse, largest_time, window_start,
 	t10 = portia_pulse.GetRecoPulse().time
 	npe_out = npe
 	if enforce_window and not ((t10 - largest_time >= window_start) and (t10 - largest_time <= window_end)):
-		print("Skip adding npe {}".format(npe))
+		# print("Skip adding npe {}".format(npe))
 		npe_out = 0
 	return npe_out
 
@@ -83,8 +94,10 @@ def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map,
 	return best_npe, omkey_npe_dict
 
 def CalcPortiaCharge(frame, DOMsToExclude = []):
+	best_npe = -20.
+	omkey_dict = {}
 	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
-		return False
+		return best_npe, omkey_dict
 
 	splitted_dom_map = frame.Get('splittedDOMMapSRT')
 	fadc_pulse_map = frame.Get('EHEFADCPortiaPulseSRT')
@@ -98,6 +111,29 @@ def CalcPortiaCharge(frame, DOMsToExclude = []):
 
 def CalcPortiaCharge_module(frame, DOMsToExclude=[]):
 	best_npe, omkey_npe_dict = CalcPortiaCharge(frame, DOMsToExclude=DOMsToExclude)
+
+
+def CalcPortiaCharge_DeepMagSix(frame, DOMsToExclude = []):
+	'''
+	Calculate Portia charge for the "magnificent six" strings (45, 46, 54, 56, 63, 64)
+	In the "deep" region (OM > 33)
+	See e.g. https://wiki.icecube.wisc.edu/index.php/Analysis_of_The_Standard_Candle_Luminosity#String-wise_Deep_NPE_distribution
+	'''
+	portia, portia_dict = CalcPortiaCharge(frame)
+
+	magsix_charge = 0.
+	for omkey, q in portia_dict.items():
+		if is_magsix(omkey):
+			magsix_charge += q
+	return magsix_charge
+
+def CalcPortiaCharge_DeepMagSix_module(frame, DOMsToExclude = [], name='PortiaEventSummarySRT_DeepMagSix'):
+	magsix_charge = CalcPortiaCharge_DeepMagSix(frame, DOMsToExclude=DOMsToExclude)
+	# frame.Put('PortiaBestNPE_DeepMagSix', dataclasses.I3Double(magsix_charge))
+	dummy_portia_event = recclasses.I3PortiaEvent()
+	dummy_portia_event.SetTotalBestNPEbtw(magsix_charge)
+	frame.Put(name, dummy_portia_event)
+
 
 def get_pulse_map(frame,pulse_mask_name):
 	if type(frame[pulse_mask_name]) == dataclasses.I3RecoPulseSeriesMap:
@@ -151,8 +187,13 @@ def get_homogqtot_omkey_npe_dict(calibration, status, vertex_time,
 	return causal_qtot, omkey_npe_dict, omkey_npe_dict_noDC
 
 def CalcQTot(frame, pulses='SplitInIcePulses', do_causal=False):
+	
+	qtot = -10.
+	qtot_omkey_npe_dict	= {}
+	qtot_omkey_npe_dict_noDC = {}
+
 	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
-		return False
+		return qtot, qtot_omkey_npe_dict, qtot_omkey_npe_dict_noDC
 
 	if not 'I3Calibration' in frame or not 'I3DetectorStatus' in frame:
 		icetray.logging.log_fatal('I3Calibration or I3Detector status not in frame')
@@ -177,6 +218,28 @@ def CalcQTot(frame, pulses='SplitInIcePulses', do_causal=False):
 
 def CalcQTot_module(frame, pulses='SplitInIcePulses', do_causal=False):
 	CalcQTot(frame, pulses=pulses, do_causal=do_causal)
+
+
+def CalcQTot_DeepMagSix(frame, pulses='SplitInIcePulses', do_causal=False):
+	'''
+	Calculate Qtot for the "magnificent six" strings (45, 46, 54, 56, 63, 64)
+	In the "deep" region (OM > 33)
+	See e.g. https://wiki.icecube.wisc.edu/index.php/Analysis_of_The_Standard_Candle_Luminosity#String-wise_Deep_NPE_distribution
+	'''
+	hqtot, hqtot_dict, hqtot_dict_noDC = CalcQTot(frame)
+
+	magsix_charge = 0.
+	for omkey, q in hqtot_dict.items():
+		if is_magsix(omkey):
+			magsix_charge += q
+	return magsix_charge
+
+def CalcQTOt_DeepMagSix_module(frame, pulses='SplitInIcePulses', do_causal=False,
+	name = 'HomogenizedQTot_DeepMagSix'):
+	magsix_charge = CalcQTot_DeepMagSix(frame, pulses=pulses, do_causal=do_causal)
+	# frame['HomogenizedQtot_DeepMagSix'] = magsix_charge
+	frame.Put(name, dataclasses.I3Double(magsix_charge))
+
 
 def Compare_Portia_QTot(frame):
 

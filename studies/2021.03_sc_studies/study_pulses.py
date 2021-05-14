@@ -1,6 +1,11 @@
 #!/bin/sh /cvmfs/icecube.opensciencegrid.org/py3-v4.1.1/icetray-start
 #METAPROJECT combo/V01-01-00
 
+'''
+A script I used early on to make plots of waveforms
+And also, to make the "charge" panopticons
+'''
+
 import matplotlib.pyplot as plt
 import numpy as np
 import copy
