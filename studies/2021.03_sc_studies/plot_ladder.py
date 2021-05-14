@@ -42,6 +42,7 @@ pulses = args.pulses
 #https://wiki.icecube.wisc.edu/index.php/Standard_Candle#Frequently_asked_questions
 filter_settings = [1, 2, 3, 4, 5, 6]
 filter_brightness = [1.4, 2.92, 8.4, 26, 37.2, 100]
+# filter_brightness = [1.4, 3.28, 8.90, 26.8, 37.7, 100]
 brightness_dict = {}
 for i, j in zip(filter_settings, filter_brightness):
 	brightness_dict[i] = j * 1E-2
