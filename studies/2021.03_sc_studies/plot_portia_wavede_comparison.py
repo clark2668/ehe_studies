@@ -16,12 +16,13 @@ parser.add_argument("-i", type=str, nargs='+',
 	required=True)
 args = parser.parse_args()
 
-# hqtot_key = 'HomogenizedQTot'
-# hqtot_key = 'HomogenziedQtot_SplitInIcePulses'
-# hqtot_key = 'HomogenziedQtot_SplitInIcePulses_ExcludeCalibrationErrata'
-hqtot_key = 'HomogenizedQTot_DeepMagSix'
-# portia_key = 'EHEPortiaEventSummarySRT'
-portia_key = 'PortiaEventSummarySRT_DeepMagSix'
+option = 'standard'
+if option=='standard':
+	hqtot_key = 'HomogenziedQtot_SplitInIcePulses'
+	portia_key = 'EHEPortiaEventSummarySRT'
+elif option=='magsix':
+	hqtot_key = 'HomogenizedQTot_DeepMagSix'
+	portia_key = 'PortiaEventSummarySRT_DeepMagSix'
 
 
 # start the list
@@ -63,22 +64,30 @@ charges = charges[mask]
 
 
 
-do_hist = False
+do_hist = True
 if do_hist:
 
 	log_portia_charges = np.log10(portia_charges)
 	log_charges = np.log10(charges)
+	
+	# to cleanup the plot (temporary!)
+	# put a mask on the "flatline" events where Portia is calculating a bunch of chrage
+	# so, put a cut on the true charge (hqtot charge) in the frame to be conservative
+	mask = log_charges > 3.5
+	log_portia_charges = log_portia_charges[mask]
+	log_charges = log_charges[mask]
+
 
 	# plot the charge in histogram
 	fig, axs = plt.subplots(1,1,figsize=(5,5))
-	bins = np.linspace(4.5, 6, 250)
+	bins = np.linspace(3.5, 6, 300)
 	axs.hist(log_charges, bins=bins,alpha=0.5, label='HomogenizedQTot')
 	axs.hist(log_portia_charges, bins=bins, alpha=0.5, label='BestNPEBTW')
 	axs.set_yscale('log')
 	axs.set_ylabel('Number of Events')
 	axs.set_xlabel('Charge')
 	axs.set_ylim([0.9,3E3])
-	axs.set_title(hqtot_key, fontsize=8)
+	axs.set_title(option, fontsize=8)
 	plt.ticklabel_format(axis="x", style="sci", scilimits=(0,0))
 	axs.legend()
 	plt.tight_layout()
@@ -90,7 +99,7 @@ if do_hist:
 do_scatter = True
 if do_scatter:
 
-	do_log = False
+	do_log = True
 
 	# and as a scatter plot
 
@@ -98,19 +107,19 @@ if do_scatter:
 	if do_log:
 		axs.plot(np.log10(portia_charges), np.log10(charges), 'o', alpha=0.5, label='SC Events')
 		axs.plot([0,6],[0,6],'--', label='1-1 line')
-		axs.set_ylabel(r'log$_{10}$(Homogenized Q Tot) [NPE]')
-		axs.set_xlabel(r'log$_{10}$(Portia Best NPE BTW) [NPE]')
-		axs.set_xlim([0.5, 6])
-		axs.set_ylim([0.5, 6])
+		axs.set_ylabel(r'log$_{10}$(Homogenized Q Tot) [NPE]'+'\n'+'{}'.format(hqtot_key))
+		axs.set_xlabel(r'log$_{10}$(Portia Best NPE BTW) [NPE]'+'\n'+'{}'.format(portia_key))
+		axs.set_xlim([3.5, 6])
+		axs.set_ylim([3.5, 6])
 	else:
 		axs.plot(portia_charges, charges, 'o', alpha=0.5, label='SC Events')
 		axs.plot([0,1E6],[0,1E6],'--', label='1-1 line')
-		axs.set_ylabel(r'Homogenized Q Tot [NPE]')
-		axs.set_xlabel(r'Portia Best NPE BTW [NPE]')
+		axs.set_ylabel(r'Homogenized Q Tot [NPE]''\n''{}'.format(hqtot_key))
+		axs.set_xlabel(r'Portia Best NPE BTW [NPE]''\n''{}'.format(portia_key))
 		# axs.set_yscale('log')
 		axs.set_xlim([0, 100000])
 		axs.set_ylim([0, 100000])
-	axs.set_title(hqtot_key, fontsize=8)
+	axs.set_title(option, fontsize=8)
 	axs.set_aspect('equal')
 	axs.legend()
 	plt.tight_layout()
