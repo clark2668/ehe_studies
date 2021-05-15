@@ -1,6 +1,6 @@
 log =    /misc/disk15/scratch/brian/trash/restore_$(infile)_$(excludeATWD).log
-output = /misc/disk15/scratch/brian/trash/restore_$(infile)_$(excludeATWD)..out
-error =  /misc/disk15/scratch/brian/trash/restore_$(infile)_$(excludeATWD)..err
+output = /misc/disk15/scratch/brian/trash/restore_$(infile)_$(excludeATWD).out
+error =  /misc/disk15/scratch/brian/trash/restore_$(infile)_$(excludeATWD).err
 
 
 request_cpus = 1
