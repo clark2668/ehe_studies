@@ -1,16 +1,16 @@
-log = /misc/disk15/scratch/brian/trash/restore_y$(year)_c$(candle)_f$(filter)_$(Process).log
-output = /misc/disk15/scratch/brian/trash/restore_y$(year)_c$(candle)_f$(filter)_$(Process).out
-error = /misc/disk15/scratch/brian/trash/restore_y$(year)_c$(candle)_f$(filter)_$(Process).err
+log    = /scratch/brianclark/IceCube/trash/$(infile).log
+output = /scratch/brianclark/IceCube/trash/$(infile).out
+err    = /scratch/brianclark/IceCube/trash/$(infile).err
 
 request_cpus = 1
-request_memory = 5GB
-request_disk = 20GB
+request_memory = 2GB
+request_disk = 2GB
 Universe = vanilla
-getenv = true
 should_transfer_files = YES
-+TransferOutput = ""
+when_to_transfer_output = ON_EXIT
+#+AccountingGroup="quicktest.$ENV(USER)"
 
 executable = job.sh
-arguments = $(year) $(candle) $(filter) $(outputdir)
+arguments = $(indir) $(infile) $(outdir) $(outfile)
 
 queue
