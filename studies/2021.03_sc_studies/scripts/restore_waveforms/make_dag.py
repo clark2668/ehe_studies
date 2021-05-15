@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 output_directory_head = '/home/brian/IceCube/sc_reprocess/v2/restore_waveforms/'
-exclude_atwd = True
+exclude_atwd = False
 
 
 dag_file_name = 'dagman_{}.dag'.format(exclude_atwd)
