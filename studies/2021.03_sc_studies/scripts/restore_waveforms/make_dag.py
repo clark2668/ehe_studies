@@ -29,7 +29,7 @@ for in_file in in_filelist.readlines():
 
 	instructions = ""
 	instructions += f'JOB job_{main_index} job.sub \n'
-	instructions += f'VARS job_{main_index} indir="{in_dir}" infile="{in_file}" outdir="{out_dir}" outfile="{out_file}" exludeATWD="{exclude_atwd}" \n\n'
+	instructions += f'VARS job_{main_index} indir="{in_dir}" infile="{in_file}" outdir="{out_dir}" outfile="{out_file}" excludeATWD="{exclude_atwd}" \n\n'
 
 	with open(dag_file_name, 'a') as f:
 		f.write(instructions)
