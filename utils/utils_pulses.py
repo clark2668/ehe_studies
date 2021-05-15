@@ -99,7 +99,7 @@ def get_portia_omkey_npe_dict(splitted_dom_map, fadc_pulse_map, atwd_pulse_map,
 	
 	return best_npe, omkey_npe_dict
 
-def CalcPortiaCharge(frame, DOMsToExclude = [], exludeFADC=False, excludeATWD=False):
+def CalcPortiaCharge(frame, DOMsToExclude = [], excludeFADC=False, excludeATWD=False):
 	best_npe = -20.
 	omkey_dict = {}
 	if not frame['I3EventHeader'].sub_event_stream == 'InIceSplit':
@@ -120,7 +120,7 @@ def CalcPortiaCharge(frame, DOMsToExclude = [], exludeFADC=False, excludeATWD=Fa
 
 	return best_npe, omkey_dict
 
-def CalcPortiaCharge_module(frame, DOMsToExclude=[], exludeFADC=False, excludeATWD=False,
+def CalcPortiaCharge_module(frame, DOMsToExclude=[], excludeFADC=False, excludeATWD=False,
 	name='PortiaEventSummarySRT'):
 	best_npe, omkey_npe_dict = CalcPortiaCharge(frame, DOMsToExclude=DOMsToExclude,
 		excludeFADC=excludeFADC, excludeATWD=excludeATWD)
@@ -130,7 +130,7 @@ def CalcPortiaCharge_module(frame, DOMsToExclude=[], exludeFADC=False, excludeAT
 
 
 
-def CalcPortiaCharge_DeepMagSix(frame, DOMsToExclude = [], exludeFADC=False, excludeATWD=False):
+def CalcPortiaCharge_DeepMagSix(frame, DOMsToExclude = [], excludeFADC=False, excludeATWD=False):
 	'''
 	Calculate Portia charge for the "magnificent six" strings (45, 46, 54, 56, 63, 64)
 	In the "deep" region (OM > 33)
@@ -145,7 +145,7 @@ def CalcPortiaCharge_DeepMagSix(frame, DOMsToExclude = [], exludeFADC=False, exc
 			magsix_charge += q
 	return magsix_charge
 
-def CalcPortiaCharge_DeepMagSix_module(frame, DOMsToExclude = [], exludeFADC=False, excludeATWD=False
+def CalcPortiaCharge_DeepMagSix_module(frame, DOMsToExclude = [], excludeFADC=False, excludeATWD=False,
 	name='PortiaEventSummarySRT_DeepMagSix'):
 	magsix_charge = CalcPortiaCharge_DeepMagSix(frame, DOMsToExclude=DOMsToExclude,
 		excludeFADC=excludeFADC, excludeATWD=excludeATWD)

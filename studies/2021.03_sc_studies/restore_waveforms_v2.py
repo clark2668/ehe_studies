@@ -15,7 +15,9 @@ from icecube.filterscripts.offlineL2.level2_HitCleaning_EHE import HitCleaningEH
 from icecube.phys_services.which_split import which_split
 
 from icecube import VHESelfVeto, hdfwriter
+from utils import utils_pulses
 import argparse
+import distutils.util
 
 class drop_pframe(icetray.I3Module):
 	def __init__(self, context):
@@ -38,12 +40,13 @@ parser.add_argument("-o", type=str,
 	dest="output_file",required=True,
 	help="full path to the output file"
 	)
-parser.add_argument("-atwd", type=bool, 
+parser.add_argument("-atwd", type=str, 
 	dest="exclude_atwd",required=True,
 	help="exclude the atwd or not (True to exclude the atwd"
 	)
 args = parser.parse_args()
-print('Running with adcs?: {}'.format(args.exclude_atwd))
+args.exclude_atwd = bool(distutils.util.strtobool(args.exclude_atwd))
+print('Exclude ATWDs?: {}'.format(args.exclude_atwd))
 
 # setup
 #####################################
@@ -134,7 +137,7 @@ tray.AddModule('HomogenizedQTot', 'qtot_total',
 # HQtot, deep mag six
 tray.AddModule(utils_pulses.CalcQTOt_DeepMagSix_module, 'hqtot_deepmagsix',
 	pulses=pulses,
-	name='HomogenizedQTot_DeepMagSix'
+	name='HomogenizedQTot_DeepMagSix',
 	Streams=[icetray.I3Frame.Physics],
 	)
 
@@ -145,16 +148,16 @@ tray.AddModule(utils_pulses.CalcQTOt_DeepMagSix_module, 'hqtot_deepmagsix',
 # bog-standard Portia
 
 # Portia Best NPE, normal mode
-tray.AddModule(utils_pulses.CalcPortiaCharge_DeepMagSix_module, 'portia_deepmagsix',
+tray.AddModule(utils_pulses.CalcPortiaCharge_module, 'portia_standard',
 	excludeATWD=args.exclude_atwd, excludeFADC=False,
-	name='PortiaEventSummarySRT_DeepMagSix'
+	name='PortiaEventSummarySRT',
 	Streams=[icetray.I3Frame.Physics],
 	)
 
 # Portia Best NPE, deep mag six
-tray.AddModule(utils_pulses.CalcPortiaCharge_DeepMagSix_module, 'portia_standard',
+tray.AddModule(utils_pulses.CalcPortiaCharge_DeepMagSix_module, 'portia_deepmagsix',
 	excludeATWD=args.exclude_atwd, excludeFADC=False,
-	name='PortiaEventSummarySRT'
+	name='PortiaEventSummarySRT_DeepMagSix',
 	Streams=[icetray.I3Frame.Physics],
 	)
 
@@ -163,12 +166,12 @@ tray.AddModule(utils_pulses.CalcPortiaCharge_DeepMagSix_module, 'portia_standard
 #####################################
 #####################################
 
-# tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
-# 	Output="{}/y{}_c{}_f{}_waves.hdf5".format(args.output_dir, args.year, args.candle, args.filter_setting), 
-# 	Keys=['I3EventHeader', 'HomogenizedQTot', 'HomogenizedQTot_DeepMagSix',
-# 	'PortiaEventSummarySRT', 'PortiaEventSummarySRT_DeepMagSix'], 
-# 	SubEventStreams=['InIceSplit']
-# 	)
+tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
+	Output=f'{args.output_file}.hdf5', 
+	Keys=['I3EventHeader', 'HomogenizedQTot', 'HomogenizedQTot_DeepMagSix',
+	'PortiaEventSummarySRT', 'PortiaEventSummarySRT_DeepMagSix'], 
+	SubEventStreams=['InIceSplit']
+	)
 
 # tray.Add("Dump")
 tray.AddModule("I3Writer", "write",
@@ -176,4 +179,4 @@ tray.AddModule("I3Writer", "write",
 	Streams=[icetray.I3Frame.DAQ, icetray.I3Frame.Physics],
 	)
 
-tray.Execute()
+tray.Execute(10)
