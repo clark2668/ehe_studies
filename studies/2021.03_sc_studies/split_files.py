@@ -59,17 +59,17 @@ tray.AddModule(tools.cut_by_config, 'cut',
 	Streams=[icetray.I3Frame.Physics]
 	)
 
-# tray.Add("I3OrphanQDropper")
+tray.Add("I3OrphanQDropper")
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
-	Output=output_location+"/"+'y{}_c{}_f{}.i3.hdf5'.format(year,candle,filter), 
+	Output=output_location+"/"+'y{}_c{}_f{}.hdf5'.format(year,candle,filter), 
 	Keys=['I3EventHeader', 'HomogenizedQTot', 'HomogenizedQTot_DeepMagSix',
 	'PortiaEventSummarySRT', 'PortiaEventSummarySRT_DeepMagSix'], 
 	SubEventStreams=['InIceSplit'],
 	)
 
 tray.Add("I3Writer", 
-	filename=output_location+"/"+'y{}_c{}_f{}.i3.bz2'.format(year,candle,filter),
+	filename=output_location+"/"+'y{}_c{}_f{}.i3.zst'.format(year,candle,filter),
 	Streams=[icetray.I3Frame.DAQ, icetray.I3Frame.Physics]
 	)
 
