@@ -58,13 +58,10 @@ def cut_by_config(frame, start, stop, qmin, qmax):
 	if frame.Has('I3EventHeader'):
 		evt_time = frame.Get('I3EventHeader').start_time
 		if evt_time > start and evt_time < stop:
-			keeper = True
-			# don't impose charge cut any more
-			# if frame.Has('HomogenizedQTot'):
-				# hqtot = frame.Get('HomogenizedQTot').value
-				# if hqtot > qmin and hqtot < qmax:
-					# print("keep, qtot {}".format(hqtot))
-					# keeper = True
+			if frame.Has('HomogenizedQTot'):
+				hqtot = frame.Get('HomogenizedQTot').value
+				if hqtot > qmin and hqtot < qmax:
+					keeper = True
 
 	return keeper
 

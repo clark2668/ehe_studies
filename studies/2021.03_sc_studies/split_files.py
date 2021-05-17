@@ -1,5 +1,5 @@
 #!/bin/sh /cvmfs/icecube.opensciencegrid.org/py3-v4.1.1/icetray-start
-#METAPROJECT combo/V01-01-00
+#METAPROJECT /home/brian/IceCube/modified_icetray/bld/
 
 import argparse
 
@@ -48,6 +48,9 @@ tray.AddModule("I3Reader",
 	)
 
 start, stop, qmin, qmax = tools.get_start_stop(year, candle, filter)
+qmin = -10
+qmax = 1E10
+# make the qmin and qmax so that every event possible will pass the cut
 start = dataclasses.I3Time(start)
 stop = dataclasses.I3Time(stop)
 
@@ -56,11 +59,12 @@ tray.AddModule(tools.cut_by_config, 'cut',
 	Streams=[icetray.I3Frame.Physics]
 	)
 
-tray.Add("I3OrphanQDropper")
+# tray.Add("I3OrphanQDropper")
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
 	Output=output_location+"/"+'y{}_c{}_f{}.i3.hdf5'.format(year,candle,filter), 
-	Keys=['I3EventHeader', 'HomogenizedQTot'], 
+	Keys=['I3EventHeader', 'HomogenizedQTot', 'HomogenizedQTot_DeepMagSix',
+	'PortiaEventSummarySRT', 'PortiaEventSummarySRT_DeepMagSix'], 
 	SubEventStreams=['InIceSplit'],
 	)
 
