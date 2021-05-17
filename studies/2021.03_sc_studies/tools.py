@@ -5,6 +5,8 @@ import numpy as np
 import os
 
 # return the MJD of the time windows
+# these times were chosen by carefully selecting where the cut should go 
+# to exclude the times when the filter wheel rotates to 100%
 def get_start_stop(year, candle, filter):
 	offset= 0
 	start = 0
@@ -13,32 +15,32 @@ def get_start_stop(year, candle, filter):
 		if candle==2:
 			offset = 5.7038e4
 			if filter==1:
-				start = 0.060
-				stop = 0.090
+				start = 0.0645
+				stop = 0.0878
 				charge_min = 0.5E5
 				charge_max = 0.8E5
 			if filter==2:
-				start = 0.085
-				stop = 0.115
+				start = 0.08855
+				stop = 0.113
 				charge_min = 0.8E5
 				charge_max = 1.2E5
 			if filter==3:
-				start = 0.11
-				stop = 0.14
+				start = 0.114
+				stop = 0.139
 				charge_min = 1.5E5
 				charge_max = 2.2E5
 			if filter==4:
-				start = 0.1375
+				start = 0.14
 				stop = 0.165
 				charge_min = 2.8E5
 				charge_max = 4E5
 			if filter==5:
-				start = 0.166
-				stop = 0.195
+				start = 0.1678
+				stop = 0.191
 				charge_min = 3.6E5
 				charge_max = 4.7E5
 			if filter==6:
-				start = 0.190
+				start = 0.192
 				stop = 0.22
 				charge_min = 6.1E5
 				charge_max = 7.5E5
@@ -56,11 +58,13 @@ def cut_by_config(frame, start, stop, qmin, qmax):
 	if frame.Has('I3EventHeader'):
 		evt_time = frame.Get('I3EventHeader').start_time
 		if evt_time > start and evt_time < stop:
-			if frame.Has('HomogenizedQTot'):
-				hqtot = frame.Get('HomogenizedQTot').value
-				if hqtot > qmin and hqtot < qmax:
-					print("keep, qtot {}".format(hqtot))
-					keeper = True
+			keeper = True
+			# don't impose charge cut any more
+			# if frame.Has('HomogenizedQTot'):
+				# hqtot = frame.Get('HomogenizedQTot').value
+				# if hqtot > qmin and hqtot < qmax:
+					# print("keep, qtot {}".format(hqtot))
+					# keeper = True
 
 	return keeper
 

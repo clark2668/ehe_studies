@@ -32,21 +32,25 @@ for temp_f in args.input_files[1:]:
 	temp_times = f['I3EventHeader']['time_start_mjd']
 	charges = np.concatenate((charges, temp_charges))
 	times = np.concatenate((times,temp_times))
+	# useful for figuring out how to set time window cuts
+	# offset = 5.7038E4
+	# for t, q in zip(temp_times, temp_charges):
+		# if t > offset + 0.195 and t < offset + 0.22 and q > 5E5:
+			# print("Something is up , t {}, q {}".format(t+offset, q))
 
 
-# plot the charge in histogram
-# NB: by construction, this probably excludes balloon DOMs, which might be interesting...
-fig, axs = plt.subplots(1,1,figsize=(5,5))
-axs.hist(charges, bins=100,alpha=0.5)
-axs.set_yscale('log')
-axs.set_ylabel('Number of Events')
-axs.set_xlabel('HomogenizedQTot')
-plt.ticklabel_format(axis="x", style="sci", scilimits=(0,0))
-plt.tight_layout()
-fig.savefig('hist_of_charge.png', dpi=300)
-del fig, axs
+# # plot the charge in histogram
+# fig, axs = plt.subplots(1,1,figsize=(5,5))
+# axs.hist(charges, bins=100,alpha=0.5)
+# axs.set_yscale('log')
+# axs.set_ylabel('Number of Events')
+# axs.set_xlabel('HomogenizedQTot')
+# plt.ticklabel_format(axis="x", style="sci", scilimits=(0,0))
+# plt.tight_layout()
+# fig.savefig('hist_of_charge.png', dpi=300)
+# del fig, axs
 
-plt.ticklabel_format(axis="x", style="plain") # reset
+# plt.ticklabel_format(axis="x", style="plain") # reset
 
 # and as a 2D plot
 
@@ -75,6 +79,8 @@ axs.set_ylim(0E5,8E5)
 
 for i in range(1,7,1):
 	start, stop, qmin, qmax = tools.get_start_stop(2015, 2, i)
+	qmin = 1
+	qmax = 8E5
 	rect = Rectangle((start, qmin), (stop-start), (qmax-qmin),
 		linewidth=1, edgecolor='r', facecolor='None',linestyle='--')
 	axs.add_patch(rect)
