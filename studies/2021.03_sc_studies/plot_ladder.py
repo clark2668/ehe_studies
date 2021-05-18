@@ -32,8 +32,8 @@ args = parser.parse_args()
 
 option = args.option
 if option=='standard':
-	hqtot_key = 'HomogenziedQtot_SplitInIcePulses'
-	portia_key = 'EHEPortiaEventSummarySRT'
+	hqtot_key = 'HomogenizedQTot'
+	portia_key = 'PortiaEventSummarySRT'
 elif option=='magsix':
 	hqtot_key = 'HomogenizedQTot_DeepMagSix'
 	portia_key = 'PortiaEventSummarySRT_DeepMagSix'
@@ -53,7 +53,7 @@ def get_predicted_brightness(original_brightness, filter_setting):
 setting_charge_dict = {}
 
 for f in filter_settings:
-	file = h5py.File(args.file_location + '/' + f'y{args.year}_c{args.candle}_f{f}_hqtot_splitinnicepulses.hdf5', 'r')
+	file = h5py.File(args.file_location + '/' + f'y{args.year}_c{args.candle}_f{f}.hdf5', 'r')
 	if pulses=='hqtot':
 		charges = file[hqtot_key]['value']
 	elif pulses=='portia':

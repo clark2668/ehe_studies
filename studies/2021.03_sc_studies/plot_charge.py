@@ -38,7 +38,6 @@ for temp_f in args.input_files[1:]:
 		# if t > offset + 0.195 and t < offset + 0.22 and q > 5E5:
 			# print("Something is up , t {}, q {}".format(t+offset, q))
 
-
 # # plot the charge in histogram
 # fig, axs = plt.subplots(1,1,figsize=(5,5))
 # axs.hist(charges, bins=100,alpha=0.5)
@@ -54,7 +53,7 @@ for temp_f in args.input_files[1:]:
 
 # and as a 2D plot
 
-mask = charges > 0.0e5 # mask "small" charge events
+mask = charges > 0.0 # mask "small" charge events
 fig, axs = plt.subplots(1,1,figsize=(7,5))
 my_map = plt.cm.plasma
 counts, xedges, yedges, im = axs.hist2d(times[mask], charges[mask],

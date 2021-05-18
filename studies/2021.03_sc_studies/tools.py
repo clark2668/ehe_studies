@@ -58,10 +58,11 @@ def cut_by_config(frame, start, stop, qmin, qmax):
 	if frame.Has('I3EventHeader'):
 		evt_time = frame.Get('I3EventHeader').start_time
 		if evt_time > start and evt_time < stop:
-			if frame.Has('HomogenizedQTot'):
-				hqtot = frame.Get('HomogenizedQTot').value
-				if hqtot > qmin and hqtot < qmax:
-					keeper = True
+			keeper = True
+			# if frame.Has('HomogenizedQTot'):
+				# hqtot = frame.Get('HomogenizedQTot').value
+				# if hqtot > qmin and hqtot < qmax:
+					# keeper = True
 
 	return keeper
 

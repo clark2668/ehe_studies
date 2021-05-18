@@ -1,6 +1,6 @@
-log = /misc/disk15/scratch/brian/trash/split_y$(year)_c$(candle)_f$(filter)_$(Process).log
-output = /misc/disk15/scratch/brian/trash/split_y$(year)_c$(candle)_f$(filter)_$(Process).out
-error = /misc/disk15/scratch/brian/trash/split_y$(year)_c$(candle)_f$(filter)_$(Process).err
+log = /misc/disk15/scratch/brian/trash/split_y$(year)_c$(candle)_f$(filter)_$(Process)_$(flag).log
+output = /misc/disk15/scratch/brian/trash/split_y$(year)_c$(candle)_f$(filter)_$(Process)_$(flag).out
+error = /misc/disk15/scratch/brian/trash/split_y$(year)_c$(candle)_f$(filter)_$(Process)_$(flag).err
 
 request_cpus = 1
 request_memory = 4000MB
