@@ -28,7 +28,7 @@ parser.add_argument("-f", type=int,
 	dest="filter_setting", required=True,
 	help="Which standard candle filter setting, e.g. 0, 1, 2, ..."
 	)
-parser.add_argument("-r", type=int,
+parser.add_argument("-r", type=str,
 	dest="redo_qest", required=True,
 	help="Redo the charge estimates"
 	)
