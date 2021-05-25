@@ -42,11 +42,17 @@ parser.add_argument("-o", type=str,
 	)
 parser.add_argument("-atwd", type=str, 
 	dest="exclude_atwd",required=True,
-	help="exclude the atwd or not (True to exclude the atwd"
+	help="exclude the atwd or not (True to exclude the atwd)"
+	)
+parser.add_argument("-fadc", type=str, 
+	dest="exclude_fadc",required=True,
+	help="exclude the fadc or not (True to exclude the fadc)"
 	)
 args = parser.parse_args()
 args.exclude_atwd = bool(distutils.util.strtobool(args.exclude_atwd))
+args.exclude_fadc = bool(distutils.util.strtobool(args.exclude_fadc))
 print('Exclude ATWDs?: {}'.format(args.exclude_atwd))
+print('Exclude FADCs?: {}'.format(args.exclude_fadc))
 
 # setup
 #####################################
@@ -78,7 +84,8 @@ tray.AddSegment(Rehydration, 'rehydrator',
 	mc=False,
 	doNotQify=True, # do not Qify, as we already have Q frames
 	pass2=False,
-	excludeATWD=args.exclude_atwd
+	excludeATWD=args.exclude_atwd,
+	excludeFADC=args.exclude_fadc
 	)
 tray.Add(drop_nullsplit)
 
@@ -149,14 +156,14 @@ tray.AddModule(utils_pulses.CalcQTOt_DeepMagSix_module, 'hqtot_deepmagsix',
 
 # Portia Best NPE, normal mode
 tray.AddModule(utils_pulses.CalcPortiaCharge_module, 'portia_standard',
-	excludeATWD=args.exclude_atwd, excludeFADC=False,
+	excludeATWD=args.exclude_atwd, excludeFADC=args.exclude_fadc,
 	name='PortiaEventSummarySRT',
 	Streams=[icetray.I3Frame.Physics],
 	)
 
 # Portia Best NPE, deep mag six
 tray.AddModule(utils_pulses.CalcPortiaCharge_DeepMagSix_module, 'portia_deepmagsix',
-	excludeATWD=args.exclude_atwd, excludeFADC=False,
+	excludeATWD=args.exclude_atwd, excludeFADC=args.exclude_fadc,
 	name='PortiaEventSummarySRT_DeepMagSix',
 	Streams=[icetray.I3Frame.Physics],
 	)
