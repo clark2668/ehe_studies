@@ -28,15 +28,22 @@ parser.add_argument("-p", type=str,
 	dest="pulses", required=True,
 	help="which pulses to choose, hqtot or portia"
 	)
+parser.add_argument("-eatwd", type=str,
+	dest="exclude_atwd", required=True,
+	help="did we exclude atwd or not"
+	)
 args = parser.parse_args()
 
 option = args.option
+noise_cut = 0
 if option=='standard':
 	hqtot_key = 'HomogenizedQTot'
 	portia_key = 'PortiaEventSummarySRT'
+	noise_cut = 1E4
 elif option=='magsix':
 	hqtot_key = 'HomogenizedQTot_DeepMagSix'
 	portia_key = 'PortiaEventSummarySRT_DeepMagSix'
+	noise_cut = 1E3
 pulses = args.pulses
 
 #https://wiki.icecube.wisc.edu/index.php/Standard_Candle#Frequently_asked_questions
@@ -60,10 +67,8 @@ for f in filter_settings:
 		charges = file[portia_key]['bestNPEbtw']
 	file.close()
 	new_charges = []
-	for charge in charges:
-		if charge > 1E3 and f<4:
-			new_charges.append(charge)
-		elif f>3 and charge > 1E4: # manually remove "flatline" events (this check can probably go away later)
+	for charge in charges:		
+		if charge > noise_cut:
 			new_charges.append(charge)
 	setting_charge_dict[f] = new_charges
 
@@ -71,6 +76,7 @@ for f in filter_settings:
 bins = np.linspace(4.75,4.95,50)
 if option == 'magsix':
 	bins = np.linspace(3.5, 4.15, 50)
+# bins = np.linspace(0,6,50)
 
 fig, axs = plt.subplots(1,1,figsize=(5,5))
 filter_1_brightness = np.average(setting_charge_dict[1])
@@ -82,37 +88,52 @@ axs.set_yscale('log')
 axs.set_ylabel('Number of Events')
 axs.set_xlabel('Charge')
 axs.legend()
-axs.set_title('{}, {}'.format(option, pulses))
+axs.set_title('{}, {}, exclude ATWD {}'.format(option, pulses, args.exclude_atwd))
 plt.tight_layout()
-fig.savefig('ladder_plots/hist_of_q_brightness_1_{}_{}.png'.format(option, pulses), dpi=300)
+fig.savefig('ladder_plots/hist_of_q_brightness_1_{}_{}_{}.png'.format(option, pulses, args.exclude_atwd), dpi=300)
 del fig, axs
 
 # calculate predicted brightness assuming no saturatione effects
 predicted_brightness_dict = {}
+obsv_filtersettings_dict = {}
 for i in filter_settings:
 	predicted_brightness_dict[i] = get_predicted_brightness(original_brightness, i)
+
+	# also, predict what filter setting we think it has based on the charge
+	obsv_mean = np.average(setting_charge_dict[i])
+	obsv_filtersettings_dict[i] = obsv_mean/original_brightness
+
+	obsv_filtersetting = obsv_filtersettings_dict[i]
+	pred_filtersetting = brightness_dict[i]
+
+	print("Filter setting {}, Pred setting {:.4f}, Obsv setting {:.4f}".format(i, 
+		pred_filtersetting, obsv_filtersetting))
 
 colors = ['C0', 'C1', 'C2', 'C3', 'C4', 'C5']
 
 
 # now, plot the first 3
-bins = np.linspace(3.5,6.5,150)
+bins = np.linspace(3.5,6,150)
+# bins = np.linspace(0,6.5,500)
+
 
 fig, axs = plt.subplots(1,1,figsize=(5,5))
 for i, f in enumerate(filter_settings[:6]):
 	obsv_mean = np.average(setting_charge_dict[f])
 	pred_mean = predicted_brightness_dict[f]
-	print("Setting {}, Pred {:.2f}, Obsv {:.2f}, (O-P)/P {:.3f}".format(f, 
-		pred_mean, obsv_mean, (obsv_mean-pred_mean)/pred_mean))
+	# print("Setting {}, Pred {:.2f}, Obsv {:.2f}, (O-P)/P {:.3f}".format(f, 
+		# pred_mean, obsv_mean, (obsv_mean-pred_mean)/pred_mean))
 	a = axs.hist(np.log10(setting_charge_dict[f]), bins=bins, color=colors[i], alpha=0.5, label='Filter {}'.format(f))
 	axs.vlines(np.log10(predicted_brightness_dict[f]), 0.1, 1E3, color=colors[i])
+
+
 axs.set_yscale('log')
 axs.set_ylabel('Number of Events')
 axs.set_xlabel('Charge')
-axs.set_title('{}, {}'.format(option, pulses))
+axs.set_title('{}, {}, exclude ATWD {}'.format(option, pulses, args.exclude_atwd))
 axs.legend()
 plt.tight_layout()
-fig.savefig('ladder_plots/hist_of_q_brightness_multi_{}_{}.png'.format(option, pulses), dpi=300)
+fig.savefig('ladder_plots/hist_of_q_brightness_multi_{}_{}_excludeATWD_{}.png'.format(option, pulses, args.exclude_atwd), dpi=300)
 del fig, axs
 
 
