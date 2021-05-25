@@ -5,8 +5,8 @@ candle=$2
 filter=$3
 output_dir=$4
 input_dir=$5
-exclude_atwd=$5
-exclude_fadc=$6
+exclude_atwd=$6
+exclude_fadc=$7
 
 files=$input_dir/*.i3.*
 
