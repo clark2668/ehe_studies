@@ -6,6 +6,7 @@ import argparse
 from icecube import icetray, dataio, dataclasses, hdfwriter, phys_services
 from I3Tray import I3Tray
 import tools
+import distutils.util
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", type=str, nargs='+',
