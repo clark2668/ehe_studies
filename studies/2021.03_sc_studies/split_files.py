@@ -5,6 +5,7 @@ import argparse
 
 from icecube import icetray, dataio, dataclasses, hdfwriter, phys_services
 from I3Tray import I3Tray
+from utils import utils_pulses
 import tools
 import distutils.util
 
@@ -57,6 +58,10 @@ filter = args.filter_setting
 tray = I3Tray()
 
 filenamelist = []
+
+scdata = '/misc/disk15/data/IceCube/RealData/86strings/standardcandle/2015/sc2/'
+filenamelist.append(scdata+'Level2_IC86.2014_data_Run00125920_0116_0_138_GCD.i3.gz')
+
 for file in filename:
 	filenamelist.append(file)
 

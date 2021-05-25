@@ -179,7 +179,7 @@ def CalcPortiaCharge_DeepNobleNine(frame, DOMsToExclude = [], excludeFADC=False,
 			magsix_charge += q
 	return magsix_charge
 
-def CalcPortiaCharge_DeepMagSix_module(frame, DOMsToExclude = [], excludeFADC=False, excludeATWD=False,
+def CalcPortiaCharge_DeepNobleNine_module(frame, DOMsToExclude = [], excludeFADC=False, excludeATWD=False,
 	name='PortiaEventSummarySRT_DeepNobleNine'):
 	noblenine_charge = CalcPortiaCharge_DeepNobleNine(frame, DOMsToExclude=DOMsToExclude,
 		excludeFADC=excludeFADC, excludeATWD=excludeATWD)
