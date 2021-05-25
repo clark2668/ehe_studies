@@ -1,4 +1,4 @@
-from icecube import icetray, dataclasses, portia, recclasses
+from icecube import icetray, dataclasses, portia, recclasses, VHESelfVeto
 from icecube.icetray import I3Units
 from icecube.phys_services.which_split import which_split
 from I3Tray import Inf
@@ -7,12 +7,23 @@ import numpy as np
 import operator
 
 magsix_strings = [45, 46, 54, 56, 63, 64]
+noblenine_strings = [44, 53, 62, 70, 71, 72, 65, 57, 47]
 def is_magsix(omkey):
 	'''
 	Function to identify if a DOM is on a "magnificent six" string
 	'''
 	result = False
 	if omkey.string in magsix_strings:
+		if omkey.om >= 33:
+			result = True
+	return result
+
+def is_noblenine(omkey):
+	'''
+	Function to identify if a DOM is on a "noble nine" string
+	'''
+	result = False
+	if omkey.string in noblenine_strings:
 		if omkey.om >= 33:
 			result = True
 	return result
@@ -154,6 +165,29 @@ def CalcPortiaCharge_DeepMagSix_module(frame, DOMsToExclude = [], excludeFADC=Fa
 	frame.Put(name, dummy_portia_event)
 
 
+def CalcPortiaCharge_DeepNobleNine(frame, DOMsToExclude = [], excludeFADC=False, excludeATWD=False):
+	'''
+	Calculate Portia charge for the "noble nine" strings (44, 53, 62, 70, 71, 72, 65, 57, 47)
+	In the "deep" region (OM > 33)
+	'''
+	portia, portia_dict = CalcPortiaCharge(frame, DOMsToExclude=DOMsToExclude,
+		excludeFADC=excludeFADC, excludeATWD=excludeATWD)
+
+	magsix_charge = 0.
+	for omkey, q in portia_dict.items():
+		if is_noblenine(omkey):
+			magsix_charge += q
+	return magsix_charge
+
+def CalcPortiaCharge_DeepMagSix_module(frame, DOMsToExclude = [], excludeFADC=False, excludeATWD=False,
+	name='PortiaEventSummarySRT_DeepNobleNine'):
+	noblenine_charge = CalcPortiaCharge_DeepNobleNine(frame, DOMsToExclude=DOMsToExclude,
+		excludeFADC=excludeFADC, excludeATWD=excludeATWD)
+	dummy_portia_event = recclasses.I3PortiaEvent()
+	dummy_portia_event.SetTotalBestNPEbtw(noblenine_charge)
+	frame.Put(name, dummy_portia_event)
+
+
 def get_pulse_map(frame,pulse_mask_name):
 	if type(frame[pulse_mask_name]) == dataclasses.I3RecoPulseSeriesMap:
 		hit_map = frame.Get(pulse_mask_name)
@@ -260,6 +294,25 @@ def CalcQTOt_DeepMagSix_module(frame, pulses='SplitInIcePulses', do_causal=False
 	frame.Put(name, dataclasses.I3Double(magsix_charge))
 
 
+def CalcQTot_DeepNobleNine(frame, pulses='SplitInIcePulses', do_causal=False):
+	'''
+	Calculate Qtot for the "noble nine" strings (44, 53, 62, 70, 71, 72, 65, 57, 47)
+	In the "deep" region (OM > 33)
+	'''
+	hqtot, hqtot_dict, hqtot_dict_noDC = CalcQTot(frame)
+
+	magsix_charge = 0.
+	for omkey, q in hqtot_dict.items():
+		if is_noblenine(omkey):
+			magsix_charge += q
+	return magsix_charge
+
+def CalcQTOt_DeepNobleNine_module(frame, pulses='SplitInIcePulses', do_causal=False,
+	name = 'HomogenizedQTot_DeepNobleNine'):
+	noblenine_charge = CalcQTot_DeepNobleNine(frame, pulses=pulses, do_causal=do_causal)
+	frame.Put(name, dataclasses.I3Double(noblenine_charge))
+
+
 def Compare_Portia_QTot(frame):
 
 	portia, portia_dict = CalcPortiaCharge(frame)
@@ -285,6 +338,74 @@ def Compare_Portia_QTot(frame):
 			portia_dict[omkey], hqtot_dict[omkey], portia_dict[omkey] - hqtot_dict[omkey]))
 
 	print("\n\n")
+
+
+@icetray.traysegment
+def CalcChargeStatistics(tray, name, excludeFADC=False, excludeATWD=False):
+	# we have to calculate a bunch of things
+	# we need HQtot and Portia, both "standard" and "magsix"
+	# for pulses unfolded using FADC only
+	# the "FADC"-only part is handled deep inside the L2 scripts
+	# also, return the keys
+	keys = []
+
+	# HQtot first
+	#####################################
+	#####################################
+
+	# HQTot, standard mode
+	pulses='SplitInIcePulses'
+	tray.AddModule('HomogenizedQTot', 'qtot_total', 
+		Pulses=pulses,
+		Output='HomogenizedQTot'
+		)
+	keys.append('HomogenizedQTot')
+
+	# HQtot, deep mag six
+	tray.AddModule(CalcQTOt_DeepMagSix_module, 'hqtot_deepmagsix',
+		pulses=pulses,
+		name='HomogenizedQTot_DeepMagSix',
+		Streams=[icetray.I3Frame.Physics],
+		)
+	keys.append('HomogenizedQTot_DeepMagSix')
+
+	# HQtot, deep noble nine
+	tray.AddModule(CalcQTOt_DeepNobleNine_module, 'hqtot_deepnoblenine',
+		pulses=pulses,
+		name='HomogenizedQTot_DeepNobleNine',
+		Streams=[icetray.I3Frame.Physics],
+		)
+	keys.append('HomogenizedQTot_DeepNobleNine')
+
+	# Portia second
+	#####################################
+	#####################################
+
+	# Portia Best NPE, normal mode
+	tray.AddModule(CalcPortiaCharge_module, 'portia_standard',
+		excludeATWD=excludeATWD, excludeFADC=excludeFADC,
+		name='PortiaEventSummarySRT',
+		Streams=[icetray.I3Frame.Physics],
+		)
+	keys.append('PortiaEventSummarySRT')
+
+	# Portia Best NPE, deep mag six
+	tray.AddModule(CalcPortiaCharge_DeepMagSix_module, 'portia_deepmagsix',
+		excludeATWD=excludeATWD, excludeFADC=excludeFADC,
+		name='PortiaEventSummarySRT_DeepMagSix',
+		Streams=[icetray.I3Frame.Physics],
+		)
+	keys.append('PortiaEventSummarySRT_DeepMagSix')
+
+	# Portia Best NPE, deep noble nine
+	tray.AddModule(CalcPortiaCharge_DeepNobleNine_module, 'portia_deepnoblenine',
+		excludeATWD=excludeATWD, excludeFADC=excludeFADC,
+		name='PortiaEventSummarySRT_DeepNobleNine',
+		Streams=[icetray.I3Frame.Physics],
+		)
+	keys.append('PortiaEventSummarySRT_DeepNobleNine')
+
+	return keys
 
 
 

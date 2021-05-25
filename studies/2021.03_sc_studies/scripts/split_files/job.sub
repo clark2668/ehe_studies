@@ -1,6 +1,6 @@
-log = /misc/disk15/scratch/brian/trash/split_y$(year)_c$(candle)_f$(filter)_$(Process)_$(flag).log
-output = /misc/disk15/scratch/brian/trash/split_y$(year)_c$(candle)_f$(filter)_$(Process)_$(flag).out
-error = /misc/disk15/scratch/brian/trash/split_y$(year)_c$(candle)_f$(filter)_$(Process)_$(flag).err
+log    = /misc/disk15/scratch/brian/trash/split_y$(year)_c$(candle)_f$(filter)_$(Process)_a$(eatwdflag)_f$(efadcflag).log
+output = /misc/disk15/scratch/brian/trash/split_y$(year)_c$(candle)_f$(filter)_$(Process)_a$(eatwdflag)_f$(efadcflag).out
+error  = /misc/disk15/scratch/brian/trash/split_y$(year)_c$(candle)_f$(filter)_$(Process)_a$(eatwdflag)_f$(efadcflag).err
 
 request_cpus = 1
 request_memory = 4000MB
@@ -11,6 +11,6 @@ should_transfer_files = YES
 +TransferOutput = ""
 
 executable = job.sh
-arguments = $(year) $(candle) $(filter) $(outputdir) $(inputdir)
+arguments = $(year) $(candle) $(filter) $(outputdir) $(inputdir) $(eatwdflag) $(efadcflag)
 
 queue

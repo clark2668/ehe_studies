@@ -14,7 +14,7 @@ from icecube.filterscripts.offlineL2.level2_EHE_Calibration import EHECalibratio
 from icecube.filterscripts.offlineL2.level2_HitCleaning_EHE import HitCleaningEHE
 from icecube.phys_services.which_split import which_split
 
-from icecube import VHESelfVeto, hdfwriter
+from icecube import hdfwriter
 from utils import utils_pulses
 import argparse
 import distutils.util
@@ -124,49 +124,12 @@ tray.AddSegment(HitCleaningEHE, 'eheclean',
 	)
 
 
-
-# we have to calculate a bunch of things
-# we need HQtot and Portia, both "standard" and "magsix"
-# for pulses unfolded using FADC only
-# the "FADC"-only part is handled deep inside the L2 scripts
-
-# HQtot first
-#####################################
-#####################################
-
-# HQTot, standard mode
-pulses='SplitInIcePulses'
-tray.AddModule('HomogenizedQTot', 'qtot_total', 
-	Pulses=pulses,
-	Output='HomogenizedQTot'
+keys = tray.Add(utils_pulses.CalcChargeStatistics, 
+	excludeFADC=args.exclude_fadc,
+	excludeATWD=args.exclude_atwd
 	)
 
-# HQtot, deep mag six
-tray.AddModule(utils_pulses.CalcQTOt_DeepMagSix_module, 'hqtot_deepmagsix',
-	pulses=pulses,
-	name='HomogenizedQTot_DeepMagSix',
-	Streams=[icetray.I3Frame.Physics],
-	)
-
-# Portia second
-#####################################
-#####################################
-
-# bog-standard Portia
-
-# Portia Best NPE, normal mode
-tray.AddModule(utils_pulses.CalcPortiaCharge_module, 'portia_standard',
-	excludeATWD=args.exclude_atwd, excludeFADC=args.exclude_fadc,
-	name='PortiaEventSummarySRT',
-	Streams=[icetray.I3Frame.Physics],
-	)
-
-# Portia Best NPE, deep mag six
-tray.AddModule(utils_pulses.CalcPortiaCharge_DeepMagSix_module, 'portia_deepmagsix',
-	excludeATWD=args.exclude_atwd, excludeFADC=args.exclude_fadc,
-	name='PortiaEventSummarySRT_DeepMagSix',
-	Streams=[icetray.I3Frame.Physics],
-	)
+hdf_keys = keys + ['I3EventHeader']
 
 
 # output
@@ -175,8 +138,7 @@ tray.AddModule(utils_pulses.CalcPortiaCharge_DeepMagSix_module, 'portia_deepmags
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
 	Output=f'{args.output_file}.hdf5', 
-	Keys=['I3EventHeader', 'HomogenizedQTot', 'HomogenizedQTot_DeepMagSix',
-	'PortiaEventSummarySRT', 'PortiaEventSummarySRT_DeepMagSix'], 
+	Keys=hdf_keys, 
 	SubEventStreams=['InIceSplit']
 	)
 

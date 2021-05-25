@@ -28,14 +28,30 @@ parser.add_argument("-f", type=int,
 	dest="filter_setting", required=True,
 	help="Which standard candle filter setting, e.g. 0, 1, 2, ..."
 	)
+parser.add_argument("-r", type=int,
+	dest="redo_qest", required=True,
+	help="Redo the charge estimates"
+	)
+parser.add_argument("-atwd", type=str, 
+	dest="exclude_atwd",required=False,default='False',
+	help="exclude the atwd or not (True to exclude the atwd)"
+	)
+parser.add_argument("-fadc", type=str, 
+	dest="exclude_fadc",required=False,default='False',
+	help="exclude the fadc or not (True to exclude the fadc)"
+	)
 args = parser.parse_args()
+args.exclude_atwd = bool(distutils.util.strtobool(args.exclude_atwd))
+args.exclude_fadc = bool(distutils.util.strtobool(args.exclude_fadc))
+args.redo_qest = bool(distutils.util.strtobool(args.redo_qest))
+print('Exclude ATWDs?: {}'.format(args.exclude_atwd))
+print('Exclude FADCs?: {}'.format(args.exclude_fadc))
+
 filename = args.input_files
 output_location = args.output_dir
 year = args.year
 candle = args.candle
 filter = args.filter_setting
-
-pulses='InIcePulses'
 
 tray = I3Tray()
 
@@ -61,10 +77,28 @@ tray.AddModule(tools.cut_by_config, 'cut',
 
 tray.Add("I3OrphanQDropper")
 
+
+keys = ['HomogenizedQTot', 'HomogenizedQTot_DeepMagSix', 'PortiaEventSummarySRT', 
+	'PortiaEventSummarySRT_DeepMagSix']
+if args.redo_qest:
+	# calculate charge statistics after spliting the file up (to save time)
+	# delete the original copies first (otherwise iceetray will be mad)
+	tray.AddModule("Delete", 'deleter', 
+		Keys=['HomogenizedQTot', 'HomogenizedQTot_DeepMagSix', 'HomogenizedQTot_DeepNobleNine', 
+		'PortiaEventSummarySRT', 'PortiaEventSummarySRT_DeepMagSix', 'PortiaEventSummarySRT_DeepNobleNine']
+		)
+	keys = tray.Add(utils_pulses.CalcChargeStatistics, 
+		excludeFADC=args.exclude_fadc,
+		excludeATWD=args.exclude_atwd
+	)
+
+
+hdf_keys = keys + ['I3EventHeader']
+
+
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
 	Output=output_location+"/"+'y{}_c{}_f{}.hdf5'.format(year,candle,filter), 
-	Keys=['I3EventHeader', 'HomogenizedQTot', 'HomogenizedQTot_DeepMagSix',
-	'PortiaEventSummarySRT', 'PortiaEventSummarySRT_DeepMagSix'], 
+	Keys=hdf_keys, 
 	SubEventStreams=['InIceSplit'],
 	)
 

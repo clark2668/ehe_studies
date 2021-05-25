@@ -1,49 +1,73 @@
 CONFIG config.dagman
 
-# "False" jobs
+
+
+
+# ATWD False, FADC False
 
 JOB job_1 job.sub
-VARS job_1 year="2015" candle="2" filter = "1" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False" flag="false"
+VARS job_1 year="2015" candle="2" filter = "1" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False_excludeFADC_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False_excludeFADC_False" eatwdflag="False" efadcflag="False"
 
-JOB job_2 job.sub
-VARS job_2 year="2015" candle="2" filter = "2" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False" flag="false"
+#JOB job_2 job.sub
+#VARS job_2 year="2015" candle="2" filter = "2" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False_excludeFADC_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False_excludeFADC_False" eatwdflag="False" efadcflag="False"
+
+#JOB job_3 job.sub
+#VARS job_3 year="2015" candle="2" filter = "3" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False_excludeFADC_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False_excludeFADC_False" eatwdflag="False" efadcflag="False"
+
+#JOB job_4 job.sub
+#VARS job_4 year="2015" candle="2" filter = "4" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False_excludeFADC_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False_excludeFADC_False" eatwdflag="False" efadcflag="False"
+
+#JOB job_5 job.sub
+#VARS job_5 year="2015" candle="2" filter = "5" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False_excludeFADC_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False_excludeFADC_False" eatwdflag="False" efadcflag="False"
+
+#JOB job_6 job.sub
+#VARS job_6 year="2015" candle="2" filter = "6" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False_excludeFADC_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False_excludeFADC_False" eatwdflag="False" efadcflag="False"
 
 
-JOB job_3 job.sub
-VARS job_3 year="2015" candle="2" filter = "3" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False" flag="false"
 
 
-JOB job_4 job.sub
-VARS job_4 year="2015" candle="2" filter = "4" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False" flag="false"
 
-
-JOB job_5 job.sub
-VARS job_5 year="2015" candle="2" filter = "5" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False" flag="false"
-
-
-JOB job_6 job.sub
-VARS job_6 year="2015" candle="2" filter = "6" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False" flag="false"
-
-# and the "True" jobs
+# ATWD False, FADC True
 
 JOB job_7 job.sub
-VARS job_7 year="2015" candle="2" filter = "1" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_True" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_True" flag="true"
+VARS job_7 year="2015" candle="2" filter = "1" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False_excludeFADC_True" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False_excludeFADC_True" eatwdflag="False" efadcflag="True"
 
-JOB job_8 job.sub
-VARS job_8 year="2015" candle="2" filter = "2" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_True" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_True" flag="true"
+#JOB job_8 job.sub
+#VARS job_8 year="2015" candle="2" filter = "2" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False_excludeFADC_True" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False_excludeFADC_True" eatwdflag="False" efadcflag="True"
+
+#JOB job_9 job.sub
+#VARS job_9 year="2015" candle="2" filter = "3" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False_excludeFADC_True" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False_excludeFADC_True" eatwdflag="False" efadcflag="True"
+
+#JOB job_10 job.sub
+#VARS job_10 year="2015" candle="2" filter = "4" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False_excludeFADC_True" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False_excludeFADC_True" eatwdflag="False" efadcflag="True"
+
+#JOB job_11 job.sub
+#VARS job_11 year="2015" candle="2" filter = "5" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False_excludeFADC_True" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False_excludeFADC_True" eatwdflag="False" efadcflag="True"
+
+#JOB job_12 job.sub
+#VARS job_12 year="2015" candle="2" filter = "6" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_False_excludeFADC_True" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_False_excludeFADC_True" eatwdflag="False" efadcflag="True"
 
 
-JOB job_9 job.sub
-VARS job_9 year="2015" candle="2" filter = "3" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_True" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_True" flag="true"
 
 
-JOB job_10 job.sub
-VARS job_10 year="2015" candle="2" filter = "4" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_True" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_True" flag="true"
 
 
-JOB job_11 job.sub
-VARS job_11 year="2015" candle="2" filter = "5" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_True" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_True" flag="true"
+# ATWD True, FADC False
 
+JOB job_13 job.sub
+VARS job_13 year="2015" candle="2" filter = "1" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_True_excludeFADC_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_True_excludeFADC_False" eatwdflag="True" efadcflag="False"
 
-JOB job_12 job.sub
-VARS job_12 year="2015" candle="2" filter = "6" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_True" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_True" flag="true"
+#JOB job_14 job.sub
+#VARS job_14 year="2015" candle="2" filter = "2" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_True_excludeFADC_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_True_excludeFADC_False" eatwdflag="True" efadcflag="False"
+
+#JOB job_15 job.sub
+#VARS job_15 year="2015" candle="2" filter = "3" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_True_excludeFADC_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_True_excludeFADC_False" eatwdflag="True" efadcflag="False"
+
+#JOB job_16 job.sub
+#VARS job_16 year="2015" candle="2" filter = "4" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_True_excludeFADC_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_True_excludeFADC_False" eatwdflag="True" efadcflag="False"
+
+#JOB job_17 job.sub
+#VARS job_17 year="2015" candle="2" filter = "5" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_True_excludeFADC_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_True_excludeFADC_False" eatwdflag="True" efadcflag="False"
+
+#JOB job_18 job.sub
+#VARS job_18 year="2015" candle="2" filter = "6" outputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/split_files/excludeATWD_True_excludeFADC_False" inputdir="/misc/disk19/users/brian/IceCube/standard_candle/2015/v2/restore_waveforms/excludeATWD_True_excludeFADC_False" eatwdflag="True" efadcflag="False"
