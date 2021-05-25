@@ -64,6 +64,25 @@ scdata = '/misc/disk15/data/IceCube/RealData/86strings/standardcandle/2015/sc2/'
 tray.AddModule("I3Reader", filenamelist=[scdata+'Level2_IC86.2014_data_Run00125920_0116_0_138_GCD.i3.gz', 
 	args.input_file]) #GCD first
 
+# ncomplete = 0
+# def increment(frame):
+# 	global ncomplete
+# 	ncomplete +=1 
+# 	print('Completed frame {}'.format(ncomplete))
+
+# # quick cut on 2021-05-25 to expedite finding bright events to look at waveforms from
+# def quick_cut(frame):
+# 	keeper = False
+# 	if frame.Has('HomogenizedQTot'):
+# 		hqtot = frame.Get('HomogenizedQTot').value
+# 		if hqtot > 1E3:
+# 			keeper = True
+# 	return keeper
+# tray.AddModule(quick_cut, 'cut',
+# 	Streams=[icetray.I3Frame.Physics]
+# 	)
+# tray.Add("I3OrphanQDropper") # nuke orphan Q frames now
+
 # we have to delete a bunch of stuff in order to get the Rehydration to run again successfully
 tray.AddModule(drop_pframe, 'dropP')
 tray.AddModule("Delete", 'deleter', 
@@ -71,7 +90,9 @@ tray.AddModule("Delete", 'deleter',
 	'CalibratedWaveformRange', 'ReextractedInIcePulses', 'ReextractedInIcePulsesTimeRange',
 	'ReextractedIceTopPulses', 'IceTopHLCPulseInfo', 'ReextractedIceTopPulses_SLC',
 	'InIcePulses', 'IceTopPulses', 'RehydrateNInIcePFrames', 'NFramesIsDifferent', 'IceTopErrata',
-	'CalibrationErrata', 'SaturationWindows', 'CalibratedSLC']
+	'CalibrationErrata', 'SaturationWindows', 'CalibratedSLC', 'HLCOfflineCleanInIceRawDataWODC', 
+	'EHECalibratedATWD_Wave', 'EHECalibratedFADC_Wave'
+	]
 	)
 
 # rehydrate, recalibrate, and re-split
@@ -130,6 +151,8 @@ keys = tray.Add(utils_pulses.CalcChargeStatistics,
 	)
 
 hdf_keys = keys + ['I3EventHeader']
+
+# tray.Add(increment, Streams=[iceeray.I3Frame.DAQ])
 
 
 # output
