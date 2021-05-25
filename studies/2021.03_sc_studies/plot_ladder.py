@@ -32,6 +32,10 @@ parser.add_argument("-eatwd", type=str,
 	dest="exclude_atwd", required=True,
 	help="did we exclude atwd or not"
 	)
+parser.add_argument("-efadc", type=str,
+	dest="exclude_fadc", required=True,
+	help="did we exclude fadc or not"
+	)
 args = parser.parse_args()
 
 option = args.option
@@ -44,6 +48,10 @@ elif option=='magsix':
 	hqtot_key = 'HomogenizedQTot_DeepMagSix'
 	portia_key = 'PortiaEventSummarySRT_DeepMagSix'
 	noise_cut = 1E3
+elif option=='nobnine':
+	hqtot_key = 'HomogenizedQTot_DeepNobleNine'
+	portia_key = 'PortiaEventSummarySRT_DeepNobleNine'
+	noise_cut = np.power(10, 2.5)
 pulses = args.pulses
 
 #https://wiki.icecube.wisc.edu/index.php/Standard_Candle#Frequently_asked_questions
@@ -60,7 +68,7 @@ def get_predicted_brightness(original_brightness, filter_setting):
 setting_charge_dict = {}
 
 for f in filter_settings:
-	file = h5py.File(args.file_location + '/' + f'y{args.year}_c{args.candle}_f{f}.hdf5', 'r')
+	file = h5py.File(args.file_location + '/' + f'excludeATWD_{args.exclude_atwd}_excludeFADC_{args.exclude_fadc}' + '/' + f'y{args.year}_c{args.candle}_f{f}.hdf5', 'r')
 	if pulses=='hqtot':
 		charges = file[hqtot_key]['value']
 	elif pulses=='portia':
@@ -76,7 +84,7 @@ for f in filter_settings:
 bins = np.linspace(4.75,4.95,50)
 if option == 'magsix':
 	bins = np.linspace(3.5, 4.15, 50)
-# bins = np.linspace(0,6,50)
+bins = np.linspace(0,6,50)
 
 fig, axs = plt.subplots(1,1,figsize=(5,5))
 filter_1_brightness = np.average(setting_charge_dict[1])
@@ -88,9 +96,9 @@ axs.set_yscale('log')
 axs.set_ylabel('Number of Events')
 axs.set_xlabel('Charge')
 axs.legend()
-axs.set_title('{}, {}, exclude ATWD {}'.format(option, pulses, args.exclude_atwd))
+axs.set_title('{}, {}, exclude ATWD {}, exclude FADC {}'.format(option, pulses, args.exclude_atwd, args.exclude_fadc))
 plt.tight_layout()
-fig.savefig('ladder_plots/hist_of_q_brightness_1_{}_{}_{}.png'.format(option, pulses, args.exclude_atwd), dpi=300)
+fig.savefig('ladder_plots/hist_of_q_brightness_1_{}_{}_eATWD{}_eFADC{}.png'.format(option, pulses, args.exclude_atwd, args.exclude_fadc), dpi=300)
 del fig, axs
 
 # calculate predicted brightness assuming no saturatione effects
@@ -113,7 +121,7 @@ colors = ['C0', 'C1', 'C2', 'C3', 'C4', 'C5']
 
 
 # now, plot the first 3
-bins = np.linspace(3.5,6,150)
+bins = np.linspace(2.5,6,200)
 # bins = np.linspace(0,6.5,500)
 
 
@@ -130,10 +138,10 @@ for i, f in enumerate(filter_settings[:6]):
 axs.set_yscale('log')
 axs.set_ylabel('Number of Events')
 axs.set_xlabel('Charge')
-axs.set_title('{}, {}, exclude ATWD {}'.format(option, pulses, args.exclude_atwd))
+axs.set_title('{}, {}, exclude ATWD {}, exclude FADC {}'.format(option, pulses, args.exclude_atwd, args.exclude_fadc))
 axs.legend()
 plt.tight_layout()
-fig.savefig('ladder_plots/hist_of_q_brightness_multi_{}_{}_excludeATWD_{}.png'.format(option, pulses, args.exclude_atwd), dpi=300)
+fig.savefig('ladder_plots/hist_of_q_brightness_multi_{}_{}_eATWD_{}_eFADC_{}.png'.format(option, pulses, args.exclude_atwd, args.exclude_fadc), dpi=300)
 del fig, axs
 
 
