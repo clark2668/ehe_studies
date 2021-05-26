@@ -114,8 +114,9 @@ for i in filter_settings:
 	obsv_filtersetting = obsv_filtersettings_dict[i]
 	pred_filtersetting = brightness_dict[i]
 
-	print("Filter setting {}, Pred setting {:.4f}, Obsv setting {:.4f}".format(i, 
-		pred_filtersetting, obsv_filtersetting))
+	# print("Filter setting {}, Pred setting {:.4f}, Obsv setting {:.4f}".format(i, 
+		# pred_filtersetting, obsv_filtersetting))
+	print("{:.4f}".format(obsv_filtersetting))
 
 colors = ['C0', 'C1', 'C2', 'C3', 'C4', 'C5']
 
@@ -123,9 +124,11 @@ colors = ['C0', 'C1', 'C2', 'C3', 'C4', 'C5']
 # now, plot the first 3
 bins = np.linspace(2.5,6,200)
 # bins = np.linspace(0,6.5,500)
+if option=='nobnine':
+	bins=np.linspace(2.5, 5, 200)	
 
 
-fig, axs = plt.subplots(1,1,figsize=(5,5))
+fig, axs = plt.subplots(1,1,figsize=(7,5))
 for i, f in enumerate(filter_settings[:6]):
 	obsv_mean = np.average(setting_charge_dict[f])
 	pred_mean = predicted_brightness_dict[f]
@@ -139,7 +142,8 @@ axs.set_yscale('log')
 axs.set_ylabel('Number of Events')
 axs.set_xlabel('Charge')
 axs.set_title('{}, {}, exclude ATWD {}, exclude FADC {}'.format(option, pulses, args.exclude_atwd, args.exclude_fadc))
-axs.legend()
+# axs.legend(loc='lower right')
+axs.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
 plt.tight_layout()
 fig.savefig('ladder_plots/hist_of_q_brightness_multi_{}_{}_eATWD_{}_eFADC_{}.png'.format(option, pulses, args.exclude_atwd, args.exclude_fadc), dpi=300)
 del fig, axs
