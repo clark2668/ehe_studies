@@ -31,7 +31,7 @@ output_file=`basename $input_file .i3.zst`
 # $TMPDIR is temporary storage space on the compute node
 # we store it there because it's easy
 top_dir=/mnt/home/baclark/IceCube/ehe/ehe_studies/other/for_jessica
-srun $top_dir/create_hdf5.py -i $input_file -o $TMPDIR/$output_file
+$top_dir/create_hdf5.py -i $input_file -o $TMPDIR/$output_file
 
 # finally, we move the results
 cp $TMPDIR/*.hdf5 $output_dir/.
