@@ -39,7 +39,7 @@ tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf',
 	Keys=['I3MCWeightDict', 'I3EventHeader', 'I3MCTree_preMuonProp', 
 	'PolyplopiaPrimary', 'CorsikaWeightMap',
     'Homogenized_QTot', 'LineFit', 
-    'EHEPortiaEventSummarySRT', 'EHEOpheliaParticleSRT_ImpLF'], 
+    'EHEPortiaEventSummarySRT', 'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF'], 
 	SubEventStreams=['InIceSplit']
 	)
 
