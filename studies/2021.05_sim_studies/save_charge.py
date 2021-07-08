@@ -36,8 +36,8 @@ tray.AddModule(has_needed, 'something',
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
 	Output=f'{args.output_file}.hdf5', 
-	Keys=['I3MCWeightDict', 'I3EventHeader', 'I3MCTree_preMuonProp', 'PolyplopiaPrimary',
-    'I3PrimaryInjectorInfo', 'I3CorsikaWeight',
+	Keys=['I3MCWeightDict', 'I3EventHeader', 'I3MCTree_preMuonProp', 
+	'PolyplopiaPrimary', 'CorsikaWeightMap',
     'Homogenized_QTot', 'LineFit', 
     'EHEPortiaEventSummarySRT', 'EHEOpheliaParticleSRT_ImpLF'], 
 	SubEventStreams=['InIceSplit']
