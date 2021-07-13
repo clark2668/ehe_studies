@@ -48,12 +48,16 @@ def find_contours_2D(x_values,y_values,xbins,weights=None,c1=16,c2=84):
 	lower = numpy.array(r1_save)
 	upper = numpy.array(r2_save)
 
+	# this is a funny way of outputting the result
+	# which was in the original code we borrowed from the oscnext folks
+	# remove it for now
 	# x = list(itertools.chain(*zip(xbins[:-1],xbins[1:])))
 	# y_median = list(itertools.chain(*zip(median,median)))
 	# y_lower = list(itertools.chain(*zip(lower,lower)))
 	# y_upper = list(itertools.chain(*zip(upper,upper)))
-	
 	# return x, y_median, y_lower, y_upper
+
+	# the first return with the [1:] and [:-1] is about locating the bin centers
 	return (xbins[1:] + xbins[:-1])/2, median, lower, upper
 
 
