@@ -48,12 +48,13 @@ def find_contours_2D(x_values,y_values,xbins,weights=None,c1=16,c2=84):
 	lower = numpy.array(r1_save)
 	upper = numpy.array(r2_save)
 
-	x = list(itertools.chain(*zip(xbins[:-1],xbins[1:])))
-	y_median = list(itertools.chain(*zip(median,median)))
-	y_lower = list(itertools.chain(*zip(lower,lower)))
-	y_upper = list(itertools.chain(*zip(upper,upper)))
+	# x = list(itertools.chain(*zip(xbins[:-1],xbins[1:])))
+	# y_median = list(itertools.chain(*zip(median,median)))
+	# y_lower = list(itertools.chain(*zip(lower,lower)))
+	# y_upper = list(itertools.chain(*zip(upper,upper)))
 	
-	return x, y_median, y_lower, y_upper
+	# return x, y_median, y_lower, y_upper
+	return (xbins[1:] + xbins[:-1])/2, median, lower, upper
 
 
 
@@ -70,7 +71,6 @@ true_azimuth = np.asarray([])
 for file in files:
 
 	file_in = h5py.File(file, "r")
-	# print(file_in['LineFit'].dtype.names)
 
 	try:
 		reco_azimuth = np.concatenate((reco_azimuth, 
@@ -86,7 +86,7 @@ for file in files:
 
 reco_azimuth = np.rad2deg(reco_azimuth)
 true_azimuth = np.rad2deg(true_azimuth)
-bins = [np.linspace(0,360,180), np.linspace(0,360,180)]
+bins = [np.linspace(0,360,72), np.linspace(0,360,72)]
 
 # 2D histogram
 fig = plt.figure(figsize=(6,5))
@@ -105,6 +105,9 @@ x, y_med, y_lo, y_hi = find_contours_2D(
 	y_values=reco_azimuth,
 	xbins=xedges
 	)
+y_med = np.asarray(y_med)
+y_lo = np.asarray(y_lo)
+y_hi = np.asarray(y_hi)
 # plot them
 ax.plot(x, y_med, 'r-', label='Median')
 ax.plot(x, y_lo, 'r-.', label='68% contour')
@@ -118,5 +121,15 @@ ax.legend()
 plt.tight_layout()
 fig.savefig('test.png', dpi=300)
 del fig, ax
+
+# we can also plot the size of the error bar in 1D to make visualization easier
+fig = plt.figure(figsize=(6,5))
+ax = fig.add_subplot(111)
+ax.errorbar(x, y_med - x, yerr=[y_hi-y_med, y_med-y_lo], capsize=0.0, fmt='o')
+ax.plot(x, y_med - x, 'o')
+ax.set_xlabel('True Azimuth')
+ax.set_ylabel('Error (True - Reco)')
+plt.tight_layout()
+fig.savefig('test2.png')
 
 
