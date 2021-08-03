@@ -65,14 +65,27 @@ tray.AddModule(reallyhighQfilter, 'reallyhighQ',
     Streams=[icetray.I3Frame.Physics]
     )
 
+# tray.AddModule('Dump')
+# def printy(frame, thing):
+#     print(frame.Get(thing))
+# tray.AddModule(printy, thing='EHEOpheliaParticleSRT_ImpLF')
+
+from icecube import linefit
+tray.AddSegment(linefit.simple, 'yo', inputResponse='SRTInIcePulses',
+    fitName='yo'
+    )
+
 from utils_pulses import get_linefit_quality
 tray.AddModule(get_linefit_quality, 'LFqual', 
     linefit_name='LineFit',
     linefit_params_name='LineFitParams',
     # pulses_name='SplitInIcePulses',
     pulses_name='SRTInIcePulses',
+    # pulses_name='yo_debiasedPulses',
     output_name='LineFitQuality',
     )
+
+
 
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
