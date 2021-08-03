@@ -407,6 +407,118 @@ def CalcChargeStatistics(tray, name, excludeFADC=False, excludeATWD=False):
 
 	return keys
 
+def get_linefit_quality(frame, linefit_name, linefit_params_name,
+	pulses_name,
+	output_name, lc_only=True
+	):
+
+	if not linefit_name in frame:
+		icetray.logging.log_fatal('Linefit result {} is not in the frame'.format(linefit_name))
+	if not linefit_params_name in frame:
+		icetray.logging.log_fatal('LineFitParam result {} is not in the frame'.format(linefit_params_name))
+	if not 'I3Geometry' in frame:
+		icetray.logging.log_fatal('I3Geometry frame is not cached somehow')
+	if not 'I3Calibration' in frame:
+		icetray.logging.log_fatal('I3Calibration frame is not cached somehow')
+
+
+	geo = frame.Get('I3Geometry').omgeo
+	# cal = frame.Get('I3Calibration')
+
+	linefit_params = frame.Get(linefit_params_name)
+	velocity = dataclasses.I3Position(linefit_params.LFVelX, 
+		linefit_params.LFVelY, linefit_params.LFVelZ) # line fit velocity
+
+	linefit = frame.Get(linefit_name)
+	cob = linefit.pos # linefit center of brightness
+	t0 = linefit.time # linefit average time
+
+	# here's how we'd get the ophelia values if we wanted them
+	# linefit_params = frame.Get('EHEOpheliaSRT_ImpLF').velocity
+	# velocity = dataclasses.I3Position(linefit_params[0], linefit_params[1], linefit_params[2])
+	# linefit = frame.Get('EHEOpheliaParticleSRT_ImpLF')
+	# cob = linefit.pos
+	# t0 = linefit.time
+	# print('Ophelia Linefit cob {}, t0 {}'.format(cob, t0))
+
+	total_n_pulses = 0
+	total_npe = 0
+	average_delta_time_square = 0 
+
+	pulse_map = get_pulse_map(frame, pulses_name)
+	for omkey, pulses in pulse_map:
+
+		om_position = geo[omkey].position
+
+		# # in case we need to remove high-QE doms
+		# dom_cal = cal.dom_cal[omkey]
+		# string = omkey.string
+		# if string in [79, 80, 81, 82, 83, 84, 85, 86]:
+		# 	continue
+		# if dom_cal.relative_dom_eff > 1.1:
+		# 	continue
+
+		npe_this_dom = 0
+		for pulse in pulses:
+			npe_this_dom += pulse.charge
+
+		for pulse in pulses:
+			if lc_only and not (pulse.flags & pulse.PulseFlags.LC):
+				continue
+			else:
+				total_n_pulses += 1
+				total_npe += pulse.charge
+
+				velocity_time = velocity * pulse.time
+				velocity_line_time = velocity*t0 + (om_position - cob)
+				vsq = (velocity_time - velocity_line_time) * (velocity_time - velocity_line_time)
+
+				average_delta_time_square += pulse.charge * vsq
+
+		# # this is a "Portia-like" attempt at recreated integrated time pulses
+		# # for doing the calculation; didn't really work out better
+		# npe_this_dom = 0
+		# for pulse in pulses:
+		# 	npe_this_dom += pulse.charge
+
+		# npe_10 = npe_this_dom*0.10
+		# total_n_pulses += 1
+		# total_npe += npe_this_dom
+
+		# cumulative_npe=0
+		# t10 = -999
+		# for pulse in pulses:
+		# 	if cumulative_npe < npe_10:
+		# 		cumulative_npe += pulse.charge
+		# 		t10 = pulse.time
+		# 	else:
+		# 		continue
+		# print('NPE {:.2f}, NPE 10 is {:.2f}, T10 is {}'.format(npe_this_dom, npe_10, t10))
+		# velocity_time = velocity * t10
+		# velocity_line_time = velocity*t0 + (om_position - cob)
+		# vsq = (velocity_time - velocity_line_time) * (velocity_time -velocity_line_time)
+		# average_delta_time_square += npe_this_dom * vsq
+	
+	# print('N Pulses {}, Npe {:.2f}, Avg dt2 {:.2f}'.format(total_n_pulses, total_npe, average_delta_time_square))
+
+	if total_n_pulses >0 and total_npe >0:
+		average_delta_time_square /= (total_npe * total_n_pulses)
+	else:
+		average_delta_time_square = -999.
+
+	frame.Put(output_name, dataclasses.I3Double(average_delta_time_square))
+
+	me = frame.Get(output_name)
+	oph = frame.Get('EHEOpheliaSRT_ImpLF').fit_quality
+	inttype = frame.Get('I3MCWeightDict')['InteractionType']
+	print('New {:.2f}, Ophelia {:.2f}'.format(me.value, oph))
+	# print('------------\n\n')
+
+
+
+
+
+
 
 
 
