@@ -5,7 +5,9 @@ from pathlib import Path
 output_directory_head = '/data/user/brianclark/IceCube/ehe/output/sim/'
 
 # datasets = [21218 (nue), 21220 (numu), 21221 (nutau), 21315 (muongun), 20787 (corsika)]
-datasets = [20787]
+#datasets = [20787]
+datasets = [21218, 21220]
+#datasets = [20787, 21218, 21220]
 for dataset in datasets:
 
 	dag_file_name = f'dagman_{dataset}.dag'
@@ -20,8 +22,8 @@ for dataset in datasets:
 	in_filelist = open(f'../list_{dataset}.txt', 'r')
 	for in_file in in_filelist.readlines():
 
-		# if main_index > 3:
-		# 	continue
+		#if main_index > 10:
+		#	continue
 
 		in_file = in_file.rstrip('\n') # remove the newline
 		in_dir, in_file = os.path.split(in_file) # split between path and filename
