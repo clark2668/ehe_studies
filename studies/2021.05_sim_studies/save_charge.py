@@ -39,49 +39,49 @@ filenamelist.append(args.input_file)
 tray = I3Tray()
 tray.AddModule("I3Reader", filenamelist=filenamelist)
 
-# # cut on the high Q filter
-# from icecube.filterscripts import filter_globals
-# def highQfilter(frame):
-#     if frame.Stop == icetray.I3Frame.Physics and frame.Has('FilterMask'):
-#         if frame['FilterMask'].get(filter_globals.HighQFilter).condition_passed:
-#             return 1
-#         else:
-#             return 0
-#     else:
-#         return 0
+# cut on the high Q filter
+from icecube.filterscripts import filter_globals
+def highQfilter(frame):
+    if frame.Stop == icetray.I3Frame.Physics and frame.Has('FilterMask'):
+        if frame['FilterMask'].get(filter_globals.HighQFilter).condition_passed:
+            return 1
+        else:
+            return 0
+    else:
+        return 0
 
-# tray.AddModule(highQfilter, 'highQ',
-#     Streams=[icetray.I3Frame.Physics])
+tray.AddModule(highQfilter, 'highQ',
+    Streams=[icetray.I3Frame.Physics])
 
-# do_fill_ratio = True
-# if do_fill_ratio:
+do_fill_ratio = False
+if do_fill_ratio:
 
-#     '''
-#     If we need to calculate the fill ratio ourselves
-#     '''
+    '''
+    If we need to calculate the fill ratio ourselves
+    '''
 
-#     suffix = '_L3'
-#     tray.AddModule('Delete', 'deleter', 
-#         Keys=['OfflinePulsesSLC', 'OfflinePulsesHLC', 'TWOfflinePulsesHLC']
-#         )
+    suffix = '_L3'
+    tray.AddModule('Delete', 'deleter', 
+        Keys=['OfflinePulsesSLC', 'OfflinePulsesHLC', 'TWOfflinePulsesHLC']
+        )
 
-#     # first, re-run cascade hit-clqeaning
-#     from icecube.phys_services.which_split import which_split
-#     from icecube.filterscripts.offlineL2.level2_HitCleaning_Cascade import CascadeHitCleaning
-#     tray.AddSegment(CascadeHitCleaning, 'CascadeHitCleaning',
-#         If=which_split(split_name='InIceSplit')
-#         )
+    # first, re-run cascade hit-clqeaning
+    from icecube.phys_services.which_split import which_split
+    from icecube.filterscripts.offlineL2.level2_HitCleaning_Cascade import CascadeHitCleaning
+    tray.AddSegment(CascadeHitCleaning, 'CascadeHitCleaning',
+        If=which_split(split_name='InIceSplit')
+        )
 
-#     # rerun some subset of the cascade reco
-#     import utils_reco
-#     from utils_reco import OfflineCascadeReco
-#     tray.AddSegment(OfflineCascadeReco, 'CascadeL2Reco',
-#         SRTPulses='SRTInIcePulses',
-#         Pulses='TWOfflinePulsesHLC',
-#         TopoPulses='OfflinePulsesHLC',
-#         If=which_split(split_name='InIceSplit'),
-#         suffix=suffix
-#         )
+    # rerun some subset of the cascade reco
+    import utils_reco
+    from utils_reco import OfflineCascadeReco
+    tray.AddSegment(OfflineCascadeReco, 'CascadeL2Reco',
+        SRTPulses='SRTInIcePulses',
+        Pulses='TWOfflinePulsesHLC',
+        TopoPulses='OfflinePulsesHLC',
+        If=which_split(split_name='InIceSplit'),
+        suffix=suffix
+        )
 
 # def make_cut(frame):
 #     hqtot = frame.Get('Homogenized_QTot').value
@@ -99,64 +99,64 @@ tray.AddModule("I3Reader", filenamelist=filenamelist)
 # # make cuts
 # tray.AddModule(make_cut, 'cut', Streams=[icetray.I3Frame.Physics])
 
-def is_neutrino(pType):
-       return(pType==dataclasses.I3Particle.ParticleType.NuE
-              or pType==dataclasses.I3Particle.ParticleType.NuEBar
-              or pType==dataclasses.I3Particle.ParticleType.NuMu
-              or pType==dataclasses.I3Particle.ParticleType.NuMuBar
-              or pType==dataclasses.I3Particle.ParticleType.NuTau
-              or pType==dataclasses.I3Particle.ParticleType.NuTauBar)
+# def is_neutrino(pType):
+#        return(pType==dataclasses.I3Particle.ParticleType.NuE
+#               or pType==dataclasses.I3Particle.ParticleType.NuEBar
+#               or pType==dataclasses.I3Particle.ParticleType.NuMu
+#               or pType==dataclasses.I3Particle.ParticleType.NuMuBar
+#               or pType==dataclasses.I3Particle.ParticleType.NuTau
+#               or pType==dataclasses.I3Particle.ParticleType.NuTauBar)
 
-def find_final_neutrino(frame, mctree_name):
-        mcTree = frame[mctree_name]
-        # print(mcTree)
-        #try to figure out which neutrino is the primary
-        primaryNeutrino=dataclasses.get_most_energetic_primary(mcTree)
-        frame["PrimaryNeutrino"]=primaryNeutrino
-        if(primaryNeutrino==None or not is_neutrino(primaryNeutrino.type)):
-            return
-        #walk down the tree to find the first daughter neutrino which is 'InIce'
-        neutrino=primaryNeutrino
-        while(neutrino.location_type!=dataclasses.I3Particle.LocationType.InIce):
-            children=mcTree.get_daughters(neutrino)
-            foundNext=False
-            #take the first child which is a neutrino;
-            #for in-Earth NC interactions it should be the only one anyway
-            for child in children:
-                if(is_neutrino(child.type)):
-                    neutrino=child
-                    foundNext=True
-                    break
-            if(not foundNext):
-                print("did not find a daughter neutrino")
-                return #bail out
-        frame["InteractingNeutrino"]=neutrino
-        stop_pos = neutrino.pos + neutrino.dir*neutrino.length
-        frame["VertexPosition"] = stop_pos
-        # if(neutrino==primaryNeutrino):
-        #     print('Final selection is same as first, z pos {}'.format(stop_pos.z))
-        # else:
-        #     print("other, x/y/z {:e}, {:e}, {:e}".format(stop_pos.x, stop_pos.y, stop_pos.z))
-        #     print(mcTree)
+# def find_final_neutrino(frame, mctree_name):
+#         mcTree = frame[mctree_name]
+#         # print(mcTree)
+#         #try to figure out which neutrino is the primary
+#         primaryNeutrino=dataclasses.get_most_energetic_primary(mcTree)
+#         frame["PrimaryNeutrino"]=primaryNeutrino
+#         if(primaryNeutrino==None or not is_neutrino(primaryNeutrino.type)):
+#             return
+#         #walk down the tree to find the first daughter neutrino which is 'InIce'
+#         neutrino=primaryNeutrino
+#         while(neutrino.location_type!=dataclasses.I3Particle.LocationType.InIce):
+#             children=mcTree.get_daughters(neutrino)
+#             foundNext=False
+#             #take the first child which is a neutrino;
+#             #for in-Earth NC interactions it should be the only one anyway
+#             for child in children:
+#                 if(is_neutrino(child.type)):
+#                     neutrino=child
+#                     foundNext=True
+#                     break
+#             if(not foundNext):
+#                 print("did not find a daughter neutrino")
+#                 return #bail out
+#         frame["InteractingNeutrino"]=neutrino
+#         stop_pos = neutrino.pos + neutrino.dir*neutrino.length
+#         frame["VertexPosition"] = stop_pos
+#         # if(neutrino==primaryNeutrino):
+#         #     print('Final selection is same as first, z pos {}'.format(stop_pos.z))
+#         # else:
+#         #     print("other, x/y/z {:e}, {:e}, {:e}".format(stop_pos.x, stop_pos.y, stop_pos.z))
+#         #     print(mcTree)
 
 
-tray.AddModule(find_final_neutrino, 'vertex', mctree_name='I3MCTree_preMuonProp',
-    Streams=[icetray.I3Frame.Physics]
-    )
+# tray.AddModule(find_final_neutrino, 'vertex', mctree_name='I3MCTree_preMuonProp',
+#     Streams=[icetray.I3Frame.Physics]
+#     )
 
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
-    Output=f'{args.output_file}_nohighQ.hdf5', 
+    Output=f'{args.output_file}.hdf5', 
     Keys=['I3MCWeightDict', 'I3EventHeader', 'PolyplopiaPrimary', 'CorsikaWeightMap',
-    'InteractingNeutrino', 'PrimaryNeutrino', 'VertexPosition',
-    'Homogenized_QTot', 'LineFit', 'CascadeFillRatio_L3',
+    #'InteractingNeutrino', 'VertexPosition','CascadeFillRatio_L3', 'PrimaryNeutrino',
+    'Homogenized_QTot', 'LineFit',
     'EHEPortiaEventSummarySRT', 'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF'], 
     SubEventStreams=['InIceSplit']
     )
 
 if args.save_i3file:
     tray.AddModule("I3Writer", "write",
-        filename=f'{args.output_file}_nohighQ.i3.zst',
+        filename=f'{args.output_file}.i3.zst',
         Streams=[icetray.I3Frame.TrayInfo, icetray.I3Frame.DAQ, icetray.I3Frame.Physics],
         DropOrphanStreams=[icetray.I3Frame.Calibration, icetray.I3Frame.DAQ]
         )
