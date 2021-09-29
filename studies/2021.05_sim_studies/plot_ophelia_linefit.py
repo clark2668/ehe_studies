@@ -19,9 +19,14 @@ dataset = file_name.split('_')[1].split('.')[0]
 
 in_file = pd.HDFStore(args.file)
 
-atmo_flux_model = utils_weights.get_flux_model('H3a_SIBYLL23C', 'nugen')
-
-weighter = utils_weights.get_weighter(in_file, 'nugen', 1000)
+if dataset == '20787':
+    atmo_flux_model = utils_weights.get_flux_model('GaisserH3a', 'corsika')
+    weighter = utils_weights.get_weighter(in_file, 'corsika', 1000)
+elif dataset == '21315':
+    print("Not implemented yet")
+else:
+    atmo_flux_model = utils_weights.get_flux_model('H3a_SIBYLL23C', 'nugen')
+    weighter = utils_weights.get_weighter(in_file, 'nugen', 1000)
 
 ophelia_zenith = weighter.get_column('EHEOpheliaParticleSRT_ImpLF', 'zenith')
 ophelia_azimuth = weighter.get_column('EHEOpheliaParticleSRT_ImpLF', 'azimuth')
@@ -47,8 +52,10 @@ kwargs = {'cmap': cmap,
 kwargs_zenith = kwargs.copy()
 bins =  [np.linspace(0,1,100), np.linspace(0,1,100)]
 kwargs_zenith['bins'] = bins
-if int(dataset) == 21218:
+if dataset == '21218':
     bins_e = np.linspace(3,8,40)
+elif dataset == '20787':
+    bins_e = np.linspace(6,10,40)
 else:
     bins_e = np.linspace(4,9,40)
 mask = np.log10(hqtot) > 3
@@ -71,7 +78,7 @@ ophelia_zenith = ophelia_zenith[mask]
 linefit_zenith = linefit_zenith[mask]
 true_zenith = true_zenith[mask]
 
-do_energy_bins=True
+do_energy_bins=False
 if do_energy_bins:
 
     # energy distribution
@@ -202,6 +209,8 @@ if do_opening_angle:
     ax.set_ylim([0,40])
     if dataset == '21218':
         ax.set_ylim([60,100])
+    elif dataset == '20787':
+        ax.set_ylim([0,10])
     ax.set_title('{}'.format(dataset))
     plt.tight_layout()
     fig.savefig('plots/{}_opening_angle_vs_e.png'.format(dataset), 
@@ -309,6 +318,8 @@ if do_zenith:
     f2_ax.set_ylim([-0.2, 0.2])
     if dataset == '21218':
         f2_ax.set_ylim([-1, 1])
+    if dataset == '20787':
+        f2_ax.set_ylim([-0.1, 0.1])
     f2_ax.set_title('{}'.format(dataset))
     f2_ax.legend()
     fig2.savefig('plots/{}_ophelia_vs_linefit_med_error.png'.format(dataset),
@@ -417,11 +428,14 @@ if do_zenith:
     ax.tick_params(labelsize=sizer)
     ax.legend(loc='upper left')
     ax.set_ylim([-0.25,1])
-    if dataset == '21218':
-        ax.set_ylim([-1, 1])
     ax.set_title('{}'.format(dataset))
     
-    ax.plot([3,9], [0, 0], 'k:')
+    ax.plot([3,10], [0, 0], 'k:')
+    if dataset == '21218':
+        ax.set_ylim([-1, 1])
+    if dataset == '20787':
+        ax.set_xlim([6,10])
+        ax.set_ylim([-0.1, 0.3])
     plt.tight_layout()
     fig.savefig('plots/{}_deltazenith_angle_vs_e.png'.format(dataset), 
             edgecolor='none', bbox_inches='tight', dpi=300)
