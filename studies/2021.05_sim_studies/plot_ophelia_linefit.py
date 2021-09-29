@@ -47,7 +47,10 @@ kwargs = {'cmap': cmap,
 kwargs_zenith = kwargs.copy()
 bins =  [np.linspace(0,1,100), np.linspace(0,1,100)]
 kwargs_zenith['bins'] = bins
-bins_e = np.linspace(5,9,40)
+if int(dataset) == 21218:
+    bins_e = np.linspace(3,8,40)
+else:
+    bins_e = np.linspace(4,9,40)
 mask = np.log10(hqtot) > 3
 
 def cartesian_components(zenith, azimuth):
@@ -68,7 +71,7 @@ ophelia_zenith = ophelia_zenith[mask]
 linefit_zenith = linefit_zenith[mask]
 true_zenith = true_zenith[mask]
 
-do_energy_bins=False
+do_energy_bins=True
 if do_energy_bins:
 
     # energy distribution
@@ -197,6 +200,8 @@ if do_opening_angle:
     ax.tick_params(labelsize=sizer)
     ax.legend()
     ax.set_ylim([0,40])
+    if dataset == '21218':
+        ax.set_ylim([60,100])
     ax.set_title('{}'.format(dataset))
     plt.tight_layout()
     fig.savefig('plots/{}_opening_angle_vs_e.png'.format(dataset), 
@@ -302,6 +307,8 @@ if do_zenith:
     f2_ax.set_xlabel(r'True $\cos(\theta)$')
     f2_ax.set_ylabel(r'Median Error in $\cos(\theta)$')
     f2_ax.set_ylim([-0.2, 0.2])
+    if dataset == '21218':
+        f2_ax.set_ylim([-1, 1])
     f2_ax.set_title('{}'.format(dataset))
     f2_ax.legend()
     fig2.savefig('plots/{}_ophelia_vs_linefit_med_error.png'.format(dataset),
@@ -410,9 +417,11 @@ if do_zenith:
     ax.tick_params(labelsize=sizer)
     ax.legend(loc='upper left')
     ax.set_ylim([-0.25,1])
+    if dataset == '21218':
+        ax.set_ylim([-1, 1])
     ax.set_title('{}'.format(dataset))
     
-    ax.plot([5,9], [0, 0], 'k:')
+    ax.plot([3,9], [0, 0], 'k:')
     plt.tight_layout()
     fig.savefig('plots/{}_deltazenith_angle_vs_e.png'.format(dataset), 
             edgecolor='none', bbox_inches='tight', dpi=300)
