@@ -50,12 +50,16 @@ kwargs = {'cmap': cmap,
             # 'weights' : weights
             }
 kwargs_zenith = kwargs.copy()
-bins =  [np.linspace(0,1,100), np.linspace(0,1,100)]
+bins =  [np.linspace(-1,1,200), np.linspace(-1,1,200)]
 kwargs_zenith['bins'] = bins
 if dataset == '21218':
+    # the nu-e set starts at slightly lower energies
     bins_e = np.linspace(3,8,40)
 elif dataset == '20787':
     bins_e = np.linspace(6,10,40)
+    # for corsika, only the downgoing region
+    bins =  [np.linspace(0,1,100), np.linspace(0,1,100)]
+    kwargs_zenith['bins'] = bins
 else:
     bins_e = np.linspace(4,9,40)
 mask = np.log10(hqtot) > 3
