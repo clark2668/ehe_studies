@@ -1,9 +1,8 @@
 #!/bin/sh /cvmfs/icecube.opensciencegrid.org/py3-v4.1.1/icetray-start
 #METAPROJECT combo/V01-01-00
 
-from icecube import icetray, dataio, dataclasses
+from icecube import icetray, dataio, dataclasses, hdfwriter
 from I3Tray import I3Tray
-from icecube import VHESelfVeto, hdfwriter
 import numpy as np
 
 import sys
@@ -54,45 +53,45 @@ tray.AddModule(highQfilter, 'highQ',
     Streams=[icetray.I3Frame.Physics])
 
 
-def reallyhighQfilter(frame):
-    if frame.Stop == icetray.I3Frame.Physics and frame.Has('Homogenized_QTot'):
-        hqtot = frame.Get('Homogenized_QTot').value
-        if np.log10(hqtot) < 4:
-            return 0
-        else:
-            return 1
-tray.AddModule(reallyhighQfilter, 'reallyhighQ',
-    Streams=[icetray.I3Frame.Physics]
-    )
+# def reallyhighQfilter(frame):
+#     if frame.Stop == icetray.I3Frame.Physics and frame.Has('Homogenized_QTot'):
+#         hqtot = frame.Get('Homogenized_QTot').value
+#         if np.log10(hqtot) < 4:
+#             return 0
+#         else:
+#             return 1
+# tray.AddModule(reallyhighQfilter, 'reallyhighQ',
+#     Streams=[icetray.I3Frame.Physics]
+#     )
 
 # tray.AddModule('Dump')
 # def printy(frame, thing):
 #     print(frame.Get(thing))
 # tray.AddModule(printy, thing='EHEOpheliaParticleSRT_ImpLF')
 
-from icecube import linefit
-tray.AddSegment(linefit.simple, 'yo', inputResponse='SRTInIcePulses',
-    fitName='yo'
-    )
+name = 'redo'
+
+# from icecube import linefit
+# tray.AddSegment(linefit.simple, 'redo', inputResponse='SRTInIcePulses',
+#     fitName=name
+#     )
+
+from utils_pulses import RedoLineFitPulseDebiasing
+tray.AddSegment(RedoLineFitPulseDebiasing, name, input_pulses='SRTInIcePulses')
 
 from utils_pulses import get_linefit_quality
 tray.AddModule(get_linefit_quality, 'LFqual', 
     linefit_name='LineFit',
     linefit_params_name='LineFitParams',
-    # pulses_name='SplitInIcePulses',
-    pulses_name='SRTInIcePulses',
-    # pulses_name='yo_debiasedPulses',
+    pulses_name=name+'_debiasedPulses',
     output_name='LineFitQuality',
     )
-
-
-
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
     Output=f'{args.output_file}_LF.hdf5', 
     Keys=['I3MCWeightDict', 'I3EventHeader', 'PolyplopiaPrimary', 'CorsikaWeightMap',
     'InteractingNeutrino', 'PrimaryNeutrino', 'VertexPosition',
-    'Homogenized_QTot', 'LineFit', 'CascadeFillRatio_L3',
+    'Homogenized_QTot', 'LineFit', 'LineFitQuality', 'CascadeFillRatio_L3',
     'EHEPortiaEventSummarySRT', 'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF'], 
     SubEventStreams=['InIceSplit']
     )
