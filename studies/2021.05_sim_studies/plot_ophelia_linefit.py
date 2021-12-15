@@ -37,6 +37,8 @@ true_azimuth = weighter.get_column('PolyplopiaPrimary', 'azimuth')
 energy = weighter.get_column('PolyplopiaPrimary', 'energy')
 hqtot = weighter.get_column('Homogenized_QTot', 'value')
 weights = weighter.get_weights(atmo_flux_model)
+linefit_quality = weighter.get_column('LineFitQuality', 'value')
+ophelia_quality = weighter.get_column('EHEOpheliaSRT_ImpLF','fitQuality')
 
 in_file.close()
 weights *= livetime
@@ -63,6 +65,7 @@ elif dataset == '20787':
 else:
     bins_e = np.linspace(4,9,40)
 mask = np.log10(hqtot) > 3
+mask = np.log10(hqtot) > np.log10(25000)
 
 def cartesian_components(zenith, azimuth):
     theta = zenith
@@ -81,6 +84,33 @@ opening_angle_linefit = opening_angle_linefit[mask]
 ophelia_zenith = ophelia_zenith[mask]
 linefit_zenith = linefit_zenith[mask]
 true_zenith = true_zenith[mask]
+
+do_quality = True
+if do_quality:
+
+    # compare the LF to Ophelia quality cut
+
+    fig = plt.figure(figsize=(22,7))
+    ax = fig.add_subplot(131)
+    counts, xedges, yedges, im = ax.hist2d(
+            ophelia_quality[mask],
+            linefit_quality[mask],
+            **kwargs,
+            bins=[np.linspace(0,600,60), np.linspace(0,600,60)]
+
+            )
+    cbar = plt.colorbar(im, ax=ax)
+    cbar.set_label('Events', fontsize=sizer)
+    ax.set_xlabel(r'Ophelia Quality ($\chi^2_{red}$)', fontsize=sizer)
+    ax.set_ylabel(r'LineFit Quality ($\chi^2_{red}$)', fontsize=sizer)
+    ax.tick_params(labelsize=sizer)
+    ax.set_title('LineFit vs Ophelia ({})'.format(dataset))
+    ax.plot([0,1000], [0, 1000], 'k:')
+    ax.set_aspect('equal')
+
+    plt.tight_layout()
+    fig.savefig('plots/{}_ophelia_vs_linefit_quality.png'.format(dataset), 
+        edgecolor='none', bbox_inches='tight', dpi=300)
 
 do_energy_bins=False
 if do_energy_bins:
@@ -101,7 +131,6 @@ if do_energy_bins:
     fig.savefig('plots/{}_energy_dist.png'.format(dataset), 
             edgecolor='none', bbox_inches='tight', dpi=300)
     del fig, ax
-
 
 do_opening_angle=False
 if do_opening_angle:
@@ -222,7 +251,7 @@ if do_opening_angle:
     del fig, ax
     sizer=15
 
-do_zenith = True
+do_zenith = False
 if do_zenith:
 
     #------------------------------------
