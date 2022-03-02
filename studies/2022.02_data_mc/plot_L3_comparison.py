@@ -7,6 +7,7 @@ import argparse
 import utils_weights, utils_ehe
 livetime = 86400 * 365
 livetime = 350 # in seconds
+livetime = 2804133.57 # in seconds (this should actually be correct)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-numu", type=str,
@@ -82,9 +83,11 @@ data_npe = np.log10(data_npe)
 do_L2_plot = True
 if do_L2_plot:
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    bins = np.linspace(2, 6, 40)
+    fig, (ax, ax2) = plt.subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [2, 1]})
+
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111)
+    bins = np.linspace(3, 6, 40)
 
     # histogram and then plot the data
     data, data_bins = np.histogram(data_npe, bins=bins)
@@ -93,7 +96,7 @@ if do_L2_plot:
     ax.errorbar(binscenters, data, yerr=errs, fmt='ko', label='Burn Sample')
 
     # histogram the backgrounds
-    ax.hist(
+    sim, sim_bins, patches = ax.hist(
         [np.log10(numu_npe), np.log10(nue_npe), np.log10(cor_npe)],
         weights=[numu_atmo_weights, nue_atmo_weights, cor_weights],
         label=[
@@ -104,13 +107,18 @@ if do_L2_plot:
         bins=bins,
         stacked=True
     )
-
-    ax.set_ylabel('Events (livetime ~350 seconds)')
-    ax.set_xlabel('Charge ({}, NPE)'.format(charge_label))
+    ax.set_ylabel('Events in {:.2f} days'.format(livetime/60/60/24))
     ax.set_yscale('log')
-    ax.set_ylim([1E-7, 1E3])
+    ax.set_ylim([1E-1, 1E7])
     ax.legend()
+
+    ax2.plot(binscenters, data/(sim[0]+sim[1]+sim[2]), 'ko', label='Sim/Data')
+    ax2.set_ylabel('Data/Sim')
+    ax2.set_xlabel('Charge ({}, NPE)'.format(charge_label))
+    ax2.plot([3, 6], [1, 1], 'k--') 
+    ax2.set_ylim([-1,2])
+
     plt.tight_layout()
-    fig.savefig('burn_sample_demo.png')
+    fig.savefig('burn_sample.png')
 
 data_file.close()
