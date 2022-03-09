@@ -43,13 +43,13 @@ elif which_one is 'new':
     zenith_label = "LineFit"
 
 atmo_model = 'H3a_SIBYLL23C'
-cr_model = 'GaisserH3a'
+cr_model = 'GaisserH4a'
 atmo_flux_model = utils_weights.get_flux_model(atmo_model, 'nugen')
 cr_flux_model = utils_weights.get_flux_model(cr_model, 'corsika')
 
 numu_weighter = utils_weights.get_weighter(numu_file, 'nugen', 1000)
 nue_weighter = utils_weights.get_weighter(nue_file, 'nugen', 1000)
-cor_weighter = utils_weights.get_weighter(cor_file, 'corsika', 1000)
+cor_weighter = utils_weights.get_weighter(cor_file, 'corsika', 10000)
 
 # # numu_zenith = numu_weighter.get_column(zenith_var[0], zenith_var[1])
 # # numu_chisqured = numu_weighter.get_column(fit_var[0], fit_var[1])
