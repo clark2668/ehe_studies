@@ -82,7 +82,7 @@ numu_atmo_weights *= livetime
 cmap=plt.cm.plasma
 sizer=15
 
-do_event_dist=True
+do_event_dist=False
 if do_event_dist:
 	fig = plt.figure(figsize=(18,7))
 	# bins = [np.linspace(0,500,100), np.linspace(4,8,40)]

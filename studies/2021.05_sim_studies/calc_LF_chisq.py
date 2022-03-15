@@ -11,7 +11,7 @@ sys.path.append('/home/brianclark/IceCube/ehe_studies/utils/')
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", type=str,
-    dest="input_file",required=True,
+    dest="input_file",required=True, nargs='+',
     help="full path to the input file",
     )
 parser.add_argument("-o", type=str,
@@ -33,7 +33,10 @@ args = parser.parse_args()
 filenamelist = []
 if args.gcd_file is not None:
     filenamelist.append(args.gcd_file)
-filenamelist.append(args.input_file)
+# filenamelist.append(args.input_file)
+for f in args.input_file:
+    filenamelist.append(f)
+print("Filename list is {}".format(filenamelist))
 
 tray = I3Tray()
 tray.AddModule("I3Reader", filenamelist=filenamelist)
@@ -85,6 +88,20 @@ tray.AddModule(get_linefit_quality, 'LFqual',
     linefit_params_name='LineFitParams',
     pulses_name=name+'_debiasedPulses',
     output_name='LineFitQuality',
+    )
+
+def pickTrouble(frame):
+    if frame.Has('LineFitQuality') and frame.Has('EHEOpheliaSRT_ImpLF'):
+        lf = frame.Get('LineFitQuality')
+        oph = frame.Get('EHEOpheliaSRT_ImpLF').fit_quality
+        if lf < 50 and oph > 150:
+            print("Trouble: LF {}, Ophelia {}".format(lf, oph))
+            return 1
+        else:
+            return 0
+        
+tray.AddModule(pickTrouble, 'picky', 
+    Streams=[icetray.I3Frame.Physics]
     )
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
