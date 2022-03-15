@@ -43,30 +43,29 @@ numu_xx = numu_weighter.get_column('PolyplopiaPrimary', 'x')
 numu_yy = numu_weighter.get_column('PolyplopiaPrimary', 'y')
 numu_zz = numu_weighter.get_column('PolyplopiaPrimary', 'z')
 
+nue_zenith = nue_weighter.get_column('EHEOpheliaParticleSRT_ImpLF', 'zenith')
+nue_chisqured = nue_weighter.get_column('EHEOpheliaSRT_ImpLF', 'fitQuality')
+nue_npe = nue_weighter.get_column('EHEPortiaEventSummarySRT', 'bestNPEbtw')
+nue_hqtot = nue_weighter.get_column('Homogenized_QTot', 'value')
+nue_speed = nue_weighter.get_column('LineFit', 'speed')
+nue_atmo_weights = nue_weighter.get_weights(atmo_flux_model)
+nue_fillratio = nue_weighter.get_column('CascadeFillRatio_L3', 'fillratio_from_mean')
 
-# nue_zenith = nue_weighter.get_column('EHEOpheliaParticleSRT_ImpLF', 'zenith')
-# nue_chisqured = nue_weighter.get_column('EHEOpheliaSRT_ImpLF', 'fitQuality')
-# nue_npe = nue_weighter.get_column('EHEPortiaEventSummarySRT', 'bestNPEbtw')
-# nue_hqtot = nue_weighter.get_column('Homogenized_QTot', 'value')
-# nue_speed = nue_weighter.get_column('LineFit', 'speed')
-# nue_atmo_weights = nue_weighter.get_weights(atmo_flux_model)
-# nue_fillratio = nue_weighter.get_column('CascadeFillRatio_L3', 'fillratio_from_mean')
-
-# cor_zenith = cor_weighter.get_column('EHEOpheliaParticleSRT_ImpLF', 'zenith')
-# cor_chisqured = cor_weighter.get_column('EHEOpheliaSRT_ImpLF', 'fitQuality')
-# cor_npe = cor_weighter.get_column('EHEPortiaEventSummarySRT', 'bestNPEbtw')
-# cor_hqtot = cor_weighter.get_column('Homogenized_QTot', 'value')
-# cor_speed = cor_weighter.get_column('LineFit', 'speed')
-# cor_weights = cor_weighter.get_weights(cr_flux_model)
-# cor_fillratio = cor_weighter.get_column('CascadeFillRatio_L3', 'fillratio_from_mean')
+cor_zenith = cor_weighter.get_column('EHEOpheliaParticleSRT_ImpLF', 'zenith')
+cor_chisqured = cor_weighter.get_column('EHEOpheliaSRT_ImpLF', 'fitQuality')
+cor_npe = cor_weighter.get_column('EHEPortiaEventSummarySRT', 'bestNPEbtw')
+cor_hqtot = cor_weighter.get_column('Homogenized_QTot', 'value')
+cor_speed = cor_weighter.get_column('LineFit', 'speed')
+cor_weights = cor_weighter.get_weights(cr_flux_model)
+cor_fillratio = cor_weighter.get_column('CascadeFillRatio_L3', 'fillratio_from_mean')
 
 numu_file.close()
 nue_file.close()
 cor_file.close()
 
 numu_atmo_weights *= livetime
-# nue_atmo_weights *= livetime
-# cor_weights *= livetime
+nue_atmo_weights *= livetime
+cor_weights *= livetime
 
 # # do some loop
 # for i, fill in enumerate(numu_fillratio):
@@ -81,6 +80,7 @@ numu_atmo_weights *= livetime
 
 cmap=plt.cm.plasma
 sizer=15
+# numu_nc_mask = numu_inttypes < 2
 
 do_event_dist=False
 if do_event_dist:
@@ -89,7 +89,7 @@ if do_event_dist:
 	bins = 100
 	numu_nc_mask = numu_inttypes < 2
 
-	# corsika
+	# top down
 	ax = fig.add_subplot(121)
 	counts, xedges, yedges, im = ax.hist2d(
 			numu_xx, 
@@ -106,7 +106,7 @@ if do_event_dist:
 	ax.tick_params(labelsize=sizer)
 	ax.set_title('Top-Down View')
 
-	# numu
+	# side view
 	ax2 = fig.add_subplot(122)
 	counts, xedges, yedges, im = ax2.hist2d(
 			numu_xx, 
@@ -241,87 +241,6 @@ if do_npe_chisqured_cut:
 	fig.savefig('orig_L3_plots.png', edgecolor='none', bbox_inches='tight', dpi=300)
 	del fig, ax
 
-do_hqtot_speed_cut = False
-if do_hqtot_speed_cut:
-
-	numu_npe_mask = numu_hqtot > 25000
-	numu_nc_mask = numu_inttypes > 0
-	nue_npe_mask = nue_hqtot > 25000
-	cor_npe_mask = cor_hqtot > 25000
-
-	# 2D hist, potential new EHE cut (Hqtot vs LFspeed)
-	fig = plt.figure(figsize=(27,7))
-	bins = [np.linspace(0,1,50), np.linspace(4,8,40)]
-	# bins = 100
-
-	# corsika
-	ax = fig.add_subplot(131)
-	counts, xedges, yedges, im = ax.hist2d(
-			# cor_speed[cor_npe_mask], 
-			cor_fillratio[cor_npe_mask],
-			np.log10(cor_hqtot[cor_npe_mask]), 
-			bins=bins,
-			weights=cor_weights[cor_npe_mask],
-			cmap=cmap,
-			norm=colors.LogNorm(),
-			)
-	im.set_clim(1E-5, 1E3)
-	max_count = np.max(counts)
-	cbar = plt.colorbar(im, ax=ax)
-	cbar.set_label('Events/Year', fontsize=sizer)
-	ax.set_ylabel(r'log$_{10}$(HQtot)', fontsize=sizer)
-	# ax.set_xlabel(r'LineFit Speed', fontsize=sizer)
-	ax.set_xlabel(r'Fill Ratio', fontsize=sizer)
-	ax.tick_params(labelsize=sizer)
-	ax.set_title('Corsika (H3a)')
-
-	# numu
-	# masks = [numu_npe_mask, numu_nc_mask]
-	# from functools import reduce
-	# numu_total_mask = reduce(np.logical_and, makss)
-	ax2 = fig.add_subplot(132)
-	counts, xedges, yedges, im = ax2.hist2d(
-			# numu_speed[numu_npe_mask & numu_nc_mask], 
-			numu_fillratio[numu_npe_mask & numu_nc_mask],
-			np.log10(numu_hqtot[numu_npe_mask & numu_nc_mask]), 
-			bins=bins,
-			weights=numu_atmo_weights[numu_npe_mask & numu_nc_mask],
-			cmap=cmap,
-			norm=colors.LogNorm(),
-			)
-	im.set_clim(1E-5, 1E3)
-	cbar2 = plt.colorbar(im, ax=ax2)
-	cbar2.set_label('Events/Year', fontsize=sizer)
-	ax2.set_ylabel(r'log$_{10}$(HQtot)', fontsize=sizer)
-	# ax2.set_xlabel(r'LineFit Speed', fontsize=sizer)
-	ax2.set_xlabel(r'Fill Ratio', fontsize=sizer)	
-	ax2.tick_params(labelsize=sizer)
-	ax2.set_title('NuMu (H3a+SIBYLL23C)')
-
-	# nue
-	ax3 = fig.add_subplot(133)
-	counts, xedges, yedges, im = ax3.hist2d(
-			# nue_speed[nue_npe_mask], 
-			nue_fillratio[nue_npe_mask],
-			np.log10(nue_hqtot[nue_npe_mask]), 
-			bins=bins,
-			weights=nue_atmo_weights[nue_npe_mask],
-			cmap=cmap,
-			norm=colors.LogNorm(),
-			)
-	im.set_clim(1E-5, 1E3)
-	cbar3 = plt.colorbar(im, ax=ax3)
-	cbar3.set_label('Events/Year', fontsize=sizer)
-	ax3.set_ylabel(r'log$_{10}$(HQtot)', fontsize=sizer)
-	# ax3.set_xlabel(r'LineFit Speed', fontsize=sizer)
-	ax3.set_xlabel(r'Fill Ratio', fontsize=sizer)
-	ax3.tick_params(labelsize=sizer)
-	ax3.set_title('NuE (H3a+SIBYLL23C)')
-
-	plt.tight_layout()
-	fig.savefig('new_L3_plots.png', edgecolor='none', bbox_inches='tight', dpi=300)
-	del fig, ax
-
 do_fillratio_speed_cut = False
 if do_fillratio_speed_cut:
 
@@ -396,3 +315,188 @@ if do_fillratio_speed_cut:
 	plt.tight_layout()
 	fig.savefig('new_L3_plots_2.png', edgecolor='none', bbox_inches='tight', dpi=300)
 	del fig, ax
+
+do_hqtot_fillratio_cut = False
+if do_hqtot_fillratio_cut:
+
+	numu_hqtot_mask = numu_hqtot > 25000
+	numu_nc_mask = numu_inttypes > 0
+	# numu_nc_mask = numu_inttypes < 2
+	# print(numu_nc_mask)
+	nue_hqtot_mask = nue_hqtot > 25000
+	cor_hqtot_mask = cor_hqtot > 25000
+
+	# 2D hist, potential new EHE cut (Hqtot vs LFspeed)
+	fig = plt.figure(figsize=(27,7))
+	bins = [np.linspace(0,1.2,70), np.linspace(4,8,40)]
+	# bins = 100
+
+	# corsika
+	ax = fig.add_subplot(131)
+	counts, xedges, yedges, im = ax.hist2d(
+			cor_fillratio[cor_hqtot_mask],
+			np.log10(cor_hqtot[cor_hqtot_mask]), 
+			bins=bins,
+			weights=cor_weights[cor_hqtot_mask],
+			cmap=cmap,
+			norm=colors.LogNorm(),
+			)
+	# im.set_clim(1E-5, 1E3)
+	max_count = np.max(counts)
+	cbar = plt.colorbar(im, ax=ax)
+	cbar.set_label('Events/Year', fontsize=sizer)
+	ax.set_ylabel(r'log$_{10}$(HQtot)', fontsize=sizer)
+	# ax.set_xlabel(r'LineFit Speed', fontsize=sizer)
+	ax.set_xlabel(r'Fill Ratio', fontsize=sizer)
+	ax.tick_params(labelsize=sizer)
+	ax.set_title('Corsika (H3a)')
+
+	# numu
+	# masks = [numu_hqtot_mask, numu_nc_mask]
+	# from functools import reduce
+	# numu_total_mask = reduce(np.logical_and, makss)
+	ax2 = fig.add_subplot(132)
+	counts, xedges, yedges, im = ax2.hist2d(
+			numu_fillratio[numu_hqtot_mask & numu_nc_mask],
+			np.log10(numu_hqtot[numu_hqtot_mask & numu_nc_mask]), 
+			bins=bins,
+			weights=numu_atmo_weights[numu_hqtot_mask & numu_nc_mask],
+			cmap=cmap,
+			norm=colors.LogNorm(),
+			)
+	# im.set_clim(1E-5, 1E3)
+	cbar2 = plt.colorbar(im, ax=ax2)
+	cbar2.set_label('Events/Year', fontsize=sizer)
+	ax2.set_ylabel(r'log$_{10}$(HQtot)', fontsize=sizer)
+	# ax2.set_xlabel(r'LineFit Speed', fontsize=sizer)
+	ax2.set_xlabel(r'Fill Ratio', fontsize=sizer)	
+	ax2.tick_params(labelsize=sizer)
+	ax2.set_title('NuMu (H3a+SIBYLL23C)')
+
+	# nue
+	ax3 = fig.add_subplot(133)
+	counts, xedges, yedges, im = ax3.hist2d(
+			nue_fillratio[nue_hqtot_mask],
+			np.log10(nue_hqtot[nue_hqtot_mask]), 
+			bins=bins,
+			weights=nue_atmo_weights[nue_hqtot_mask],
+			cmap=cmap,
+			norm=colors.LogNorm(),
+			)
+	# im.set_clim(1E-5, 1E3)
+	cbar3 = plt.colorbar(im, ax=ax3)
+	cbar3.set_label('Events/Year', fontsize=sizer)
+	ax3.set_ylabel(r'log$_{10}$(HQtot)', fontsize=sizer)
+	ax3.set_xlabel(r'LineFit Speed', fontsize=sizer)
+	# ax3.set_xlabel(r'Fill Ratio', fontsize=sizer)
+	ax3.tick_params(labelsize=sizer)
+	ax3.set_title('NuE (H3a+SIBYLL23C)')
+
+	plt.tight_layout()
+	fig.savefig('L3_hqtot_vs_fillratio.png', edgecolor='none', bbox_inches='tight', dpi=300)
+	del fig, ax
+
+do_hqtot_speed_cut = True
+if do_hqtot_speed_cut:
+
+	numu_hqtot_mask = numu_hqtot > 25000
+	numu_nc_mask = numu_inttypes > 0
+	numu_nc_mask = numu_inttypes < 2
+	# print(numu_nc_mask)
+	nue_hqtot_mask = nue_hqtot > 25000
+	cor_hqtot_mask = cor_hqtot > 25000
+
+	# one dimesional, to see things quantitatively
+	fig = plt.figure(figsize=(5,5))
+	bins = np.linspace(0 ,0.5, 150)
+	ax = fig.add_subplot(111)
+	ax.hist(cor_speed[cor_hqtot_mask], weights=cor_weights[cor_hqtot_mask],
+		histtype='step', bins=bins, label='Corsika', 
+	)
+	ax.hist(numu_speed[numu_hqtot_mask & numu_nc_mask], weights=numu_atmo_weights[numu_hqtot_mask & numu_nc_mask],
+		histtype='step', bins=bins, label='Atm NuMu CC'
+	)
+	ax.hist(numu_speed[numu_hqtot_mask & ~numu_nc_mask], weights=numu_atmo_weights[numu_hqtot_mask & ~numu_nc_mask],
+		histtype='step', bins=bins, label='Atm NuMu NC'
+	)
+	ax.hist(nue_speed[nue_hqtot_mask], weights=nue_atmo_weights[nue_hqtot_mask],
+		histtype='step', bins=bins, label='Atm NuE'
+	)
+	ax.set_ylim([1E-4, 1E4])
+	ax.set_ylabel(r'Events/Year')#, fontsize=sizer)
+	ax.set_xlabel(r'LineFit Speed')#, fontsize=sizer)
+	ax.set_yscale('log')
+	ax.legend(loc='upper left')
+	plt.tight_layout()
+	fig.savefig('L3_speed.png', edgecolor='none', bbox_inches='tight')
+	del fig, ax
+
+
+	# 2D hist, potential new EHE cut (Hqtot vs LFspeed)
+	fig = plt.figure(figsize=(27,7))
+	bins = [np.linspace(0,0.5,50), np.linspace(4,8,40)]
+	# bins = 100
+
+	# corsika
+	ax = fig.add_subplot(131)
+	counts, xedges, yedges, im = ax.hist2d(
+			cor_speed[cor_hqtot_mask], 
+			np.log10(cor_hqtot[cor_hqtot_mask]), 
+			bins=bins,
+			weights=cor_weights[cor_hqtot_mask],
+			cmap=cmap,
+			norm=colors.LogNorm(),
+			)
+	im.set_clim(1E-5, 1E3)
+	max_count = np.max(counts)
+	cbar = plt.colorbar(im, ax=ax)
+	cbar.set_label('Events/Year', fontsize=sizer)
+	ax.set_ylabel(r'log$_{10}$(HQtot)', fontsize=sizer)
+	ax.set_xlabel(r'LineFit Speed', fontsize=sizer)
+	ax.tick_params(labelsize=sizer)
+	ax.set_title('Corsika (H3a)')
+
+	# numu
+	# masks = [numu_hqtot_mask, numu_nc_mask]
+	# from functools import reduce
+	# numu_total_mask = reduce(np.logical_and, makss)
+	ax2 = fig.add_subplot(132)
+	counts, xedges, yedges, im = ax2.hist2d(
+			numu_speed[numu_hqtot_mask & numu_nc_mask], 
+			np.log10(numu_hqtot[numu_hqtot_mask & numu_nc_mask]), 
+			bins=bins,
+			weights=numu_atmo_weights[numu_hqtot_mask & numu_nc_mask],
+			cmap=cmap,
+			norm=colors.LogNorm(),
+			)
+	im.set_clim(1E-5, 1E3)
+	cbar2 = plt.colorbar(im, ax=ax2)
+	cbar2.set_label('Events/Year', fontsize=sizer)
+	ax2.set_ylabel(r'log$_{10}$(HQtot)', fontsize=sizer)
+	ax2.set_xlabel(r'LineFit Speed', fontsize=sizer)
+	ax2.tick_params(labelsize=sizer)
+	ax2.set_title('NuMu (H3a+SIBYLL23C)')
+
+	# nue
+	ax3 = fig.add_subplot(133)
+	counts, xedges, yedges, im = ax3.hist2d(
+			nue_speed[nue_hqtot_mask], 
+			np.log10(nue_hqtot[nue_hqtot_mask]), 
+			bins=bins,
+			weights=nue_atmo_weights[nue_hqtot_mask],
+			cmap=cmap,
+			norm=colors.LogNorm(),
+			)
+	im.set_clim(1E-5, 1E3)
+	cbar3 = plt.colorbar(im, ax=ax3)
+	cbar3.set_label('Events/Year', fontsize=sizer)
+	ax3.set_ylabel(r'log$_{10}$(HQtot)', fontsize=sizer)
+	ax3.set_xlabel(r'LineFit Speed', fontsize=sizer)
+	ax3.tick_params(labelsize=sizer)
+	ax3.set_title('NuE (H3a+SIBYLL23C)')
+
+	plt.tight_layout()
+	fig.savefig('L3_hqtot_vs_speed.png', edgecolor='none', bbox_inches='tight', dpi=300)
+	del fig, ax
+
+
