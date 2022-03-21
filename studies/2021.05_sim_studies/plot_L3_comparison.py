@@ -23,16 +23,18 @@ numu_file = pd.HDFStore(args.numu_file)
 nue_file = pd.HDFStore(args.nue_file)
 cor_file = pd.HDFStore(args.cor_file)
 
-which_one = 'original'
+which_one = 'new'
 if which_one is 'original':
     charge_var = ['EHEPortiaEventSummarySRT', 'bestNPEbtw']
     zenith_var = ['EHEOpheliaParticleSRT_ImpLF', 'zenith']
     fit_var = ['EHEOpheliaSRT_ImpLF', 'fitQuality']
+    speed_var = None
     charge_label = "Portia"
     zenith_label = "Ophelia"
 elif which_one is 'new':
     charge_var = ['Homogenized_QTot', 'value']
     zenith_var = ['LineFit', 'zenith']
+    speed_var = ['LineFit', 'speed']
     fit_var = ['LineFitQuality', 'value']
     charge_label = "HQtot"
     zenith_label = "LineFit"
@@ -47,15 +49,17 @@ cor_weighter = utils_weights.get_weighter(cor_file, 'corsika', 1000)
 numu_zenith = numu_weighter.get_column(zenith_var[0], zenith_var[1])
 numu_chisqured = numu_weighter.get_column(fit_var[0], fit_var[1])
 numu_npe = numu_weighter.get_column(charge_var[0], charge_var[1])
+numu_speed = numu_weighter.get_column(speed_var[0], speed_var[1])
 
 nue_zenith = nue_weighter.get_column(zenith_var[0], zenith_var[1])
 nue_chisqured = nue_weighter.get_column(fit_var[0], fit_var[1])
 nue_npe = nue_weighter.get_column(charge_var[0], charge_var[1])
+nue_speed = nue_weighter.get_column(speed_var[0], speed_var[1])
 
 cor_zenith = cor_weighter.get_column(zenith_var[0], zenith_var[1])
 cor_chisqured = cor_weighter.get_column(fit_var[0], fit_var[1])
 cor_npe = cor_weighter.get_column(charge_var[0], charge_var[1])
-
+cor_speed = cor_weighter.get_column(speed_var[0], speed_var[1])
 
 numu_atmo_weights = numu_weighter.get_weights(atmo_flux_model)
 nue_atmo_weights = nue_weighter.get_weights(atmo_flux_model)
@@ -72,7 +76,7 @@ cor_weights *= livetime
 cmap=plt.cm.viridis
 sizer=20
 
-do_npe_chisqured_cut = True
+do_npe_chisqured_cut = False
 if do_npe_chisqured_cut:
 
     numu_npe_mask = numu_npe > 25000
@@ -149,4 +153,86 @@ if do_npe_chisqured_cut:
 
     plt.tight_layout()
     fig.savefig('plots/L3_plots_{}.png'.format(which_one), edgecolor='none', bbox_inches='tight', dpi=300)
+    del fig, ax2, ax3
+
+do_chisqured_speed_cut = True
+if do_chisqured_speed_cut:
+    numu_npe_mask = numu_npe > 25000
+    nue_npe_mask = nue_npe > 25000
+    cor_npe_mask = cor_npe > 25000
+
+
+    fig = plt.figure(figsize=(27,7))
+    # bins = [np.linspace(0,500,100), np.linspace(4,8,40)]
+    bins = [np.linspace(0,500,100), np.linspace(0, 0.5, 50)]
+
+    # corsika
+    ax = fig.add_subplot(131)
+    counts, xedges, yedges, im = ax.hist2d(
+            cor_chisqured[cor_npe_mask], 
+            # np.log10(cor_npe[cor_npe_mask]), 
+            cor_speed[cor_npe_mask],
+            bins=bins,
+            weights=cor_weights[cor_npe_mask],
+            cmap=cmap,
+            norm=colors.LogNorm(),
+            )
+    im.set_clim(1E-5, 1E3)
+    max_count = np.max(counts)
+    cbar = plt.colorbar(im, ax=ax)
+    cbar.set_label('Events/Year', fontsize=sizer)
+    cbar.ax.tick_params(labelsize=sizer) 
+    ax.plot(xvals, yvals, 'k')
+    # ax.set_ylabel(r'log10({} Charge)'.format(charge_label), fontsize=sizer)
+    ax.set_ylabel(r'LineFit Speed', fontsize=sizer)
+    ax.set_xlabel(r'{} Reduced Chi-Square'.format(zenith_label), fontsize=sizer)
+    ax.tick_params(labelsize=sizer)
+    ax.set_title('Corsika (H3a)', fontsize=sizer)
+
+    # numu
+    ax2 = fig.add_subplot(132)
+    counts, xedges, yedges, im = ax2.hist2d(
+            numu_chisqured[numu_npe_mask], 
+            # np.log10(numu_npe[numu_npe_mask]), 
+            numu_speed[numu_npe_mask],
+            bins=bins,
+            weights=numu_atmo_weights[numu_npe_mask],
+            cmap=cmap,
+            norm=colors.LogNorm(),
+            )
+    im.set_clim(1E-5, 1E3)
+    cbar2 = plt.colorbar(im, ax=ax2)
+    ax2.plot(xvals, yvals, 'k')
+    cbar2.set_label('Events/Year', fontsize=sizer)
+    cbar2.ax.tick_params(labelsize=sizer) 
+    ax2.set_ylabel('LineFit Speed', fontsize=sizer)
+    # ax2.set_ylabel(r'log10({} Charge)'.format(charge_label), fontsize=sizer)
+    ax2.set_xlabel(r'{} Reduced Chi-Square'.format(zenith_label), fontsize=sizer)
+    ax2.tick_params(labelsize=sizer)
+    ax2.set_title('NuMu (H3a+SIBYLL23C)', fontsize=sizer)
+
+    # nue
+    ax3 = fig.add_subplot(133)
+    counts, xedges, yedges, im = ax3.hist2d(
+            nue_chisqured[nue_npe_mask], 
+            nue_speed[nue_npe_mask],
+            # np.log10(nue_npe[nue_npe_mask]), 
+            bins=bins,
+            weights=nue_atmo_weights[nue_npe_mask],
+            cmap=cmap,
+            norm=colors.LogNorm(),
+            )
+    im.set_clim(1E-5, 1E3)
+    cbar3 = plt.colorbar(im, ax=ax3)
+    ax3.plot(xvals, yvals, 'k')
+    cbar3.set_label('Events/Year', fontsize=sizer)
+    cbar3.ax.tick_params(labelsize=sizer) 
+    # ax3.set_ylabel(r'log10({} Charge)'.format(charge_label), fontsize=sizer)
+    ax3.set_ylabel('LineFit Speed', fontsize=sizer)
+    ax3.set_xlabel(r'{} Reduced Chi-Square'.format(zenith_label), fontsize=sizer)
+    ax3.tick_params(labelsize=sizer)
+    ax3.set_title('NuE (H3a+SIBYLL23C)', fontsize=sizer)
+
+    plt.tight_layout()
+    fig.savefig('plots/L3_speed_vs_fitqual_{}.png'.format(which_one), edgecolor='none', bbox_inches='tight', dpi=300)
     del fig, ax2, ax3

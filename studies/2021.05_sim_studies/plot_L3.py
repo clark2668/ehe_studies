@@ -218,7 +218,7 @@ if do_npe_chisqured_cut:
 	ax2.set_ylabel(r'log$_{10}$(Portia NPE)', fontsize=sizer)
 	ax2.set_xlabel(r'Ophelia Reduced Chi-Square', fontsize=sizer)
 	ax2.tick_params(labelsize=sizer)
-	ax2.set_title('NuMu (H3a+SIBYLL23C)')
+	ax2.set_title('NuMu (H3a+S````IBYLL23C)')
 
 	# nue
 	ax3 = fig.add_subplot(133)
@@ -401,7 +401,7 @@ if do_hqtot_speed_cut:
 
 	numu_hqtot_mask = numu_hqtot > 25000
 	numu_nc_mask = numu_inttypes > 0
-	numu_nc_mask = numu_inttypes < 2
+	# numu_nc_mask = numu_inttypes < 2
 	# print(numu_nc_mask)
 	nue_hqtot_mask = nue_hqtot > 25000
 	cor_hqtot_mask = cor_hqtot > 25000
@@ -431,10 +431,31 @@ if do_hqtot_speed_cut:
 	fig.savefig('L3_speed.png', edgecolor='none', bbox_inches='tight')
 	del fig, ax
 
+	top_val = 5.2
+	bot_val = 4.6
+	left_val = 0.25
+	right_val = 0.27
+	slope = (bot_val - top_val)/(right_val - left_val)
+	print(slope)
+	def new_cut(speed):
+		lognpe_cut = 1e30
+		if(speed < left_val):
+			lognpe_cut = top_val
+		elif(speed < right_val):
+			lognpe_cut = top_val + slope*(speed - left_val)
+		else:
+			lognpe_cut = bot_val
+		return lognpe_cut
+	vec_function = np.vectorize(new_cut)
+	xvals = np.linspace(0,0.6,200)
+	yvals = vec_function(xvals)
+	# print(xvals)
+	# print(yvals)
+
 
 	# 2D hist, potential new EHE cut (Hqtot vs LFspeed)
 	fig = plt.figure(figsize=(27,7))
-	bins = [np.linspace(0,0.5,50), np.linspace(4,8,40)]
+	bins = [np.linspace(0,0.5,50), np.linspace(4.4,6.5,20)]
 	# bins = 100
 
 	# corsika
@@ -447,6 +468,7 @@ if do_hqtot_speed_cut:
 			cmap=cmap,
 			norm=colors.LogNorm(),
 			)
+	ax.plot(xvals, yvals, linewidth=3)
 	im.set_clim(1E-5, 1E3)
 	max_count = np.max(counts)
 	cbar = plt.colorbar(im, ax=ax)
@@ -469,6 +491,7 @@ if do_hqtot_speed_cut:
 			cmap=cmap,
 			norm=colors.LogNorm(),
 			)
+	ax2.plot(xvals, yvals, linewidth=3)
 	im.set_clim(1E-5, 1E3)
 	cbar2 = plt.colorbar(im, ax=ax2)
 	cbar2.set_label('Events/Year', fontsize=sizer)
@@ -487,6 +510,7 @@ if do_hqtot_speed_cut:
 			cmap=cmap,
 			norm=colors.LogNorm(),
 			)
+	ax3.plot(xvals, yvals, linewidth=3)
 	im.set_clim(1E-5, 1E3)
 	cbar3 = plt.colorbar(im, ax=ax3)
 	cbar3.set_label('Events/Year', fontsize=sizer)
@@ -496,7 +520,7 @@ if do_hqtot_speed_cut:
 	ax3.set_title('NuE (H3a+SIBYLL23C)')
 
 	plt.tight_layout()
-	fig.savefig('L3_hqtot_vs_speed.png', edgecolor='none', bbox_inches='tight', dpi=300)
+	fig.savefig('L3_hqtot_vs_speed.png', edgecolor='none', bbox_inches='tight')
 	del fig, ax
 
 
