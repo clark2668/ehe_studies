@@ -145,31 +145,38 @@ tray.AddModule(find_final_neutrino, 'vertex', mctree_name='I3MCTree_preMuonProp'
     )
 
 name = 'redo'
+# redo_name = 'redo_LF'
 input_pulses = 'SRTInIcePulses'
+
+# redo linefit itself
+from icecube import linefit
+tray.AddSegment(linefit.simple, 'redo_LF', inputResponse=input_pulses,
+    fitName='LineFit_'+name
+    )
+
 from utils_pulses import RedoLineFitPulseDebiasing
 tray.AddSegment(RedoLineFitPulseDebiasing, name, input_pulses=input_pulses)
 
 from utils_pulses import get_linefit_quality
 tray.AddModule(get_linefit_quality, 'LFqual', 
-    linefit_name='LineFit',
-    linefit_params_name='LineFitParams',
+    linefit_name='LineFit_'+name,
+    linefit_params_name='LineFit_'+name+'Params',
     pulses_name=name+'_debiasedPulses',
-    output_name='LineFitQuality',
+    output_name='LineFit_'+name+'Quality'
     )
 
 output_pulses = name+'_debiasedPulses' + '_CutFarAway'
 from utils_pulses import strip_pulses
 tray.AddModule(strip_pulses, 'sp', 
-    track_name='LineFit', impact_parameter=300,
+    track_name='LineFit_'+name, impact_parameter=300,
     input_pulses_name=input_pulses, output_pulses_name=output_pulses
     )
 
-from utils_pulses import get_linefit_quality
 tray.AddModule(get_linefit_quality, 'LFqual2', 
-    linefit_name='LineFit',
-    linefit_params_name='LineFitParams',
-    pulses_name = output_pulses,
-    output_name='LineFitQuality_CutFarAway',
+    linefit_name='LineFit_'+name,
+    linefit_params_name='LineFit_'+name+'Params',
+    pulses_name=output_pulses,
+    output_name='LineFit_'+name+'Quality_CutFarAway'
     )
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
@@ -178,7 +185,7 @@ tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf',
     'InteractingNeutrino', 'VertexPosition','CascadeFillRatio_L3', 'PrimaryNeutrino',
     'Homogenized_QTot', 'LineFit',
     'EHEPortiaEventSummarySRT', 'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF',
-    'LineFitQuality', 'LineFitQuality_CutFarAway' 
+    'LineFit_'+name+'Quality', 'LineFit_'+name+'Quality_CutFarAway'
     ], 
     SubEventStreams=['InIceSplit']
     )

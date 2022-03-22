@@ -37,7 +37,9 @@ true_azimuth = weighter.get_column('PolyplopiaPrimary', 'azimuth')
 energy = weighter.get_column('PolyplopiaPrimary', 'energy')
 hqtot = weighter.get_column('Homogenized_QTot', 'value')
 weights = weighter.get_weights(atmo_flux_model)
-linefit_quality = weighter.get_column('LineFitQuality', 'value')
+which_quality = 'LineFit_redoQuality_CutFarAway'
+which_quality = 'LineFit_redoQuality'
+linefit_quality = weighter.get_column(which_quality, 'value')
 ophelia_quality = weighter.get_column('EHEOpheliaSRT_ImpLF','fitQuality')
 
 in_file.close()
@@ -109,7 +111,7 @@ if do_quality:
     ax.set_aspect('equal')
 
     plt.tight_layout()
-    fig.savefig('plots/{}_ophelia_vs_linefit_quality.png'.format(dataset), 
+    fig.savefig('plots/{}_ophelia_vs_linefit_quality_{}.png'.format(dataset, which_quality), 
         edgecolor='none', bbox_inches='tight', dpi=300)
 
 do_energy_bins=False
