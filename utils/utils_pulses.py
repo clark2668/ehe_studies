@@ -1,4 +1,5 @@
-from icecube import icetray, dataclasses, portia, recclasses, VHESelfVeto
+from dataclasses import dataclass
+from icecube import icetray, dataclasses, portia, recclasses, VHESelfVeto, linefit
 from icecube.icetray import I3Units
 from icecube.phys_services.which_split import which_split
 from I3Tray import Inf
@@ -407,13 +408,30 @@ def CalcChargeStatistics(tray, name, excludeFADC=False, excludeATWD=False):
 
 	return keys
 
+@icetray.traysegment
+def RedoLineFitPulseDebiasing(tray, name, input_pulses):
+	# do the delay cleaning, huber fit, and debiasing ourselves
+	# (straight from the OG linefit.simple)
+	tray.AddModule("DelayCleaning", name+"_DelayCleaning", InputResponse =
+		input_pulses, OutputResponse=name+"_Pulses_delay_cleaned")
+
+	tray.AddModule("HuberFit", name+"_HuberFit", Name = name+"_HuberFit",
+		InputRecoPulses = name+"_Pulses_delay_cleaned")
+
+	tray.AddModule("Debiasing", name+"_Debiasing", OutputResponse =
+		name+"_debiasedPulses", InputResponse = name+"_Pulses_delay_cleaned", Seed =
+		name+"_HuberFit")
+
 def get_linefit_quality(frame, linefit_name, linefit_params_name,
 	pulses_name,
 	output_name, lc_only=True
 	):
 
 	if not linefit_name in frame:
-		icetray.logging.log_fatal('Linefit result {} is not in the frame'.format(linefit_name))
+		icetray.logging.log_warn('Linefit result {} is not in the frame. Putting in -999'.format(linefit_name))
+		average_delta_time_square = -999.
+		frame.Put(output_name, dataclasses.I3Double(average_delta_time_square))
+		return
 	if not linefit_params_name in frame:
 		icetray.logging.log_fatal('LineFitParam result {} is not in the frame'.format(linefit_params_name))
 	if not 'I3Geometry' in frame:
@@ -462,7 +480,7 @@ def get_linefit_quality(frame, linefit_name, linefit_params_name,
 		for pulse in pulses:
 			npe_this_dom += pulse.charge
 
-		for pulse in pulses:
+		for pulse in [pulses[0]]:
 			if lc_only and not (pulse.flags & pulse.PulseFlags.LC):
 				continue
 			else:
@@ -510,15 +528,39 @@ def get_linefit_quality(frame, linefit_name, linefit_params_name,
 
 	me = frame.Get(output_name)
 	oph = frame.Get('EHEOpheliaSRT_ImpLF').fit_quality
-	inttype = frame.Get('I3MCWeightDict')['InteractionType']
-	print('New {:.2f}, Ophelia {:.2f}'.format(me.value, oph))
+	# inttype = frame.Get('I3MCWeightDict')['InteractionType']
+	# print('New {:.2f}, Ophelia {:.2f}'.format(me.value, oph))
 	# print('------------\n\n')
 
+# from icecube.phys_services.I3Calculator import closest_approach_distance as cad
+from icecube import phys_services
+
+def strip_pulses(frame, 
+	input_pulses_name=None, output_pulses_name=None, 
+	track_name=None, impact_parameter=None):
+
+	doms_to_drop = []
+
+	geometry = frame['I3Geometry']
+	the_track = frame[track_name]
+	input_pulses = get_pulse_map(frame, input_pulses_name)
+	for omkey, pulses in input_pulses.items():
+		om_pos = geometry.omgeo[omkey].position # get the goemetry
+		dist = phys_services.I3Calculator.closest_approach_distance(the_track, om_pos)
+		if dist > impact_parameter:
+			# print("Droppping {}".format(omkey))
+			doms_to_drop.append(omkey)
+		
+	new_pulse_mask = dataclasses.I3RecoPulseSeriesMapMask(frame, input_pulses_name)
+	pulse_keys = dataclasses.I3RecoPulseSeriesMap.from_frame(frame, input_pulses_name).keys()
+	for omkey in pulse_keys:
+		if omkey in doms_to_drop:
+			new_pulse_mask.set(omkey, False)
+	frame[output_pulses_name] = new_pulse_mask
+	del new_pulse_mask
 
 
-
-
-
+	
 
 
 

@@ -53,7 +53,7 @@ def highQfilter(frame):
 tray.AddModule(highQfilter, 'highQ',
     Streams=[icetray.I3Frame.Physics])
 
-do_fill_ratio = True
+do_fill_ratio = False
 if do_fill_ratio:
 
     '''
@@ -144,13 +144,42 @@ tray.AddModule(find_final_neutrino, 'vertex', mctree_name='I3MCTree_preMuonProp'
     Streams=[icetray.I3Frame.Physics]
     )
 
+name = 'redo'
+input_pulses = 'SRTInIcePulses'
+from utils_pulses import RedoLineFitPulseDebiasing
+tray.AddSegment(RedoLineFitPulseDebiasing, name, input_pulses=input_pulses)
+
+from utils_pulses import get_linefit_quality
+tray.AddModule(get_linefit_quality, 'LFqual', 
+    linefit_name='LineFit',
+    linefit_params_name='LineFitParams',
+    pulses_name=name+'_debiasedPulses',
+    output_name='LineFitQuality',
+    )
+
+output_pulses = name+'_debiasedPulses' + '_CutFarAway'
+from utils_pulses import strip_pulses
+tray.AddModule(strip_pulses, 'sp', 
+    track_name='LineFit', impact_parameter=300,
+    input_pulses_name=input_pulses, output_pulses_name=output_pulses
+    )
+
+from utils_pulses import get_linefit_quality
+tray.AddModule(get_linefit_quality, 'LFqual2', 
+    linefit_name='LineFit',
+    linefit_params_name='LineFitParams',
+    pulses_name = output_pulses,
+    output_name='LineFitQuality_CutFarAway',
+    )
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
     Output=f'{args.output_file}.hdf5', 
     Keys=['I3MCWeightDict', 'I3EventHeader', 'PolyplopiaPrimary', 'CorsikaWeightMap',
     'InteractingNeutrino', 'VertexPosition','CascadeFillRatio_L3', 'PrimaryNeutrino',
     'Homogenized_QTot', 'LineFit',
-    'EHEPortiaEventSummarySRT', 'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF'], 
+    'EHEPortiaEventSummarySRT', 'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF',
+    'LineFitQuality', 'LineFitQuality_CutFarAway' 
+    ], 
     SubEventStreams=['InIceSplit']
     )
 

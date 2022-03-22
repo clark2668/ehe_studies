@@ -79,8 +79,9 @@ name = 'redo'
 #     fitName=name
 #     )
 
+input_pulses = 'SRTInIcePulses'
 from utils_pulses import RedoLineFitPulseDebiasing
-tray.AddSegment(RedoLineFitPulseDebiasing, name, input_pulses='SRTInIcePulses')
+tray.AddSegment(RedoLineFitPulseDebiasing, name, input_pulses=input_pulses)
 
 from utils_pulses import get_linefit_quality
 tray.AddModule(get_linefit_quality, 'LFqual', 
@@ -90,19 +91,35 @@ tray.AddModule(get_linefit_quality, 'LFqual',
     output_name='LineFitQuality',
     )
 
-def pickTrouble(frame):
-    if frame.Has('LineFitQuality') and frame.Has('EHEOpheliaSRT_ImpLF'):
-        lf = frame.Get('LineFitQuality')
-        oph = frame.Get('EHEOpheliaSRT_ImpLF').fit_quality
-        if lf < 50 and oph > 150:
-            print("Trouble: LF {}, Ophelia {}".format(lf, oph))
-            return 1
-        else:
-            return 0
-        
-tray.AddModule(pickTrouble, 'picky', 
-    Streams=[icetray.I3Frame.Physics]
+output_pulses = name+'_debiasedPulses' + '_CutFarAway'
+from utils_pulses import strip_pulses
+tray.AddModule(strip_pulses, 'sp', 
+    track_name='LineFit', impact_parameter=300,
+    input_pulses_name=input_pulses, output_pulses_name=output_pulses
     )
+
+from utils_pulses import get_linefit_quality
+tray.AddModule(get_linefit_quality, 'LFqual2', 
+    linefit_name='LineFit',
+    linefit_params_name='LineFitParams',
+    pulses_name = output_pulses,
+    output_name='LineFitQuality_CutFarAway',
+    )
+
+
+# def pickTrouble(frame):
+#     if frame.Has('LineFitQuality') and frame.Has('EHEOpheliaSRT_ImpLF'):
+#         lf = frame.Get('LineFitQuality')
+#         oph = frame.Get('EHEOpheliaSRT_ImpLF').fit_quality
+#         if lf < 50 and oph > 150:
+#             print("Trouble: LF {}, Ophelia {}".format(lf, oph))
+#             return 1
+#         else:
+#             return 0
+        
+# tray.AddModule(pickTrouble, 'picky', 
+#     Streams=[icetray.I3Frame.Physics]
+#     )
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
     Output=f'{args.output_file}_LF.hdf5', 
