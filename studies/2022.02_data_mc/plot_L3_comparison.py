@@ -33,15 +33,13 @@ which_one = 'new'
 if which_one is 'original':
     charge_var = ['EHEPortiaEventSummarySRT', 'bestNPEbtw']
     zenith_var = ['EHEOpheliaParticleSRT_ImpLF', 'zenith']
-    fit_var = ['EHEOpheliaSRT_ImpLF', 'fitQuality']
     speed_var = ['EHEOpheliaParticleSRT_ImpLF', 'speed']
     charge_label = "Portia"
     zenith_label = "Ophelia"
 elif which_one is 'new':
     charge_var = ['Homogenized_QTot', 'value']
-    zenith_var = ['LineFit', 'zenith']
-    fit_var = ['LineFitQuality', 'value']
-    speed_var = ['LineFit', 'speed']
+    zenith_var = ['LineFit_redo', 'zenith']
+    speed_var = ['LineFit_redo', 'speed']
     charge_label = "HQtot"
     zenith_label = "LineFit"
     speed_label = "LineFit Speed"
@@ -60,22 +58,21 @@ log10_charge_cut = 4.4
 
 numu_zenith = numu_weighter.get_column(zenith_var[0], zenith_var[1])
 numu_coszenith = np.cos(numu_zenith)
-# # numu_chisqured = numu_weighter.get_column(fit_var[0], fit_var[1])
 numu_speed = numu_weighter.get_column(speed_var[0], speed_var[1])
 numu_npe = numu_weighter.get_column(charge_var[0], charge_var[1])
 charge_masks['numu'] = np.log10(numu_npe)> log10_charge_cut
 
 nue_zenith = nue_weighter.get_column(zenith_var[0], zenith_var[1])
 nue_coszenith = np.cos(nue_zenith)
-# # nue_chisqured = nue_weighter.get_column(fit_var[0], fit_var[1])
 nue_speed = nue_weighter.get_column(speed_var[0], speed_var[1])
 nue_npe = nue_weighter.get_column(charge_var[0], charge_var[1])
 charge_masks['nue'] = np.log10(nue_npe) > log10_charge_cut
 
-cor_zenith = cor_weighter.get_column(zenith_var[0], zenith_var[1])
+# cor_zenith = cor_weighter.get_column(zenith_var[0], zenith_var[1])
+cor_zenith = cor_weighter.get_column('LineFit_repeat', 'zenith')
 cor_coszenith = np.cos(cor_zenith)
-# # cor_chisqured = cor_weighter.get_column(fit_var[0], fit_var[1])
-cor_speed = cor_weighter.get_column(speed_var[0], speed_var[1])
+# cor_speed = cor_weighter.get_column(speed_var[0], speed_var[1])
+cor_speed = cor_weighter.get_column('LineFit_repeat', 'speed')
 cor_npe = cor_weighter.get_column(charge_var[0], charge_var[1])
 charge_masks['cor'] = np.log10(cor_npe)> log10_charge_cut
 
@@ -95,9 +92,11 @@ data_file = pd.HDFStore(args.data_file)
 data_npe = np.asarray(data_file.get(charge_var[0]).get(charge_var[1]))
 data_npe = np.log10(data_npe)
 charge_masks['data'] = data_npe > log10_charge_cut
-data_zenith = np.asarray(data_file.get(zenith_var[0]).get(zenith_var[1]))
+# data_zenith = np.asarray(data_file.get(zenith_var[0]).get(zenith_var[1]))
+data_zenith = np.asarray(data_file.get('LineFit_repeat').get('zenith'))
 data_coszenith = np.cos(data_zenith)
-data_speed = np.asarray(data_file.get(speed_var[0]).get(speed_var[1]))
+# data_speed = np.asarray(data_file.get(speed_var[0]).get(speed_var[1]))
+data_speed = np.asarray(data_file.get('LineFit_repeat').get('speed'))
 
 do_L2_plot = True
 if do_L2_plot:
