@@ -157,6 +157,7 @@ tray.AddSegment(linefit.simple, 'redo_LF', inputResponse=input_pulses,
 from utils_pulses import RedoLineFitPulseDebiasing
 tray.AddSegment(RedoLineFitPulseDebiasing, name, input_pulses=input_pulses)
 
+# get the fit quality of vanilla linefit
 from utils_pulses import get_linefit_quality
 tray.AddModule(get_linefit_quality, 'LFqual', 
     linefit_name='LineFit_'+name,
@@ -165,27 +166,48 @@ tray.AddModule(get_linefit_quality, 'LFqual',
     output_name='LineFit_'+name+'Quality'
     )
 
-output_pulses = name+'_debiasedPulses' + '_CutFarAway'
+# then recalculate for an impact factor of 300
+impact = 300
+output_pulses1 = name+'_debiasedPulses' + '_CutFarAway_{}'.format(impact)
 from utils_pulses import strip_pulses
-tray.AddModule(strip_pulses, 'sp', 
-    track_name='LineFit_'+name, impact_parameter=300,
-    input_pulses_name=input_pulses, output_pulses_name=output_pulses
+tray.AddModule(strip_pulses, 'sp1', 
+    track_name='LineFit_'+name, impact_parameter=impact,
+    input_pulses_name=input_pulses, output_pulses_name=output_pulses1
     )
 
+qualfit_output_name_1 = 'LineFit_'+name+'Quality_CutFarAway_{}'.format(impact)
 tray.AddModule(get_linefit_quality, 'LFqual2', 
     linefit_name='LineFit_'+name,
     linefit_params_name='LineFit_'+name+'Params',
-    pulses_name=output_pulses,
-    output_name='LineFit_'+name+'Quality_CutFarAway'
+    pulses_name=output_pulses1,
+    output_name=qualfit_output_name_1
     )
+
+# and one more time for an impact factor of 120 (Ty's suggestion)
+impact = 120
+output_pulses2 = name+'_debiasedPulses' + '_CutFarAway_{}'.format(impact)
+from utils_pulses import strip_pulses
+tray.AddModule(strip_pulses, 'sp2', 
+    track_name='LineFit_'+name, impact_parameter=impact,
+    input_pulses_name=input_pulses, output_pulses_name=output_pulses2
+    )
+
+qualfit_output_name_2 = 'LineFit_'+name+'Quality_CutFarAway_{}'.format(impact)
+tray.AddModule(get_linefit_quality, 'LFqual3', 
+    linefit_name='LineFit_'+name,
+    linefit_params_name='LineFit_'+name+'Params',
+    pulses_name=output_pulses2,
+    output_name=qualfit_output_name_2
+    )
+
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
     Output=f'{args.output_file}.hdf5', 
     Keys=['I3MCWeightDict', 'I3EventHeader', 'PolyplopiaPrimary', 'CorsikaWeightMap',
     'InteractingNeutrino', 'VertexPosition','CascadeFillRatio_L3', 'PrimaryNeutrino',
-    'Homogenized_QTot', 'LineFit',
+    'Homogenized_QTot', 'LineFit', 'LineFit_'+name,
     'EHEPortiaEventSummarySRT', 'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF',
-    'LineFit_'+name+'Quality', 'LineFit_'+name+'Quality_CutFarAway'
+    'LineFit_'+name+'Quality', qualfit_output_name_1, qualfit_output_name_2
     ], 
     SubEventStreams=['InIceSplit']
     )

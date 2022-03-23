@@ -38,7 +38,7 @@ energy = weighter.get_column('PolyplopiaPrimary', 'energy')
 hqtot = weighter.get_column('Homogenized_QTot', 'value')
 weights = weighter.get_weights(atmo_flux_model)
 which_quality = 'LineFit_redoQuality_CutFarAway'
-which_quality = 'LineFit_redoQuality'
+# which_quality = 'LineFit_redoQuality'
 linefit_quality = weighter.get_column(which_quality, 'value')
 ophelia_quality = weighter.get_column('EHEOpheliaSRT_ImpLF','fitQuality')
 
