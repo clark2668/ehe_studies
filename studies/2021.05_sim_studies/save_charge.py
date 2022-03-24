@@ -200,6 +200,25 @@ tray.AddModule(get_linefit_quality, 'LFqual3',
     output_name=qualfit_output_name_2
     )
 
+# we also need to count channels and strings hit, etc. (hit multiplicity)
+from icecube.common_variables import hit_multiplicity
+pulses = 'SplitInIcePulses'
+hmoutput_name = 'HitMultiplicityValues'
+tray.AddSegment(hit_multiplicity.I3HitMultiplicityCalculatorSegment, 'hm',
+    PulseSeriesMapName=pulses,
+    OutputI3HitMultiplicityValuesName = hmoutput_name,
+    # BookIt = True
+)
+
+# and also need things like the COG (hit statistics)
+from icecube.common_variables import hit_statistics
+hsoutput_name = 'HitStatisticsValues'
+tray.AddSegment(hit_statistics.I3HitStatisticsCalculatorSegment, 'hs',
+    PulseSeriesMapName=pulses,
+    OutputI3HitStatisticsValuesName=hsoutput_name
+)
+
+
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
     Output=f'{args.output_file}.hdf5', 
@@ -207,7 +226,8 @@ tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf',
     'InteractingNeutrino', 'VertexPosition','CascadeFillRatio_L3', 'PrimaryNeutrino',
     'Homogenized_QTot', 'LineFit', 'LineFit_'+name,
     'EHEPortiaEventSummarySRT', 'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF',
-    'LineFit_'+name+'Quality', qualfit_output_name_1, qualfit_output_name_2
+    'LineFit_'+name+'Quality', qualfit_output_name_1, qualfit_output_name_2,
+    hmoutput_name, hsoutput_name, 
     ], 
     SubEventStreams=['InIceSplit']
     )
@@ -219,4 +239,4 @@ if args.save_i3file:
         DropOrphanStreams=[icetray.I3Frame.Calibration, icetray.I3Frame.DAQ]
         )
 
-tray.Execute()
+tray.Execute(100)
