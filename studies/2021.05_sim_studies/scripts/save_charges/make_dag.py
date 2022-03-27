@@ -6,8 +6,8 @@ output_directory_head = '/data/user/brianclark/IceCube/ehe/output/sim_cutfaraway
 
 # datasets = [21218 (nue), 21220 (numu), 21221 (nutau), 21315 (muongun), 20787 (corsika)]
 # datasets = [21218, 21220]
-# datasets = [20787, 21218, 21220]
-datasets = [20787]
+datasets = [20787, 21218, 21220]
+# datasets = [21220]
 for dataset in datasets:
 
 	dag_file_name = f'dagman_{dataset}.dag'
