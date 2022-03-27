@@ -239,4 +239,4 @@ if args.save_i3file:
         DropOrphanStreams=[icetray.I3Frame.Calibration, icetray.I3Frame.DAQ]
         )
 
-tray.Execute(100)
+tray.Execute()
