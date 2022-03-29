@@ -6,9 +6,11 @@ import argparse
 import utils_plot as up
 
 import utils_weights, utils_ehe
-livetime = 86400 * 365
-livetime = 350 # in seconds
-livetime = 2804133.57 # in seconds (this should actually be correct)
+livetime_ic86_i = 2721082.25
+livetime_ic86_ii = 2804133.57
+livetime_ic86_iii = 2948421.03
+livetime = livetime_ic86_i + livetime_ic86_ii + livetime_ic86_iii
+# livetime = livetime_ic86_ii
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-numu", type=str,
@@ -36,6 +38,7 @@ if which_one is 'original':
     speed_var = ['EHEOpheliaParticleSRT_ImpLF', 'speed']
     charge_label = "Portia"
     zenith_label = "Ophelia"
+    speed_label = "Ophelia Speed"
 elif which_one is 'new':
     charge_var = ['Homogenized_QTot', 'value']
     zenith_var = ['LineFit_redo', 'zenith']
@@ -45,16 +48,18 @@ elif which_one is 'new':
     speed_label = "LineFit Speed"
 
 atmo_model = 'H3a_SIBYLL23C'
-cr_model = 'GaisserH3a'
+cr_model = 'GaisserH4a'
 atmo_flux_model = utils_weights.get_flux_model(atmo_model, 'nugen')
 cr_flux_model = utils_weights.get_flux_model(cr_model, 'corsika')
 
-numu_weighter = utils_weights.get_weighter(numu_file, 'nugen', 1000)
+numu_weighter = utils_weights.get_weighter(numu_file, 'nugen', 3000)
 nue_weighter = utils_weights.get_weighter(nue_file, 'nugen', 1000)
-cor_weighter = utils_weights.get_weighter(cor_file, 'corsika', 1000)
+cor_weighter = utils_weights.get_weighter(cor_file, 'corsika', 10000)
 
 charge_masks = {}
 log10_charge_cut = 4.4
+
+lims = 1E-5, 1E3
 
 numu_zenith = numu_weighter.get_column(zenith_var[0], zenith_var[1])
 numu_coszenith = np.cos(numu_zenith)
@@ -64,15 +69,14 @@ charge_masks['numu'] = np.log10(numu_npe)> log10_charge_cut
 
 nue_zenith = nue_weighter.get_column(zenith_var[0], zenith_var[1])
 nue_coszenith = np.cos(nue_zenith)
-nue_speed = nue_weighter.get_column(speed_var[0], speed_var[1])
+# nue_speed = nue_weighter.get_column(speed_var[0], speed_var[1])
+nue_speed = nue_weighter.get_column('LineFit', 'speed')
 nue_npe = nue_weighter.get_column(charge_var[0], charge_var[1])
 charge_masks['nue'] = np.log10(nue_npe) > log10_charge_cut
 
-# cor_zenith = cor_weighter.get_column(zenith_var[0], zenith_var[1])
-cor_zenith = cor_weighter.get_column('LineFit_repeat', 'zenith')
+cor_zenith = cor_weighter.get_column(zenith_var[0], zenith_var[1])
 cor_coszenith = np.cos(cor_zenith)
-# cor_speed = cor_weighter.get_column(speed_var[0], speed_var[1])
-cor_speed = cor_weighter.get_column('LineFit_repeat', 'speed')
+cor_speed = cor_weighter.get_column(speed_var[0], speed_var[1])
 cor_npe = cor_weighter.get_column(charge_var[0], charge_var[1])
 charge_masks['cor'] = np.log10(cor_npe)> log10_charge_cut
 
@@ -80,11 +84,16 @@ numu_atmo_weights = numu_weighter.get_weights(atmo_flux_model)
 nue_atmo_weights = nue_weighter.get_weights(atmo_flux_model)
 cor_weights = cor_weighter.get_weights(cr_flux_model)
 
+def northern_tracks(energy):
+    return 1.44e-18 / 2 * (energy/1e5)**-2.2
+numu_astro_weights = numu_weighter.get_weights(northern_tracks)
+
 numu_file.close()
 nue_file.close()
 cor_file.close()
 
 numu_atmo_weights *= livetime
+numu_astro_weights *= livetime
 nue_atmo_weights *= livetime
 cor_weights *= livetime
 
@@ -92,11 +101,9 @@ data_file = pd.HDFStore(args.data_file)
 data_npe = np.asarray(data_file.get(charge_var[0]).get(charge_var[1]))
 data_npe = np.log10(data_npe)
 charge_masks['data'] = data_npe > log10_charge_cut
-# data_zenith = np.asarray(data_file.get(zenith_var[0]).get(zenith_var[1]))
-data_zenith = np.asarray(data_file.get('LineFit_repeat').get('zenith'))
+data_zenith = np.asarray(data_file.get(zenith_var[0]).get(zenith_var[1]))
 data_coszenith = np.cos(data_zenith)
-# data_speed = np.asarray(data_file.get(speed_var[0]).get(speed_var[1]))
-data_speed = np.asarray(data_file.get('LineFit_repeat').get('speed'))
+data_speed = np.asarray(data_file.get(speed_var[0]).get(speed_var[1]))
 
 do_L2_plot = True
 if do_L2_plot:
@@ -130,11 +137,13 @@ if do_L2_plot:
     sim, sim_bins, patches = ax.hist(
         [
             np.log10(numu_npe)[charge_masks['numu']], 
+            # np.log10(numu_npe)[charge_masks['numu']], 
             np.log10(nue_npe)[charge_masks['nue']], 
             np.log10(cor_npe)[charge_masks['cor']]
         ],
         weights=[
             numu_atmo_weights[charge_masks['numu']], 
+            # numu_astro_weights[charge_masks['numu']],
             nue_atmo_weights[charge_masks['nue']], 
             cor_weights[charge_masks['cor']]
             ],
@@ -148,11 +157,15 @@ if do_L2_plot:
     ax.legend()
 
     # ratios
-    ax2.plot(binscenters, data/(sim[0]+sim[1]+sim[2]), 'ko', label='Sim/Data')
+
+    ratio = data/(sim[0]+sim[1]+sim[2])
+    ratio_err = ratio * (errs/data)
+    ax2.errorbar(binscenters, ratio, yerr=ratio_err, fmt='ko', label='Data/Sim')
+    # ax2.plot(binscenters, ratio, 'ko', label='Sim/Data')
     ax2.set_ylabel('Data/Sim')
-    ax2.set_xlabel('Charge ({}, NPE)'.format(charge_label))
+    ax2.set_xlabel(r'log$_{10}$(Charge)' + '({}, NPE)'.format(charge_label))
     ax2.plot([4, 6], [1, 1], 'k--') 
-    ax2.set_ylim([-1,2])
+    ax2.set_ylim([0.5,1.5])
 
     plt.tight_layout()
     fig.savefig('L2_charge_hist_{}.png'.format(charge_label))
@@ -199,11 +212,14 @@ if do_L2_plot:
     ax.legend(loc='upper left')
 
     # ratios
-    ax2.plot(binscenters, data/(sim[0]+sim[1]+sim[2]), 'ko', label='Sim/Data')
+    ratio = data/(sim[0]+sim[1]+sim[2])
+    ratio_err = ratio * (errs/data)
+    ax2.errorbar(binscenters, ratio, yerr=ratio_err, fmt='ko', label='Data/Sim')
+    # ax2.plot(binscenters, data/(sim[0]+sim[1]+sim[2]), 'ko', label='Sim/Data')
     ax2.set_ylabel('Data/Sim')
     ax2.set_xlabel(r'$cos \theta$ ({})'.format(zenith_label))
     ax2.plot([-1.1, 1.1], [1, 1], 'k--') 
-    ax2.set_ylim([-1,2])
+    ax2.set_ylim([0.5,1.5])
 
     plt.tight_layout()
     fig.savefig('L2_coszenith_hist_{}.png'.format(zenith_label))
@@ -248,11 +264,14 @@ if do_L2_plot:
     ax.legend(loc='upper left')
 
     # ratios
-    ax2.plot(binscenters, data/(sim[0]+sim[1]+sim[2]), 'ko', label='Sim/Data')
+    ratio = data/(sim[0]+sim[1]+sim[2])
+    ratio_err = ratio * (errs/data)
+    ax2.errorbar(binscenters, ratio, yerr=ratio_err, fmt='ko', label='Data/Sim')
+    # ax2.plot(binscenters, data/(sim[0]+sim[1]+sim[2]), 'ko', label='Sim/Data')
     ax2.set_ylabel('Data/Sim')
     ax2.set_xlabel('LineFit Speed')
     ax2.plot([0, 0.5], [1, 1], 'k--') 
-    ax2.set_ylim([-1,2])
+    ax2.set_ylim([0,2])
 
     plt.tight_layout()
     fig.savefig('L2_speed_hist_{}.png'.format(zenith_label))
@@ -268,7 +287,6 @@ if do_L2_plot:
         'y': r'log$_{10}$(Charge)' + "({}, NPE)".format(charge_label)
         }
 
-    lims = 1E-3, 1E3
 
     # the ax order looks moronic, but the panels make more sense later
     fig, ((ax3, ax, ax2), (ax5, ax6, ax4)) = plt.subplots(2, 3, 
@@ -297,7 +315,7 @@ if do_L2_plot:
     # corsika
     sim_cor, sim_cor_edges, sim_cor_yedges, sim_cor_im = up.make_2D_hist(
         ax, cor_coszenith, np.log10(cor_npe), cor_weights,
-        bins, my_map, colors.LogNorm(), 1E-3,
+        bins, my_map, colors.LogNorm(), lims[0],
         labels['x'], labels['y'],
         r'MC: $\mu$ '+ f'{cr_model}'   
     )
@@ -310,7 +328,7 @@ if do_L2_plot:
         np.concatenate([numu_coszenith, nue_coszenith]), 
         np.concatenate([np.log10(numu_npe), np.log10(nue_npe)]),
         np.concatenate([numu_atmo_weights, nue_atmo_weights]),
-        bins, my_map, colors.LogNorm(), 1E-3,
+        bins, my_map, colors.LogNorm(), lims[0],
         labels['x'], labels['y'],
         r'atm $\nu_{\mu} + \nu_{e}$' + f'{atmo_model}'   
     )
@@ -323,7 +341,7 @@ if do_L2_plot:
         np.concatenate([numu_coszenith, nue_coszenith, cor_coszenith]), 
         np.concatenate([np.log10(numu_npe), np.log10(nue_npe), np.log10(cor_npe)]),
         np.concatenate([numu_atmo_weights, nue_atmo_weights, cor_weights]),
-        bins, my_map, colors.LogNorm(), 1E-3,
+        bins, my_map, colors.LogNorm(), lims[0],
         labels['x'], labels['y'],
         r'MC: $\mu$ '+ f'{cr_model}' + r', atm $\nu_{\mu} + \nu_{e}$' + f'{atmo_model}'
     )
@@ -336,7 +354,7 @@ if do_L2_plot:
         data_coszenith, 
         data_npe,
         np.ones_like(data_npe),
-        bins, my_map, colors.LogNorm(), 1E-3,
+        bins, my_map, colors.LogNorm(), lims[0],
         labels['x'], labels['y'],
         "Data: Burn Sample, {:.2f} days".format(livetime/60/60/24)
     )
@@ -374,7 +392,6 @@ if do_L2_plot:
         'y': r'log$_{10}$(Charge)' + "({}, NPE)".format(charge_label)
         }
 
-    lims = 1E-3, 1E3
 
     # the ax order looks moronic, but the panels make more sense later
     fig, ((ax3, ax, ax2), (ax5, ax6, ax4)) = plt.subplots(2, 3, 
@@ -389,7 +406,7 @@ if do_L2_plot:
     # corsika
     sim_cor, sim_cor_edges, sim_cor_yedges, sim_cor_im = up.make_2D_hist(
         ax, cor_speed, np.log10(cor_npe), cor_weights,
-        bins, my_map, colors.LogNorm(), 1E-3,
+        bins, my_map, colors.LogNorm(), lims[0],
         labels['x'], labels['y'],
         r'MC: $\mu$ '+ f'{cr_model}'   
     )
@@ -402,7 +419,10 @@ if do_L2_plot:
         np.concatenate([numu_speed, nue_speed]), 
         np.concatenate([np.log10(numu_npe), np.log10(nue_npe)]),
         np.concatenate([numu_atmo_weights, nue_atmo_weights]),
-        bins, my_map, colors.LogNorm(), 1E-3,
+        # np.concatenate([nue_speed]), 
+        # np.concatenate([np.log10(nue_npe)]),
+        # np.concatenate([nue_atmo_weights]),
+        bins, my_map, colors.LogNorm(), lims[0],
         labels['x'], labels['y'],
         r'atm $\nu_{\mu} + \nu_{e}$' + f'{atmo_model}'   
     )
@@ -415,7 +435,7 @@ if do_L2_plot:
         np.concatenate([numu_speed, nue_speed, cor_speed]), 
         np.concatenate([np.log10(numu_npe), np.log10(nue_npe), np.log10(cor_npe)]),
         np.concatenate([numu_atmo_weights, nue_atmo_weights, cor_weights]),
-        bins, my_map, colors.LogNorm(), 1E-3,
+        bins, my_map, colors.LogNorm(), lims[0],
         labels['x'], labels['y'],
         r'MC: $\mu$ '+ f'{cr_model}' + r', atm $\nu_{\mu} + \nu_{e}$' + f'{atmo_model}'
     )
@@ -428,7 +448,7 @@ if do_L2_plot:
         data_speed, 
         data_npe,
         np.ones_like(data_npe),
-        bins, my_map, colors.LogNorm(), 1E-3,
+        bins, my_map, colors.LogNorm(), lims[0],
         labels['x'], labels['y'],
         "Data: Burn Sample, {:.2f} days".format(livetime/60/60/24)
     )
@@ -469,8 +489,6 @@ if do_L2_plot:
         'x': r'$\cos(\theta)$' + "({})".format(zenith_label)
         }
 
-    lims = 1E-3, 1E3
-
     # the ax order looks moronic, but the panels make more sense later
     fig, ((ax3, ax, ax2), (ax5, ax6, ax4)) = plt.subplots(2, 3, 
         gridspec_kw={
@@ -484,7 +502,7 @@ if do_L2_plot:
     # corsika
     sim_cor, sim_cor_edges, sim_cor_yedges, sim_cor_im = up.make_2D_hist(
         ax, cor_coszenith[cor_npe_mask], cor_speed[cor_npe_mask], cor_weights[cor_npe_mask],
-        bins, my_map, colors.LogNorm(), 1E-3,
+        bins, my_map, colors.LogNorm(), lims[0],
         labels['x'], labels['y'],
         r'MC: $\mu$ '+ f'{cr_model}'   
     )
@@ -497,7 +515,7 @@ if do_L2_plot:
         np.concatenate([numu_coszenith[numu_npe_mask], nue_coszenith[nue_npe_mask]]),
         np.concatenate([numu_speed[numu_npe_mask], nue_speed[nue_npe_mask]]), 
         np.concatenate([numu_atmo_weights[numu_npe_mask], nue_atmo_weights[nue_npe_mask]]),
-        bins, my_map, colors.LogNorm(), 1E-3,
+        bins, my_map, colors.LogNorm(), lims[0],
         labels['x'], labels['y'],
         r'atm $\nu_{\mu} + \nu_{e}$' + f'{atmo_model}'   
     )
@@ -510,7 +528,7 @@ if do_L2_plot:
         np.concatenate([numu_coszenith[numu_npe_mask], nue_coszenith[nue_npe_mask], cor_coszenith[cor_npe_mask]]),
         np.concatenate([numu_speed[numu_npe_mask], nue_speed[nue_npe_mask], cor_speed[cor_npe_mask]]), 
         np.concatenate([numu_atmo_weights[numu_npe_mask], nue_atmo_weights[nue_npe_mask], cor_weights[cor_npe_mask]]),
-        bins, my_map, colors.LogNorm(), 1E-3,
+        bins, my_map, colors.LogNorm(), lims[0],
         labels['x'], labels['y'],
         r'MC: $\mu$ '+ f'{cr_model}' + r', atm $\nu_{\mu} + \nu_{e}$' + f'{atmo_model}'
     )
@@ -523,7 +541,7 @@ if do_L2_plot:
         data_coszenith[data_mask],
         data_speed[data_mask], 
         np.ones_like(data_coszenith[data_mask]),
-        bins, my_map, colors.LogNorm(), 1E-3,
+        bins, my_map, colors.LogNorm(), lims[0],
         labels['x'], labels['y'],
         "Data: Burn Sample, {:.2f} days".format(livetime/60/60/24)
     )
