@@ -24,7 +24,7 @@ numu_file = pd.HDFStore(args.numu_file)
 nue_file = pd.HDFStore(args.nue_file)
 cor_file = pd.HDFStore(args.cor_file)
 
-which_one = 'new'
+which_one = 'original'
 if which_one is 'original':
     charge_var = ['EHEPortiaEventSummarySRT', 'bestNPEbtw']
     zenith_var = ['EHEOpheliaParticleSRT_ImpLF', 'zenith']
@@ -36,9 +36,9 @@ elif which_one is 'new':
     charge_var = ['Homogenized_QTot', 'value']
     zenith_var = ['LineFit_redo', 'zenith']
     speed_var = ['LineFit_redo', 'speed']
-    # fit_var = ['LineFit_redoQuality', 'value', 'LineFit_Standard']
+    fit_var = ['LineFit_redoQuality', 'value', 'LineFit_Standard']
     # fit_var = ['LineFit_redoQuality_CutFarAway_120', 'value', 'LineFit_CutFarAway_120m']
-    fit_var = ['LineFit_redoQuality_CutFarAway_300', 'value', 'LineFit_CutFarAway_300m']
+    # fit_var = ['LineFit_redoQuality_CutFarAway_300', 'value', 'LineFit_CutFarAway_300m']
     charge_label = "HQtot"
     zenith_label = "LineFit"
 
@@ -51,6 +51,7 @@ cor_weighter = utils_weights.get_weighter(cor_file, 'corsika', 1000)
 
 numu_zenith = numu_weighter.get_column(zenith_var[0], zenith_var[1])
 numu_chisqured = numu_weighter.get_column(fit_var[0], fit_var[1])
+numu_inttypes = numu_weighter.get_column('I3MCWeightDict', 'InteractionType')
 numu_npe = numu_weighter.get_column(charge_var[0], charge_var[1])
 numu_speed = numu_weighter.get_column(speed_var[0], speed_var[1])
 
@@ -85,6 +86,7 @@ if do_npe_chisqured_cut:
     numu_npe_mask = numu_npe > 25000
     nue_npe_mask = nue_npe > 25000
     cor_npe_mask = cor_npe > 25000
+    numu_nc_mask = numu_inttypes > 1
 
     #################################
     #################################
@@ -121,10 +123,10 @@ if do_npe_chisqured_cut:
 
     # numu
     ax2 = fig.add_subplot(132)
-    counts, xedges, yedges, im = ax2.hist2d(numu_chisqured[numu_npe_mask], 
-            np.log10(numu_npe[numu_npe_mask]), 
+    counts, xedges, yedges, im = ax2.hist2d(numu_chisqured[numu_npe_mask&numu_nc_mask], 
+            np.log10(numu_npe[numu_npe_mask&numu_nc_mask]), 
             bins=bins,
-            weights=numu_atmo_weights[numu_npe_mask],
+            weights=numu_atmo_weights[numu_npe_mask&numu_nc_mask],
             cmap=cmap,
             norm=colors.LogNorm(),
             )
@@ -136,7 +138,7 @@ if do_npe_chisqured_cut:
     ax2.set_ylabel(r'log10({} Charge)'.format(charge_label), fontsize=sizer)
     ax2.set_xlabel(r'{} Reduced Chi-Square'.format(zenith_label), fontsize=sizer)
     ax2.tick_params(labelsize=sizer)
-    ax2.set_title('NuMu (H3a+SIBYLL23C)', fontsize=sizer)
+    ax2.set_title('NuMu NC (H3a+SIBYLL23C)', fontsize=sizer)
 
     # nue
     ax3 = fig.add_subplot(133)
@@ -174,8 +176,8 @@ if do_npe_chisqured_cut:
     ax.hist(cor_chisqured[cor_npe_mask], weights=cor_weights[cor_npe_mask],
         histtype='step', bins=bins, label='Corsika', 
     )
-    ax.hist(numu_chisqured[numu_npe_mask], weights=numu_atmo_weights[numu_npe_mask],
-        histtype='step', bins=bins, label='NuMu', 
+    ax.hist(numu_chisqured[numu_npe_mask&numu_nc_mask], weights=numu_atmo_weights[numu_npe_mask&numu_nc_mask],
+        histtype='step', bins=bins, label='NuMu NC', 
     )
     ax.hist(nue_chisqured[nue_npe_mask], weights=nue_atmo_weights[nue_npe_mask],
         histtype='step', bins=bins, label='NuE', 
@@ -189,7 +191,7 @@ if do_npe_chisqured_cut:
     n_cor, bins_cor, patches_cor = ax2.hist(cor_chisqured[cor_npe_mask], weights=cor_weights[cor_npe_mask],
         histtype='step', bins=bins, label='Corsika (Atm)', density=True
     )
-    ax2.hist(numu_chisqured[numu_npe_mask], weights=numu_atmo_weights[numu_npe_mask],
+    ax2.hist(numu_chisqured[numu_npe_mask&numu_nc_mask], weights=numu_atmo_weights[numu_npe_mask&numu_nc_mask],
         histtype='step', bins=bins, label='NuMu', density=True,
     )
     n_nue, bins_nue, patches_nue = ax2.hist(nue_chisqured[nue_npe_mask], weights=nue_atmo_weights[nue_npe_mask],
@@ -215,7 +217,7 @@ if do_npe_chisqured_cut:
     n_cor, bins_cor, patches_cor = ax3.hist(cor_chisqured[cor_npe_mask], weights=cor_weights[cor_npe_mask],
         histtype='step', bins=bins, label='Corsika (Atm)', density=True, cumulative=-1
     )
-    ax3.hist(numu_chisqured[numu_npe_mask], weights=numu_atmo_weights[numu_npe_mask],
+    ax3.hist(numu_chisqured[numu_npe_mask&numu_nc_mask], weights=numu_atmo_weights[numu_npe_mask&numu_nc_mask],
         histtype='step', bins=bins, label='NuMu', density=True, cumulative=1,
     )
     n_nue, bins_nue, patches_nue = ax3.hist(nue_chisqured[nue_npe_mask], weights=nue_atmo_weights[nue_npe_mask],
@@ -290,10 +292,10 @@ if do_npe_chisqured_cut:
     # numu_total_mask = reduce(np.logical_and, makss)
     ax2 = fig.add_subplot(132)
     counts, xedges, yedges, im = ax2.hist2d(
-            numu_speed[numu_npe_mask], 
-            np.log10(numu_npe[numu_npe_mask]), 
+            numu_speed[numu_npe_mask&numu_nc_mask], 
+            np.log10(numu_npe[numu_npe_mask&numu_nc_mask]), 
             bins=bins,
-            weights=numu_atmo_weights[numu_npe_mask],
+            weights=numu_atmo_weights[numu_npe_mask&numu_nc_mask],
             cmap=cmap,
             norm=colors.LogNorm(),
             )
@@ -342,7 +344,7 @@ if do_npe_chisqured_cut:
     ax.hist(cor_speed[cor_npe_mask], weights=cor_weights[cor_npe_mask],
         histtype='step', bins=bins, label='Corsika',
     )
-    ax.hist(numu_speed[numu_npe_mask], weights=numu_atmo_weights[numu_npe_mask],
+    ax.hist(numu_speed[numu_npe_mask&numu_nc_mask], weights=numu_atmo_weights[numu_npe_mask&numu_nc_mask],
         histtype='step', bins=bins, label='NuMu',
     )
     ax.hist(nue_speed[nue_npe_mask], weights=nue_atmo_weights[nue_npe_mask],
@@ -357,7 +359,7 @@ if do_npe_chisqured_cut:
     n_cor, bins_cor, patches_cor = ax2.hist(cor_speed[cor_npe_mask], weights=cor_weights[cor_npe_mask],
         histtype='step', bins=bins, label='Corsika (Atm)', density=True
     )
-    ax2.hist(numu_speed[numu_npe_mask], weights=numu_atmo_weights[numu_npe_mask],
+    ax2.hist(numu_speed[numu_npe_mask&numu_nc_mask], weights=numu_atmo_weights[numu_npe_mask&numu_nc_mask],
         histtype='step', bins=bins, label='NuMu', density=True
     )
     n_nue, bins_nue, patches_nue = ax2.hist(nue_speed[nue_npe_mask], weights=nue_atmo_weights[nue_npe_mask],
@@ -370,7 +372,7 @@ if do_npe_chisqured_cut:
     ax3.hist(cor_speed[cor_npe_mask], weights=cor_weights[cor_npe_mask],
         histtype='step', bins=bins, label='Corsika (Atm)', density=True, cumulative=1
     )
-    ax3.hist(numu_speed[numu_npe_mask], weights=numu_atmo_weights[numu_npe_mask],
+    ax3.hist(numu_speed[numu_npe_mask&numu_nc_mask], weights=numu_atmo_weights[numu_npe_mask&numu_nc_mask],
         histtype='step', bins=bins, label='NuMu', density=True, cumulative=-1
     )
     ax3.hist(nue_speed[nue_npe_mask], weights=nue_atmo_weights[nue_npe_mask],
