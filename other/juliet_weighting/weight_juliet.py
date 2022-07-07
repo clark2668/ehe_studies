@@ -11,8 +11,9 @@ import weights as weighter
 n_gen = 10000 * 150
 livetime = 86400 * 365 # 1 year
 
-he_file = 'juliet_weight_test.hd5'
-he_file = 'juliet_weight_test_vhe.hd5'
+# he_file = 'juliet_weight_test.hd5'
+# he_file = 'juliet_weight_test_vhe.hd5'
+he_file = '/home/mmeier/data/simulations/table_based_sim/juliet/mu/high_energy/l2_prime/1/Level2_prime_00000001.hd5'
 
 with tables.open_file(he_file) as f:
 
