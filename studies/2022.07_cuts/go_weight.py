@@ -12,6 +12,9 @@ style.use('/home/brian/IceCube/ehe/max_tools/EHE_analysis/eheanalysis/ehe.mplsty
 from ehefluxes import fluxes
 from eheanalysis import weighting, plotting
 gzk_flux = fluxes.EHEFlux("ahlers_gzk")
+from functools import partial
+gzk_partial = partial(gzk_flux, which_species="nue_sum") 
+
 
 def get_stuff(f):
 
@@ -97,7 +100,7 @@ for s in species:
     h = weighting.make_enu_2d_hist(
         weight_dict,
         n_gen,
-        gzk_flux,
+        gzk_partial,
         var_values=charge,
         var_bins=charge_bins,
         prop_matrix=prop_matrix,
