@@ -17,6 +17,8 @@ ndoms_var =  cfg_file['variables']['ndoms']['variable']
 ndoms_val =  cfg_file['variables']['ndoms']['value']
 alt_ndoms_var = 'HitMultiplicityValues'
 
+log10_q_cut = 4.
+q_cut = np.power(10., log10_q_cut)
 
 # set up our flux models
 # for GZK, us partial function, so it's purely a function of energy for weighting
@@ -37,10 +39,13 @@ def astro_flux(energy):
 juliet_species = ["nue", "numu", "nutau", "mu", "tau"]
 juliet_energy_levels = ["high_energy"]
 juliet_species = ["mu"]
+# juliet_species = []
 
 corsika_sets = ["20787"]
+# corsika_sets = []
 
 nugen_sets = ["nue", "numu"]
+# nugen_sets = []
 
 burn_samples = ["IC86-I-pass2", "IC86-II-pass2", "IC86-III-pass2"]
 
@@ -51,10 +56,10 @@ for b in burn_samples:
     livetime += cfg_file['burn_sample'][b]['livetime']
 print("Total livetime {}".format(livetime))
 
-charge_bins = np.logspace(2, 8, 51)
+charge_bins = np.logspace(4, 7, 16)
 charge_bin_centers = plotting.get_bin_centers(charge_bins)
 
-ndoms_bins = np.linspace(0,4000, 50)
+ndoms_bins = np.linspace(0,4000, 41)
 ndoms_bin_centers = plotting.get_bin_centers(ndoms_bins)
 
 
@@ -74,14 +79,17 @@ for s in juliet_species:
         charge = the_f.get_node(f'/{charge_var}').col(f'{charge_val}')
         ndoms = the_f.get_node(f'/{ndoms_var}').col(f'{ndoms_val}')
         n_gen = cfg_file['juliet'][s][l]['n_files'] * evts_per_file
+        q_mask = charge > q_cut
 
         h_charge = weighting.make_enu_2d_hist( weight_dict, n_gen, gzk_partial,
             var_values=charge, var_bins=charge_bins,
-            prop_matrix=prop_matrix, livetime=livetime
+            prop_matrix=prop_matrix, livetime=livetime,
+            selection_mask = q_mask
             )
         h_ndoms = weighting.make_enu_2d_hist( weight_dict, n_gen, gzk_partial,
             var_values=ndoms, var_bins=ndoms_bins,
-            prop_matrix=prop_matrix, livetime=livetime
+            prop_matrix=prop_matrix, livetime=livetime,
+            selection_mask = q_mask
             )
     
         if summed_ehe_q is None:
@@ -109,12 +117,14 @@ for c in corsika_sets:
     cor_weighter = weighting.get_weighter( cor_file, 'corsika',
         cfg_file['corsika'][c]['n_files']
         )
-    cor_charge = np.concatenate((cor_charge, cor_weighter.get_column(charge_var, charge_val)))
+    this_cor_charge = cor_weighter.get_column(charge_var, charge_val)
+    q_mask = this_cor_charge > q_cut
+    cor_charge = np.concatenate((cor_charge, this_cor_charge[q_mask]))
     try:
-        cor_ndoms = np.concatenate((cor_ndoms, cor_weighter.get_column(ndoms_var, ndoms_val)))
+        cor_ndoms = np.concatenate((cor_ndoms, cor_weighter.get_column(ndoms_var, ndoms_val)[q_mask]))
     except:
-        cor_ndoms = np.concatenate((cor_ndoms, cor_weighter.get_column(alt_ndoms_var, ndoms_val)))
-    cor_weights = np.concatenate((cor_weights, cor_weighter.get_weights(cr_flux) * livetime))
+        cor_ndoms = np.concatenate((cor_ndoms, cor_weighter.get_column(alt_ndoms_var, ndoms_val)[q_mask]))
+    cor_weights = np.concatenate((cor_weights, cor_weighter.get_weights(cr_flux)[q_mask] * livetime))
     cor_file.close()
 
 
@@ -132,18 +142,19 @@ for n in nugen_sets:
         cfg_file['nugen'][n]['n_files']
         )
     this_nugen_charge = np.asarray(nugen_weighter.get_column(charge_var, charge_val))
+    q_mask = this_nugen_charge > q_cut
     try:
-        this_nugen_ndoms = np.asfarray(nugen_weighter.get_column(ndoms_var, ndoms_val))
+        this_nugen_ndoms = np.asarray(nugen_weighter.get_column(ndoms_var, ndoms_val))
     except:
-        this_nugen_ndoms = np.asfarray(nugen_weighter.get_column(alt_ndoms_var, ndoms_val))
-    nugen_charges = np.concatenate((nugen_charges, this_nugen_charge))
-    nugen_ndoms = np.concatenate((nugen_ndoms, this_nugen_ndoms))
+        this_nugen_ndoms = np.asarray(nugen_weighter.get_column(alt_ndoms_var, ndoms_val))
+    nugen_charges = np.concatenate((nugen_charges, this_nugen_charge[q_mask]))
+    nugen_ndoms = np.concatenate((nugen_ndoms, this_nugen_ndoms[q_mask]))
     
     this_nugen_atmo_weights = nugen_weighter.get_weights(atmo_flux) * livetime
-    nugen_atmo_weights = np.concatenate((nugen_atmo_weights, this_nugen_atmo_weights))
+    nugen_atmo_weights = np.concatenate((nugen_atmo_weights, this_nugen_atmo_weights[q_mask]))
 
     this_nugen_astro_weights = nugen_weighter.get_weights(astro_flux) * livetime
-    nugen_astro_weights = np.concatenate((nugen_astro_weights, this_nugen_astro_weights))
+    nugen_astro_weights = np.concatenate((nugen_astro_weights, this_nugen_astro_weights[q_mask]))
     nugen_file.close()
 
 
@@ -156,12 +167,19 @@ for b in burn_samples:
     print("Working on burn samples {}".format(b))
     data_file = pd.HDFStore(cfg_file['burn_sample'][b]['file'])
     this_charge = np.asarray(data_file.get(charge_var).get(charge_val))
+    q_mask = this_charge > q_cut
+    # runs = np.asarray(data_file.get("I3EventHeader").get("Run"))
+    # events = np.asfarray(data_file.get("I3EventHeader").get("Event"))
+    # mask = this_charge > 2E5
+    # print(this_charge[mask])
+    # print(runs[mask])
+    # print(events[mask])
     try:
         this_ndoms = np.asarray(data_file.get(ndoms_var).get(ndoms_val))
     except:
         this_ndoms = np.asarray(data_file.get(alt_ndoms_var).get(ndoms_val))
-    data_charges = np.concatenate((data_charges, this_charge))
-    data_ndoms = np.concatenate((data_ndoms, this_ndoms))
+    data_charges = np.concatenate((data_charges, this_charge[q_mask]))
+    data_ndoms = np.concatenate((data_ndoms, this_ndoms[q_mask]))
     data_file.close()
 
 data_q, data_bins_q = np.histogram(data_charges, bins=charge_bins)
@@ -172,12 +190,13 @@ errs_ndoms = np.sqrt(data_ndoms)
 
 
 #############################
-# histogram of charge
+# histogram of charge 
 #############################
-fig, ax = plt.subplots(1,1)
+# fig, ax = plt.subplots(1,1)
+fig, (ax, axr) = plt.subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [2, 1]})
 
 # plot the MC (sum, and individual components)
-ax.hist(
+sim_q_sum, b, p = ax.hist(
     x = np.concatenate((cor_charge, nugen_charges, nugen_charges,charge_bin_centers)),
     weights = np.concatenate((cor_weights, nugen_atmo_weights, nugen_astro_weights, ehe_q_projection)),
     bins = charge_bins, histtype='step', label='Sum')
@@ -196,21 +215,33 @@ ax.errorbar(charge_bin_centers, data_q, yerr=errs_q, fmt='ko', label='Burn Sampl
 ax.set_xscale('log')
 ax.set_yscale('log')
 ax.set_ylabel('Events / bin/ {:.2f} days'.format(livetime/(60*60*24)))
-ax.set_xlabel('Q / PE')
-ax.set_ylim([1E-4, 1E7])
-ax.legend()
+ax.set_ylim([1E-4, 1E5])
+# ax.legend(ncol=2)
+ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
+    mode="expand", borderaxespad=0, ncol=2
+)
+
+# and plot data/MC agreement
+ratio_q = data_q/sim_q_sum
+ratio_q_errs = ratio_q * (errs_q/data_q)
+axr.errorbar(charge_bin_centers, ratio_q, yerr=ratio_q_errs, fmt='ko', label='Data/Sim')
+axr.set_xlabel('')
+axr.set_ylabel('Data/Sim')
+axr.set_xlabel('Q / PE')
+axr.set_ylim([0.5, 1.5])
+axr.plot([1E4, 1E7], [1, 1], 'k--') 
 fig.tight_layout()
 fig.savefig('q_hist.png')
 
 
-# #############################
-# # histogram of ndoms
-# #############################
+#############################
+# histogram of ndoms
+#############################
 
-fig2, ax2 = plt.subplots(1,1)
+fig2, (ax2, ax2r) = plt.subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [2, 1]})
 
 # plot the MC (sum, and individual components)
-ax2.hist(
+sim_ndoms_sum, b, p = ax2.hist(
     x = np.concatenate((cor_ndoms, nugen_ndoms, nugen_ndoms,ndoms_bin_centers)),
     weights = np.concatenate((cor_weights, nugen_atmo_weights, nugen_astro_weights, ehe_ndoms_projection)),
     bins = ndoms_bins, histtype='step', label='Sum')
@@ -226,11 +257,21 @@ ax2.hist(ndoms_bin_centers, bins=ndoms_bins, weights=ehe_ndoms_projection,
 # plot the data
 ax2.errorbar(ndoms_bin_centers, data_ndoms, yerr=errs_ndoms, fmt='ko', label='Burn Sample')
 
-# ax2.set_xscale('log')
 ax2.set_yscale('log')
 ax2.set_ylabel('Events / bin/ {:.2f} days'.format(livetime/(60*60*24)))
-ax2.set_xlabel('N DOMs')
-ax2.set_ylim([1E-7, 1E7])
-ax2.legend()
+ax2.set_ylim([1E-7, 1E5])
+ax2.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
+    mode="expand", borderaxespad=0, ncol=2
+)
+# and plot data/MC agreement
+ratio_ndoms = data_ndoms/sim_ndoms_sum
+ration_ndoms_err = ratio_ndoms * (errs_ndoms/data_ndoms)
+ax2r.errorbar(ndoms_bin_centers, ratio_ndoms, yerr=ration_ndoms_err, fmt='ko', label='Data/Sim')
+ax2r.set_xlabel('')
+ax2r.set_xlabel('N DOMs')
+ax2r.set_ylabel('Data/Sim')
+ax2r.set_ylim([0.5, 1.5])
+ax2r.plot([0, 4000], [1, 1], 'k--')
+
 fig2.tight_layout()
 fig2.savefig('ndoms_hist.png')
