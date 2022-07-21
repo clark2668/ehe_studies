@@ -9,8 +9,8 @@ variables:
 juliet:
   nue:
     high_energy:
-      # file: "/home/mmeier/data/simulations/table_based_sim/juliet/nue/high_energy/l2_prime/nue_high_energy_l2_prime_1k_merged.hd5"
-      file: "/home/mmeier/data/simulations/table_based_sim/juliet/nue/high_energy/l2_prime/1/Level2_prime_00000001.hd5"
+      file: "/home/mmeier/data/simulations/table_based_sim/juliet/nue/high_energy/l2_prime/nue_high_energy_l2_prime_1k_merged.hd5"
+      # file: "/home/mmeier/data/simulations/table_based_sim/juliet/nue/high_energy/l2_prime/1/Level2_prime_00000001.hd5"
       n_files: 1000
   numu:
     high_energy:
