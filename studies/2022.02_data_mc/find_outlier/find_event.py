@@ -20,11 +20,17 @@ tray = I3Tray()
 #     filename='/data/sim/IceCube/2016/filtered/level2/CORSIKA-in-ice/20787/0000000-0000999/Level2_IC86.2016_corsika.020787.000220.i3.zst'
 #     )
 
-run_no = 78700509
-evt_no = 1439
-tray.AddModule("I3Reader", 
-    filename='/data/sim/IceCube/2016/filtered/level2/CORSIKA-in-ice/20787/0000000-0000999/Level2_IC86.2016_corsika.020787.000508.i3.zst'
-    )
+# run_no = 78700509
+# evt_no = 1439
+# tray.AddModule("I3Reader", 
+#     filename='/data/sim/IceCube/2016/filtered/level2/CORSIKA-in-ice/20787/0000000-0000999/Level2_IC86.2016_corsika.020787.000508.i3.zst'
+#     )
+
+import glob
+file_list = glob.glob("")
+
+run_no = 119510
+evt_no = 19598412
 
 tray.AddModule(find_event, 'find_event', run = run_no, evt = evt_no,
     Streams=[icetray.I3Frame.Physics, icetray.I3Frame.DAQ])
