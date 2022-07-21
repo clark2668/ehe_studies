@@ -2,6 +2,9 @@ variables:
   charge:
     variable: "Homogenized_QTot"
     value: "value"
+  ndoms:
+    variable: "CVMultiplicity"
+    value: "n_hit_doms"
 
 juliet:
   nue:
