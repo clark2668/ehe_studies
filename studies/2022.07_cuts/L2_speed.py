@@ -190,7 +190,7 @@ elif version == "old":
     bins_cor_cut = bins_cor < speed_cut
 
 integral_cor = np.sum(n_cor[bins_cor_cut]) * (bins_cor[1]-bins_cor[0])
-print("the cor integral is {}".format(integral))
+print("the cor integral is {}".format(integral_cor))
 
 bins_nue = (bins_nue[1:] + bins_nue[:-1])/2
 if version == "new":
@@ -198,7 +198,7 @@ if version == "new":
 elif version == "old":
     bins_nue_cut = bins_nue > speed_cut
 integral_nue = np.sum(n_nue[bins_nue_cut]) * (bins_nue[1]- bins_nue[0])
-print("the nue integral is {}".format(integral))
+print("the nue integral is {}".format(integral_nue))
 
 
 ax3.hist( speed_bin_centers, bins=speed_bins, weights=ehe_speed_nue,
@@ -214,6 +214,7 @@ ax3.hist( cor_speed, bins=speed_bins, weights=cor_weights,
 ax3.set_xlabel("LineFit Speed")
 ax3.set_ylabel('CDF')
 ax3.axvline(speed_cut, linestyle='--')
+ax3.legend()
 
 def scaling(ax):
     ax.set_xlim(speed_lims)
