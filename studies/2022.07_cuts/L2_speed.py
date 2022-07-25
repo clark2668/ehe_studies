@@ -18,39 +18,41 @@ from eheanalysis import plotting
 cfg_file = 'config.yaml'
 cfg_file = yaml.safe_load(open(cfg_file))
 
-alt_ndoms_var = 'HitMultiplicityValues'
-
-
 version = 'new'
 if version == 'new':
     charge_var = cfg_file['variables']['charge']['variable']
     charge_val = cfg_file['variables']['charge']['value']
     ndoms_var =  cfg_file['variables']['ndoms']['variable']
+    cor_ndoms_var = 'HitMultiplicityValues'
     ndoms_val =  cfg_file['variables']['ndoms']['value']
     speed_var = cfg_file['variables']['speed']['variable']
+    cor_speed_var = "LineFit_redo"
     speed_val = cfg_file['variables']['speed']['value']
-    speed_bins = np.linspace(0, 2, 201)
+    speed_bins = np.linspace(0, 2, 401)
     speed_label = "LineFit Speed"
     speed_cut = 0.26
     speed_lims = [0, 0.5]
     log10_q_cut = np.log10(27500)
+    nue_cumulative_sign = -1
 elif version == 'old':
     charge_var = "EHEPortiaEventSummarySRT"
     charge_val = "bestNPEbtw"
     ndoms_var =  "EHEPortiaEventSummarySRT"
+    cor_ndoms_var = "EHEPortiaEventSummarySRT"
     ndoms_val =  "NCHbtw"
     speed_var = "EHEOpheliaSRT_ImpLF"
+    cor_speed_var = speed_var
     speed_val = "fitQuality"
     speed_label = "Ophelia FitQual"
-    speed_bins = np.linspace(0, 600, 601)
+    speed_bins = np.linspace(0, 1000, 601)
     speed_cut = 100
     speed_lims = [0,500]
     log10_q_cut = np.log10(25000)
+    nue_cumulative_sign = 1
 
 speed_bin_centers = plotting.get_bin_centers(speed_bins)
 q_cut = np.power(10., log10_q_cut)
 ndom_cut = 100   
-
 
 from functools import partial
 from ehefluxes import fluxes
@@ -58,14 +60,6 @@ from eheanalysis import weighting
 gzk_flux = fluxes.EHEFlux("ahlers_gzk")
 gzk_partial = partial(gzk_flux, which_species="nue_sum") 
 cr_flux = weighting.get_flux_model('GaisserH4a', 'corsika')
-
-# set up datasets
-# juliet (EHE neutrinos)
-juliet_species = ["nue", "numu", "nutau", "mu", "tau"]
-juliet_energy_levels = ["high_energy"]
-juliet_species = ["nue"]
-
-corsika_sets = ["20787"]
 
 burn_samples = ["IC86-I-pass2", "IC86-II-pass2", "IC86-III-pass2"]
 
@@ -82,13 +76,11 @@ print("Total livetime {}".format(livetime))
 # ehe/cosmogenic flux (juliet)
 #############################
 
-# we want EHE speed broken out a little more carefully...
-# maybe nue, numu, corsika?
-
 summed_ehe_nue = None
 summed_ehe_mu = None
 
 juliet_species = ["nue", "mu"]
+juliet_energy_levels = ["high_energy"]
 for s in juliet_species:
     for l in juliet_energy_levels:
 
@@ -135,8 +127,11 @@ if summed_ehe_mu is not None:
 #############################
 # muon bundles (corsika)
 #############################
+
 cor_speed = np.asarray([])
 cor_weights = np.asarray([])
+
+corsika_sets = ["20787"]
 for c in corsika_sets:
     print("Working on corsika {}".format(c))
     cor_file = pd.HDFStore(cfg_file['corsika'][c]['file'])
@@ -145,8 +140,8 @@ for c in corsika_sets:
         )
     this_cor_charge = cor_weighter.get_column(charge_var, charge_val)
     # special values for corsika (ugh)
-    this_cor_ndoms = cor_weighter.get_column('HitMultiplicityValues', ndoms_val)
-    this_cor_speed = cor_weighter.get_column('LineFit_redo', speed_val)
+    this_cor_ndoms = cor_weighter.get_column(cor_ndoms_var, ndoms_val)
+    this_cor_speed = cor_weighter.get_column(cor_speed_var, speed_val)
     
     L2_q_mask = this_cor_charge > q_cut
     L2_ndom_mask = this_cor_ndoms > ndom_cut
@@ -184,29 +179,37 @@ n_cor, bins_cor, patches_cor = ax2.hist( cor_speed, bins=speed_bins, weights=cor
         histtype='step', density=True)
 ax2.set_xlabel(f"{speed_var}")
 ax2.set_ylabel('Normalized Counts')
-ax2.axvline(speed_cut, linstyle='--')
+ax2.axvline(speed_cut, linestyle='--')
 
 # figure out efficiency
 bins_cor = (bins_cor[1:] + bins_cor[:-1])/2
-bins_cor_cut = bins_cor > speed_cut
+# sign of this needs to be flipped
+if version == "new":
+    bins_cor_cut = bins_cor > speed_cut
+elif version == "old":
+    bins_cor_cut = bins_cor < speed_cut
+
 integral = np.sum(n_cor[bins_cor_cut]) * (bins_cor[1]-bins_cor[0])
-print("fitspeed: the cor integral is {}".format(integral))
+print("the cor integral is {}".format(integral))
 
 bins_nue = (bins_nue[1:] + bins_nue[:-1])/2
-bins_nue_cut = bins_nue < speed_cut
+if version == "new":
+    bins_nue_cut = bins_nue < speed_cut
+elif version == "old":
+    bins_nue_cut = bins_nue > speed_cut
 integral = np.sum(n_nue[bins_nue_cut]) * (bins_nue[1]- bins_nue[0])
-print("fitspeed: the nue integral is {}".format(integral))
+print("the nue integral is {}".format(integral))
 
 
 ax3.hist( speed_bin_centers, bins=speed_bins, weights=ehe_speed_nue,
-        histtype='step', density=True, cumulative=-1)
+        histtype='step', density=True, cumulative=nue_cumulative_sign)
 ax3.hist( speed_bin_centers, bins=speed_bins, weights=ehe_speed_mu,
-        histtype='step', density=True, cumulative=1)
+        histtype='step', density=True, cumulative=-nue_cumulative_sign)
 ax3.hist( cor_speed, bins=speed_bins, weights=cor_weights,
-        histtype='step', density=True, cumulative=1)
+        histtype='step', density=True, cumulative=-nue_cumulative_sign)
 ax3.set_xlabel("LineFit Speed")
 ax3.set_ylabel('CDF')
-ax3.axvline(speed_cut, linstyle='--')
+ax3.axvline(speed_cut, linestyle='--')
 
 def scaling(ax):
     ax.set_xlim(speed_lims)
