@@ -189,7 +189,7 @@ if version == "new":
 elif version == "old":
     bins_cor_cut = bins_cor < speed_cut
 
-integral = np.sum(n_cor[bins_cor_cut]) * (bins_cor[1]-bins_cor[0])
+integral_cor = np.sum(n_cor[bins_cor_cut]) * (bins_cor[1]-bins_cor[0])
 print("the cor integral is {}".format(integral))
 
 bins_nue = (bins_nue[1:] + bins_nue[:-1])/2
@@ -197,16 +197,20 @@ if version == "new":
     bins_nue_cut = bins_nue < speed_cut
 elif version == "old":
     bins_nue_cut = bins_nue > speed_cut
-integral = np.sum(n_nue[bins_nue_cut]) * (bins_nue[1]- bins_nue[0])
+integral_nue = np.sum(n_nue[bins_nue_cut]) * (bins_nue[1]- bins_nue[0])
 print("the nue integral is {}".format(integral))
 
 
 ax3.hist( speed_bin_centers, bins=speed_bins, weights=ehe_speed_nue,
-        histtype='step', density=True, cumulative=nue_cumulative_sign)
+        histtype='step', density=True, cumulative=nue_cumulative_sign,
+        label="{:.2f}".format(integral_nue)
+        )
 ax3.hist( speed_bin_centers, bins=speed_bins, weights=ehe_speed_mu,
         histtype='step', density=True, cumulative=-nue_cumulative_sign)
 ax3.hist( cor_speed, bins=speed_bins, weights=cor_weights,
-        histtype='step', density=True, cumulative=-nue_cumulative_sign)
+        histtype='step', density=True, cumulative=-nue_cumulative_sign,
+        label="{:.2f}".format(integral_cor)
+        )
 ax3.set_xlabel("LineFit Speed")
 ax3.set_ylabel('CDF')
 ax3.axvline(speed_cut, linestyle='--')
@@ -219,4 +223,4 @@ for ax in [ax1, ax2, ax3]:
 
 
 fig.tight_layout()
-fig.savefig(f'speed_hist_{version}.png')
+fig.savefig(f'CascadeTrackSep_hist_{version}.png')
