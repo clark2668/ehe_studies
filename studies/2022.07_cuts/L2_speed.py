@@ -18,7 +18,8 @@ from eheanalysis import plotting
 cfg_file = 'config.yaml'
 cfg_file = yaml.safe_load(open(cfg_file))
 
-version = 'new'
+version = 'old'
+# version = "new"
 if version == 'new':
     charge_var = cfg_file['variables']['charge']['variable']
     charge_val = cfg_file['variables']['charge']['value']
@@ -28,9 +29,9 @@ if version == 'new':
     speed_var = cfg_file['variables']['speed']['variable']
     cor_speed_var = "LineFit_redo"
     speed_val = cfg_file['variables']['speed']['value']
-    speed_bins = np.linspace(0, 2, 401)
+    speed_bins = np.linspace(0, 2, 601)
     speed_label = "LineFit Speed"
-    speed_cut = 0.26
+    speed_cut = 0.27
     speed_lims = [0, 0.5]
     log10_q_cut = np.log10(27500)
     nue_cumulative_sign = -1
@@ -157,13 +158,13 @@ for c in corsika_sets:
 
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, sharex=True, figsize=(15,5))
 
-
+lw = 2
 ax1.hist( speed_bin_centers, bins=speed_bins, weights=ehe_speed_nue,
-        histtype='step', label=r'GZK $\nu_{e}$')
+        histtype='step', label=r'GZK $\nu_{e}$', linewidth=lw)
 ax1.hist( speed_bin_centers, bins=speed_bins, weights=ehe_speed_mu,
-        histtype='step', label=r'GZK $\mu$')
+        histtype='step', label=r'GZK $\mu$', linewidth=lw)
 ax1.hist( cor_speed, bins=speed_bins, weights=cor_weights,
-        histtype='step', label='Corsika (H4a)')
+        histtype='step', label='Corsika (H4a)', linewidth=lw)
 ax1.set_yscale('log')
 ax1.set_xlabel(f"{speed_var}")
 ax1.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
@@ -172,11 +173,11 @@ ax1.legend()
 
 
 n_nue, bins_nue, patches_nue = ax2.hist( speed_bin_centers, bins=speed_bins, weights=ehe_speed_nue,
-        histtype='step',  density=True)
+        histtype='step',  density=True, linewidth=lw)
 ax2.hist( speed_bin_centers, bins=speed_bins, weights=ehe_speed_mu,
-        histtype='step', density=True)
+        histtype='step', density=True, linewidth=lw)
 n_cor, bins_cor, patches_cor = ax2.hist( cor_speed, bins=speed_bins, weights=cor_weights,
-        histtype='step', density=True)
+        histtype='step', density=True, linewidth=lw)
 ax2.set_xlabel(f"{speed_var}")
 ax2.set_ylabel('Normalized Counts')
 ax2.axvline(speed_cut, linestyle='--')
@@ -203,13 +204,13 @@ print("the nue integral is {}".format(integral_nue))
 
 ax3.hist( speed_bin_centers, bins=speed_bins, weights=ehe_speed_nue,
         histtype='step', density=True, cumulative=nue_cumulative_sign,
-        label="{:.2f}".format(integral_nue)
+        label="{:.3f}".format(integral_nue), linewidth=lw
         )
 ax3.hist( speed_bin_centers, bins=speed_bins, weights=ehe_speed_mu,
-        histtype='step', density=True, cumulative=-nue_cumulative_sign)
+        histtype='step', density=True, cumulative=-nue_cumulative_sign, linewidth=lw)
 ax3.hist( cor_speed, bins=speed_bins, weights=cor_weights,
         histtype='step', density=True, cumulative=-nue_cumulative_sign,
-        label="{:.2f}".format(integral_cor)
+        label="{:.3f}".format(integral_cor), linewidth=lw
         )
 ax3.set_xlabel("LineFit Speed")
 ax3.set_ylabel('CDF')
