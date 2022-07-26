@@ -15,8 +15,11 @@ charge_var = cfg_file['variables']['charge']['variable']
 charge_val = cfg_file['variables']['charge']['value']
 ndoms_var =  cfg_file['variables']['ndoms']['variable']
 ndoms_val =  cfg_file['variables']['ndoms']['value']
+czen_var = cfg_file['variables']['zenith']['variable']
+czen_val = cfg_file['variables']['zenith']['value']
 alt_ndoms_var = 'HitMultiplicityValues'
-do_efficiency = True
+alt_czen_var = 'LineFit_redo'
+do_efficiency = False
 
 log10_q_cut = np.log10(27500)
 q_cut = np.power(10., log10_q_cut)
@@ -42,7 +45,7 @@ def astro_flux(energy):
 # juliet (EHE neutrinos)
 juliet_species = ["nue", "numu", "nutau", "mu", "tau"]
 juliet_energy_levels = ["high_energy"]
-# juliet_species = ["nue"]
+juliet_species = ["nue"]
 # juliet_species = ["mu"]
 # juliet_species = []
 
@@ -70,6 +73,9 @@ charge_bin_centers_noqcuts = plotting.get_bin_centers(charge_bins_noqcuts)
 ndoms_bins = np.linspace(0,4000, 21)
 ndoms_bin_centers = plotting.get_bin_centers(ndoms_bins)
 
+czen_bins = np.linspace(-1, 1, 20)
+czen_bin_centers = plotting.get_bin_centers(czen_bins)
+
 
 #############################
 # ehe/cosmogenic flux (juliet)
@@ -77,6 +83,7 @@ ndoms_bin_centers = plotting.get_bin_centers(ndoms_bins)
 ehe_weights = np.asarray([])
 ehe_charge = np.asarray([])
 ehe_ndoms = np.asarray([])
+ehe_czen = np.asarray([])
 ehe_L2_mask = np.asarray([])
 
 ehe_energy_weights_nocuts = None
@@ -90,6 +97,7 @@ for s in juliet_species:
         weight_dict, prop_matrix, evts_per_file = weighting.get_juliet_weightdict_and_propmatrix(the_f)
         charge = the_f.get_node(f'/{charge_var}').col(f'{charge_val}')
         ndoms = the_f.get_node(f'/{ndoms_var}').col(f'{ndoms_val}')
+        czen = np.cos(the_f.get_node(f'/{czen_var}').col(f'{czen_val}'))
         n_gen = cfg_file['juliet'][s][l]['n_files'] * evts_per_file
 
         weights = weighting.calc_juliet_weight_from_weight_dict_and_prop_matrix(
@@ -99,24 +107,29 @@ for s in juliet_species:
         ehe_weights = np.concatenate((ehe_weights, weights))
         ehe_charge = np.concatenate((ehe_charge, charge))
         ehe_ndoms = np.concatenate((ehe_ndoms, ndoms))
+        ehe_czen = np.concatenate((ehe_czen, czen))
 
         L2_q_mask = charge > q_cut
         L2_ndoms_mask = ndoms > ndom_cut
         L2_mask = L2_q_mask & L2_ndoms_mask
         
         ehe_L2_mask = np.concatenate((ehe_L2_mask, L2_mask))
-        
-        the_enu_weights = weighting.calc_juliet_flux_weight(
-            weight_dict = weight_dict, prop_matrix = prop_matrix, 
-            flux= gzk_partial, n_gen = n_gen, livetime=livetime
-        )
-
-        if ehe_energy_weights_nocuts is None:
-            ehe_energy_weights_nocuts = copy.deepcopy(the_enu_weights)
-        else:
-            ehe_energy_weights_nocuts += copy.deepcopy(the_enu_weights)
-            
+                    
         if do_efficiency:
+            # if we want to tabulate efficiencies vs energy
+            # then we need to project into enu space
+
+            # all events (no cuts)
+            the_enu_weights = weighting.calc_juliet_flux_weight(
+                weight_dict = weight_dict, prop_matrix = prop_matrix, 
+                flux= gzk_partial, n_gen = n_gen, livetime=livetime
+            )
+            if ehe_energy_weights_nocuts is None:
+                ehe_energy_weights_nocuts = copy.deepcopy(the_enu_weights)
+            else:
+                ehe_energy_weights_nocuts += copy.deepcopy(the_enu_weights)
+
+            # after L2 cuts
             the_enu_weights_L2 = weighting.calc_juliet_flux_weight(
                 weight_dict = weight_dict, prop_matrix = prop_matrix, 
                 flux= gzk_partial, n_gen = n_gen, livetime=livetime,
@@ -190,6 +203,7 @@ if do_efficiency:
 cor_charge = np.asarray([])
 cor_ndoms = np.asarray([])
 cor_weights = np.asarray([])
+cor_czen = np.asarray([])
 for c in corsika_sets:
     print("Working on corsika {}".format(c))
     cor_file = pd.HDFStore(cfg_file['corsika'][c]['file'])
@@ -198,12 +212,22 @@ for c in corsika_sets:
         )
     this_cor_charge = cor_weighter.get_column(charge_var, charge_val)
     q_mask = this_cor_charge > q_cut_for_plot
-    cor_charge = np.concatenate((cor_charge, this_cor_charge[q_mask]))
     try:
-        cor_ndoms = np.concatenate((cor_ndoms, cor_weighter.get_column(ndoms_var, ndoms_val)[q_mask]))
+        this_cor_ndoms = cor_weighter.get_column(ndoms_var, ndoms_val)[q_mask]
     except:
-        cor_ndoms = np.concatenate((cor_ndoms, cor_weighter.get_column(alt_ndoms_var, ndoms_val)[q_mask]))
-    cor_weights = np.concatenate((cor_weights, cor_weighter.get_weights(cr_flux)[q_mask] * livetime))
+        this_cor_ndoms = cor_weighter.get_column(alt_ndoms_var, ndoms_val)[q_mask]
+
+    try:
+        this_cor_czen = np.cos(cor_weighter.get_column(czen_var, czen_val))[q_mask]
+    except:
+        this_cor_czen = np.cos(cor_weighter.get_column(alt_czen_var, czen_val))[q_mask]
+
+    this_cor_weights = cor_weighter.get_weights(cr_flux)[q_mask] * livetime
+    
+    cor_charge = np.concatenate((cor_charge, this_cor_charge[q_mask]))
+    cor_czen = np.concatenate((cor_czen, this_cor_czen))
+    cor_ndoms = np.concatenate((cor_ndoms, this_cor_ndoms))
+    cor_weights = np.concatenate((cor_weights, this_cor_weights))
     cor_file.close()
 
 
@@ -212,6 +236,7 @@ for c in corsika_sets:
 #############################
 nugen_charges = np.asarray([])
 nugen_ndoms = np.asarray([])
+nugen_czens = np.asarray([])
 nugen_atmo_weights = np.asarray([])
 nugen_astro_weights = np.asarray([])
 for n in nugen_sets:
@@ -222,12 +247,20 @@ for n in nugen_sets:
         )
     this_nugen_charge = np.asarray(nugen_weighter.get_column(charge_var, charge_val))
     q_mask = this_nugen_charge > q_cut_for_plot
+    
     try:
         this_nugen_ndoms = np.asarray(nugen_weighter.get_column(ndoms_var, ndoms_val))
     except:
         this_nugen_ndoms = np.asarray(nugen_weighter.get_column(alt_ndoms_var, ndoms_val))
+    
+    try:
+        this_nugen_czen = np.cos(nugen_weighter.get_column(czen_var, czen_val))
+    except:
+        this_nugen_czen = np.cos(cor_weighter.get_column(alt_czen_var, czen_val))
+    
     nugen_charges = np.concatenate((nugen_charges, this_nugen_charge[q_mask]))
     nugen_ndoms = np.concatenate((nugen_ndoms, this_nugen_ndoms[q_mask]))
+    nugen_czens = np.concatenate((nugen_czens, this_nugen_czen[q_mask]))
     
     this_nugen_atmo_weights = nugen_weighter.get_weights(atmo_flux) * livetime
     nugen_atmo_weights = np.concatenate((nugen_atmo_weights, this_nugen_atmo_weights[q_mask]))
@@ -241,7 +274,8 @@ for n in nugen_sets:
 # data
 #############################
 data_charges = np.asarray([])
-data_ndoms = np.asfarray([])
+data_ndoms = np.asarray([])
+data_czen = np.asarray([])
 for b in burn_samples:
     print("Working on burn samples {}".format(b))
     data_file = pd.HDFStore(cfg_file['burn_sample'][b]['file'])
@@ -257,16 +291,23 @@ for b in burn_samples:
         this_ndoms = np.asarray(data_file.get(ndoms_var).get(ndoms_val))
     except:
         this_ndoms = np.asarray(data_file.get(alt_ndoms_var).get(ndoms_val))
+    
+    try:
+        this_czen = np.cos(np.asarray(data_file.get(czen_var).get(czen_val)))
+    except:
+        this_czen = np.cos(np.asarray(data_file.get(alt_czen_var).get(czen_val)))
+
+    
     data_charges = np.concatenate((data_charges, this_charge[q_mask]))
     data_ndoms = np.concatenate((data_ndoms, this_ndoms[q_mask]))
+    data_czen = np.concatenate((data_czen, this_czen[q_mask]))
     data_file.close()
 
-data_q, data_bins_q = np.histogram(data_charges, bins=charge_bins)
-errs_q = np.sqrt(data_q)
+data_q_binned, data_bins_q = np.histogram(data_charges, bins=charge_bins)
+errs_q = np.sqrt(data_q_binned)
 
-data_ndoms, data_bins_ndoms = np.histogram(data_ndoms, bins=ndoms_bins)
-errs_ndoms = np.sqrt(data_ndoms)
-
+data_ndoms_binned, data_bins_ndoms = np.histogram(data_ndoms, bins=ndoms_bins)
+errs_ndoms = np.sqrt(data_ndoms_binned)
 
 #############################
 # histogram of charge 
@@ -291,7 +332,7 @@ ax.hist(ehe_charge[ehe_q_mask], bins=charge_bins, weights=ehe_weights[ehe_q_mask
     histtype='step', label=r'Cosmo $\nu$ (Ahlers GZK)', linewidth=2)      
 
 # plot the data
-ax.errorbar(charge_bin_centers, data_q, yerr=errs_q, fmt='ko', label='Burn Sample')
+ax.errorbar(charge_bin_centers, data_q_binned, yerr=errs_q, fmt='ko', label='Burn Sample')
 
 ax.set_xscale('log')
 ax.set_yscale('log')
@@ -302,8 +343,8 @@ ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
 )
 
 # and plot data/MC agreement
-ratio_q = data_q/sim_q_sum
-ratio_q_errs = ratio_q * (errs_q/data_q)
+ratio_q = data_q_binned/sim_q_sum
+ratio_q_errs = ratio_q * (errs_q/data_q_binned)
 axr.errorbar(charge_bin_centers, ratio_q, yerr=ratio_q_errs, fmt='ko', label='Data/Sim')
 axr.set_xlabel('')
 axr.set_ylabel('Data/Sim')
@@ -311,7 +352,7 @@ axr.set_xlabel('Q / PE')
 axr.set_ylim([0.5, 1.5])
 axr.plot([1E4, 1E7], [1, 1], 'k--') 
 fig.tight_layout()
-fig.savefig('q_hist.png')
+fig.savefig('hist_charge.png')
 
 
 #############################
@@ -333,20 +374,20 @@ ax2.hist(nugen_ndoms, bins=ndoms_bins, weights=nugen_astro_weights,
     histtype='step', label=r'Astro $\nu$ (north tracks, $\nu_{e}$ + $\nu_{\mu}$ only)', linewidth=2)
 ax2.hist(ehe_ndoms[ehe_q_mask], bins=ndoms_bins, weights=ehe_weights[ehe_q_mask],
         histtype='step', label=r'Cosmo $\nu$ (Ahlers GZK)', linewidth=2)
-# ax2.set_title("Q > {:.2f}".format(q_cut_for_plot))
 
 # plot the data
-ax2.errorbar(ndoms_bin_centers, data_ndoms, yerr=errs_ndoms, fmt='ko', label='Burn Sample')
+ax2.errorbar(ndoms_bin_centers, data_ndoms_binned, yerr=errs_ndoms, fmt='ko', label='Burn Sample')
 
 ax2.set_yscale('log')
 ax2.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
 ax2.set_ylim([1E-7, 1E5])
 ax2.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
-    mode="expand", borderaxespad=0, ncol=2
+    mode="expand", borderaxespad=0, ncol=2,
+    title="Q > {:.2f}".format(q_cut_for_plot)
 )
 # and plot data/MC agreement
-ratio_ndoms = data_ndoms/sim_ndoms_sum
-ration_ndoms_err = ratio_ndoms * (errs_ndoms/data_ndoms)
+ratio_ndoms = data_ndoms_binned/sim_ndoms_sum
+ration_ndoms_err = ratio_ndoms * (errs_ndoms/data_ndoms_binned)
 ax2r.errorbar(ndoms_bin_centers, ratio_ndoms, yerr=ration_ndoms_err, fmt='ko', label='Data/Sim')
 ax2r.set_xlabel('')
 ax2r.set_xlabel('N DOMs')
@@ -355,4 +396,58 @@ ax2r.set_ylim([0.5, 1.5])
 ax2r.plot([0, 4000], [1, 1], 'k--')
 
 fig2.tight_layout()
-fig2.savefig('ndoms_hist.png')
+fig2.savefig('hist_ndoms.png')
+
+
+
+#############################
+# histogram of cos(zen) 
+#############################
+# fig, ax = plt.subplots(1,1)
+fig3, (ax3, ax3r) = plt.subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [3, 1]})
+
+ehe_L2_mask = (ehe_charge > q_cut) & (ehe_ndoms > ndom_cut)
+cor_L2_mask = (cor_charge > q_cut) & (cor_ndoms > ndom_cut)
+nugen_L2_mask = (nugen_charges > q_cut) & (nugen_ndoms > ndom_cut)
+
+data_L2_mask = (data_charges > q_cut) & (data_ndoms > ndom_cut)
+data_czen_binned, data_bins_czen = np.histogram(data_czen[data_L2_mask], bins=czen_bins)
+errs_czen = np.sqrt(data_czen_binned)
+
+
+# plot the MC (sum, and individual components)
+sim_czen_sum, b, p = ax3.hist(
+    x = np.concatenate((cor_czen[cor_L2_mask], nugen_czens[nugen_L2_mask], nugen_czens[nugen_L2_mask],ehe_czen[ehe_L2_mask])),
+    weights = np.concatenate((cor_weights[cor_L2_mask], nugen_atmo_weights[nugen_L2_mask], nugen_astro_weights[nugen_L2_mask], ehe_weights[ehe_L2_mask])),
+    bins = czen_bins, histtype='step', label='Sum', linewidth=2)
+ax3.hist(cor_czen[cor_L2_mask], bins=czen_bins, weights=cor_weights[cor_L2_mask], 
+    histtype='step', label=r'Atm $\mu$ (H4a)', linewidth=2)
+ax3.hist(nugen_czens[nugen_L2_mask], bins=czen_bins, weights=nugen_atmo_weights[nugen_L2_mask], 
+    histtype='step', label=r'Atm $\nu$ (H3a, Sibyll 2.3c)', linewidth=2)
+ax3.hist(nugen_czens[nugen_L2_mask], bins=czen_bins, weights=nugen_astro_weights[nugen_L2_mask], 
+    histtype='step', label=r'Astro $\nu$ (north tracks, $\nu_{e}$ + $\nu_{\mu}$ only)', linewidth=2)
+ax3.hist(ehe_czen[ehe_L2_mask], bins=czen_bins, weights=ehe_weights[ehe_L2_mask],
+    histtype='step', label=r'Cosmo $\nu$ (Ahlers GZK)', linewidth=2)
+
+# plot the data
+ax3.errorbar(czen_bin_centers, data_czen_binned, yerr=errs_czen, fmt='ko', label='Burn Sample')
+
+ax3.set_yscale('log')
+ax3.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
+ax3.set_ylim([1E-5, 1E4])
+ax3.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
+    mode="expand", borderaxespad=0, ncol=2,
+    title="L3 (Q > {:d}, NDoms > {:d})".format(int(q_cut), int(ndom_cut))
+)
+
+# and plot data/MC agreement
+ratio_czen = data_czen_binned/sim_czen_sum
+ratio_czen_errs = ratio_czen * (errs_czen/data_czen_binned)
+ax3r.errorbar(czen_bin_centers, ratio_czen, yerr=ratio_czen_errs, fmt='ko', label='Data/Sim')
+ax3r.set_xlabel('')
+ax3r.set_ylabel('Data/Sim')
+ax3r.set_xlabel(r'cos($\theta$)')
+ax3r.set_ylim([0.5, 1.5])
+ax3r.plot([-1, 1], [1, 1], 'k--')
+fig3.tight_layout()
+fig3.savefig('hist_czen.png')
