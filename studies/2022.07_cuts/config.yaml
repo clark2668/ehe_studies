@@ -8,6 +8,9 @@ variables:
   speed:
     variable: "LineFit"
     value: "speed"
+  zenith:
+    variable: "LineFit"
+    value: "zenith"
 
 juliet:
   nue:

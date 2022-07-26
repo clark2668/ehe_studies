@@ -16,7 +16,7 @@ charge_val = cfg_file['variables']['charge']['value']
 ndoms_var =  cfg_file['variables']['ndoms']['variable']
 ndoms_val =  cfg_file['variables']['ndoms']['value']
 alt_ndoms_var = 'HitMultiplicityValues'
-do_efficiency = True
+do_efficiency = False
 
 log10_q_cut = np.log10(27500)
 q_cut = np.power(10., log10_q_cut)
@@ -74,14 +74,11 @@ ndoms_bin_centers = plotting.get_bin_centers(ndoms_bins)
 #############################
 # ehe/cosmogenic flux (juliet)
 #############################
-ehe_weights = np.asarray([])
-ehe_charge = np.asarray([])
-ehe_ndoms = np.asarray([])
-ehe_L2_mask = np.asarray([])
-
-ehe_energy_weights_nocuts = None
-ehe_energy_weights_after_L2 = None
-
+summed_ehe_q = None
+summed_ehe_ndoms = None
+summed_ehe_q_nocuts = None
+summed_ehe_ndoms_nocuts = None
+summed_ehe_after_L2 = None
 for s in juliet_species:
     for l in juliet_energy_levels:
 
@@ -91,63 +88,87 @@ for s in juliet_species:
         charge = the_f.get_node(f'/{charge_var}').col(f'{charge_val}')
         ndoms = the_f.get_node(f'/{ndoms_var}').col(f'{ndoms_val}')
         n_gen = cfg_file['juliet'][s][l]['n_files'] * evts_per_file
-
-        weights = weighting.calc_juliet_weight_from_weight_dict_and_prop_matrix(
-            weight_dict=weight_dict, prop_matrix=prop_matrix, 
-            flux=gzk_partial, n_gen=n_gen, livetime=livetime
-        )
-        ehe_weights = np.concatenate((ehe_weights, weights))
-        ehe_charge = np.concatenate((ehe_charge, charge))
-        ehe_ndoms = np.concatenate((ehe_ndoms, ndoms))
-
+        
+        q_mask = charge > q_cut_for_plot
+        
         L2_q_mask = charge > q_cut
-        L2_ndoms_mask = ndoms > ndom_cut
-        L2_mask = L2_q_mask & L2_ndoms_mask
-        
-        ehe_L2_mask = np.concatenate((ehe_L2_mask, L2_mask))
-        
-        the_enu_weights = weighting.calc_juliet_flux_weight(
-            weight_dict = weight_dict, prop_matrix = prop_matrix, 
-            flux= gzk_partial, n_gen = n_gen, livetime=livetime
-        )
+        L2_ndom_mask = ndoms > ndom_cut
+        L2_mask = L2_q_mask & L2_ndom_mask
 
-        if ehe_energy_weights_nocuts is None:
-            ehe_energy_weights_nocuts = copy.deepcopy(the_enu_weights)
-        else:
-            ehe_energy_weights_nocuts += copy.deepcopy(the_enu_weights)
-            
-        if do_efficiency:
-            the_enu_weights_L2 = weighting.calc_juliet_flux_weight(
-                weight_dict = weight_dict, prop_matrix = prop_matrix, 
-                flux= gzk_partial, n_gen = n_gen, livetime=livetime,
-                selection_mask = L2_mask
+        h_charge_qmask = weighting.make_enu_2d_hist( weight_dict, n_gen, gzk_partial,
+            var_values=charge, var_bins=charge_bins,
+            prop_matrix=prop_matrix, livetime=livetime,
+            selection_mask = q_mask
             )
-            if ehe_energy_weights_after_L2 is None:
-                ehe_energy_weights_after_L2 = copy.deepcopy(the_enu_weights_L2)
-            else:
-                ehe_energy_weights_after_L2 += copy.deepcopy(the_enu_weights_L2)
+        h_ndoms_qmask = weighting.make_enu_2d_hist( weight_dict, n_gen, gzk_partial,
+            var_values=ndoms, var_bins=ndoms_bins,
+            prop_matrix=prop_matrix, livetime=livetime,
+            selection_mask = q_mask
+            )
+    
+        if summed_ehe_q is None:
+            summed_ehe_q = copy.deepcopy(h_charge_qmask)
+            summed_ehe_ndoms = copy.deepcopy(h_ndoms_qmask)
+        else:
+            summed_ehe_q += copy.deepcopy(h_charge_qmask)
+            summed_ehe_ndoms += copy.deepcopy(h_ndoms_qmask)
         
+        if do_efficiency:
+
+            h_charge = weighting.make_enu_2d_hist( weight_dict, n_gen, gzk_partial,
+                var_values=charge, var_bins=charge_bins_noqcuts,
+                prop_matrix=prop_matrix, livetime=livetime,
+                )
+            h_ndoms = weighting.make_enu_2d_hist( weight_dict, n_gen, gzk_partial,
+                var_values=ndoms, var_bins=ndoms_bins,
+                prop_matrix=prop_matrix, livetime=livetime,
+                )
+            h_charge_L2 = weighting.make_enu_2d_hist( weight_dict, n_gen, gzk_partial,
+                var_values=charge, var_bins=charge_bins_noqcuts,
+                prop_matrix=prop_matrix, livetime=livetime,
+                selection_mask = L2_mask
+                )            
+            if summed_ehe_q_nocuts is None:
+                summed_ehe_q_nocuts = copy.deepcopy(h_charge)
+                summed_ehe_ndoms_nocuts = copy.deepcopy(h_ndoms)
+                summed_ehe_after_L2 = copy.deepcopy(h_charge_L2)
+            else:
+                summed_ehe_q_nocuts += copy.deepcopy(h_charge)
+                summed_ehe_ndoms_nocuts += copy.deepcopy(h_ndoms)
+                summed_ehe_after_L2 += copy.deepcopy(h_charge_L2)
+
+                
         the_f.close()
+ehe_q_projection = np.asarray([])
+ehe_ndoms_projection = np.asarray([])
+if summed_ehe_q is not None:
+    ehe_q_projection = summed_ehe_q.sum(axis=1) # project down onto the charge axis
+if summed_ehe_ndoms is not None:
+    ehe_ndoms_projection = summed_ehe_ndoms.sum(axis=1) # project onto ndoms axis
 
 if do_efficiency:
 
     # eff for the charge and ndom cut separately
     # these are the 1D projections
-    ehe_q_binned, ehe_q_bins = np.histogram(ehe_charge, 
-        bins=charge_bins_noqcuts, weights = ehe_weights)
-    ehe_ndom_binned, ehe_ndom_bins = np.histogram(ehe_ndoms, 
-        bins=ndoms_bins, weights = ehe_weights)
+    ehe_q_projection_nocuts = np.asarray([])
+    ehe_ndoms_projection_nocuts = np.asarray([])
+    if summed_ehe_q_nocuts is not None:
+        ehe_q_projection_nocuts = summed_ehe_q_nocuts.sum(axis=1)
+    if summed_ehe_ndoms_nocuts is not None:
+        ehe_ndoms_projection_nocuts = summed_ehe_ndoms_nocuts.sum(axis=1)
 
     eff_qcut = plotting.calc_juliet_eff_vs_var(
-        ehe_q_binned, charge_bin_centers_noqcuts)
+        ehe_q_projection_nocuts, charge_bin_centers_noqcuts)
     eff_ndomcut = plotting.calc_juliet_eff_vs_var(
-        ehe_ndom_binned, ndoms_bin_centers)
+        ehe_ndoms_projection_nocuts, ndoms_bin_centers)
 
-    # eff vs energy    
+    # eff vs energy
+    ehe_enu_projection_nocuts = summed_ehe_q_nocuts.sum(axis=0)
+    ehe_enu_projection_L2 = summed_ehe_after_L2.sum(axis=0)
     energy_bins, energy_bin_centers = weighting.get_juliet_enu_binning()
 
-    total_ehe_weight_nocuts = ehe_energy_weights_nocuts.sum()
-    total_ehe_weight_L2 = ehe_energy_weights_after_L2.sum()
+    total_ehe_weight_nocuts = ehe_enu_projection_nocuts.sum()
+    total_ehe_weight_L2 = ehe_enu_projection_L2.sum()
     total_eff_L2 = total_ehe_weight_L2/total_ehe_weight_nocuts
 
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15,5))
@@ -166,8 +187,9 @@ if do_efficiency:
     ax2.set_ylim([0, 1.1])
     ax2.axvline(ndom_cut, ls='--')
 
+    
     # eff vs energy
-    ax3.plot(energy_bin_centers, ehe_energy_weights_after_L2/ehe_energy_weights_nocuts,
+    ax3.plot(energy_bin_centers, ehe_enu_projection_L2/ehe_enu_projection_nocuts,
         linewidth=3
     )
     ax3.set_xscale('log')
@@ -274,12 +296,10 @@ errs_ndoms = np.sqrt(data_ndoms)
 # fig, ax = plt.subplots(1,1)
 fig, (ax, axr) = plt.subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [3, 1]})
 
-ehe_q_mask = ehe_charge > q_cut_for_plot
-
 # plot the MC (sum, and individual components)
 sim_q_sum, b, p = ax.hist(
-    x = np.concatenate((cor_charge, nugen_charges, nugen_charges,ehe_charge[ehe_q_mask])),
-    weights = np.concatenate((cor_weights, nugen_atmo_weights, nugen_astro_weights, ehe_weights[ehe_q_mask])),
+    x = np.concatenate((cor_charge, nugen_charges, nugen_charges,charge_bin_centers)),
+    weights = np.concatenate((cor_weights, nugen_atmo_weights, nugen_astro_weights, ehe_q_projection)),
     bins = charge_bins, histtype='step', label='Sum', linewidth=2)
 ax.hist(cor_charge, bins=charge_bins, weights=cor_weights, 
     histtype='step', label=r'Atm $\mu$ (H4a)', linewidth=2)
@@ -287,8 +307,8 @@ ax.hist(nugen_charges, bins=charge_bins, weights=nugen_atmo_weights,
     histtype='step', label=r'Atm $\nu$ (H3a, Sibyll 2.3c)', linewidth=2)
 ax.hist(nugen_charges, bins=charge_bins, weights=nugen_astro_weights, 
     histtype='step', label=r'Astro $\nu$ (north tracks, $\nu_{e}$ + $\nu_{\mu}$ only)', linewidth=2)
-ax.hist(ehe_charge[ehe_q_mask], bins=charge_bins, weights=ehe_weights[ehe_q_mask],
-    histtype='step', label=r'Cosmo $\nu$ (Ahlers GZK)', linewidth=2)      
+ax.hist(charge_bin_centers, bins=charge_bins, weights=ehe_q_projection,
+    histtype='step', label=r'Cosmo $\nu$ (Ahlers GZK)', linewidth=2)
 
 # plot the data
 ax.errorbar(charge_bin_centers, data_q, yerr=errs_q, fmt='ko', label='Burn Sample')
@@ -297,6 +317,7 @@ ax.set_xscale('log')
 ax.set_yscale('log')
 ax.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
 ax.set_ylim([1E-4, 1E5])
+# ax.legend(ncol=2)
 ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
     mode="expand", borderaxespad=0, ncol=2
 )
@@ -322,8 +343,8 @@ fig2, (ax2, ax2r) = plt.subplots(2, 1, sharex=True, gridspec_kw={'height_ratios'
 
 # plot the MC (sum, and individual components)
 sim_ndoms_sum, b, p = ax2.hist(
-    x = np.concatenate((cor_ndoms, nugen_ndoms, nugen_ndoms,ehe_ndoms[ehe_q_mask])),
-    weights = np.concatenate((cor_weights, nugen_atmo_weights, nugen_astro_weights, ehe_weights[ehe_q_mask])),
+    x = np.concatenate((cor_ndoms, nugen_ndoms, nugen_ndoms,ndoms_bin_centers)),
+    weights = np.concatenate((cor_weights, nugen_atmo_weights, nugen_astro_weights, ehe_ndoms_projection)),
     bins = ndoms_bins, histtype='step', label='Sum', linewidth=2)
 ax2.hist(cor_ndoms, bins=ndoms_bins, weights=cor_weights, 
     histtype='step', label=r'Atm $\mu$ (H4a)', linewidth=2)
@@ -331,9 +352,8 @@ ax2.hist(nugen_ndoms, bins=ndoms_bins, weights=nugen_atmo_weights,
     histtype='step', label=r'Atm $\nu$ (H3a, Sibyll 2.3c)', linewidth=2)
 ax2.hist(nugen_ndoms, bins=ndoms_bins, weights=nugen_astro_weights, 
     histtype='step', label=r'Astro $\nu$ (north tracks, $\nu_{e}$ + $\nu_{\mu}$ only)', linewidth=2)
-ax2.hist(ehe_ndoms[ehe_q_mask], bins=ndoms_bins, weights=ehe_weights[ehe_q_mask],
-        histtype='step', label=r'Cosmo $\nu$ (Ahlers GZK)', linewidth=2)
-# ax2.set_title("Q > {:.2f}".format(q_cut_for_plot))
+ax2.hist(ndoms_bin_centers, bins=ndoms_bins, weights=ehe_ndoms_projection,
+    histtype='step', label=r'Cosmo $\nu$ (Ahlers GZK)', linewidth=2)
 
 # plot the data
 ax2.errorbar(ndoms_bin_centers, data_ndoms, yerr=errs_ndoms, fmt='ko', label='Burn Sample')
