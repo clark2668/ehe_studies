@@ -42,6 +42,7 @@ burn_sample:
     livetime: 2721082.25
   IC86-II-pass2:
     file: "/disk20/users/brian/IceCube/data/combo_IC86-II-pass2.hdf5"
+    # file: "/disk20/users/brian/IceCube/data/combo_IC86-II-pass2_smaller.hdf5"
     livetime: 2804133.57
   IC86-III-pass2:
     file: "/disk20/users/brian/IceCube/data/combo_IC86-III-pass2.hdf5"
