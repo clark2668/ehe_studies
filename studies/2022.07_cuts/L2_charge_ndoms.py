@@ -40,7 +40,8 @@ cr_flux = weighting.get_flux_model('GaisserH4a', 'corsika')
 atmo_flux = weighting.get_flux_model('H3a_SIBYLL23C', 'nugen')
 
 def astro_flux(energy):
-    return 1.44e-18 / 2 * (energy/1e5)**-2.2
+    # flux of mu + mubar @ 100 TeV (basically the per-flavor flux)
+    return 1.44e-18 / 2 * (energy/1e5)**-2.37
 
 # set up datasets
 # juliet (EHE neutrinos)
@@ -66,7 +67,7 @@ for b in burn_samples:
     livetime += cfg_file['burn_sample'][b]['livetime']
 print("Total livetime {}".format(livetime))
 
-charge_bins = np.logspace(4, 7, 16)
+charge_bins = np.logspace(4, 7, 32)
 charge_bin_centers = plotting.get_bin_centers(charge_bins)
 
 charge_bins_noqcuts = np.logspace(2, 7, 16)
@@ -75,7 +76,7 @@ charge_bin_centers_noqcuts = plotting.get_bin_centers(charge_bins_noqcuts)
 ndoms_bins = np.linspace(0,4000, 21)
 ndoms_bin_centers = plotting.get_bin_centers(ndoms_bins)
 
-czen_bins = np.linspace(-1, 1, 20)
+czen_bins = np.linspace(-1, 1, 40)
 czen_bin_centers = plotting.get_bin_centers(czen_bins)
 
 
@@ -416,3 +417,56 @@ if do_plots:
     axr.set_xlabel(r'cos($\theta$)')
     fig.tight_layout()
     fig.savefig('plots/hist_czen.png')
+
+    #############################
+    # 2D: charge vs zenith
+    #############################
+    
+    sim_y_vals = {
+        'cor': cor_charge[cor_L2_mask],
+        'nugen_atmo': nugen_charges[nugen_L2_mask],
+        'nugen_astro': nugen_charges[nugen_L2_mask],
+        'ehe': ehe_charge[ehe_L2_mask]
+    }
+    sim_x_vals = {
+        'cor': cor_czen[cor_L2_mask],
+        'nugen_atmo': nugen_czens[nugen_L2_mask],
+        'nugen_astro': nugen_czens[nugen_L2_mask],
+        'ehe': ehe_czen[ehe_L2_mask]
+    }
+    set_labels={
+        'cor': r'Atm $\mu$ (H4a)',
+        'nugen_atmo': r'Atm $\nu$ (H3a, Sibyll 2.3c)',
+        'nugen_astro': r'Astro $\nu$ (north tracks, $\nu_{e}$ + $\nu_{\mu}$ only)',
+        'ehe': r'Cosmo $\nu$ (Ahlers GZK)',
+        'data': 'Burn Sample ({:.2f} days)'.format(livetime/(60*60*24))
+    }
+    data_y_vals = data_charges[data_L2_mask]
+    data_x_vals = data_czen[data_L2_mask]
+    my_map = plt.cm.plasma
+    plotting_options = {
+        'xlabel': r'cos($\theta$)',
+        'ylabel': 'Q / PE',
+        'zlabel': 'Number of Events',
+        'cmap': my_map,
+        'norm': colors.LogNorm(),
+        'zlims':  (1E-5, 1E2)
+    }
+        
+    fig, plotting_products = plotting.do_2D_data_mc_comparison(
+        bins_x=czen_bins, bins_y = charge_bins,
+        sim_x_vals=sim_x_vals, sim_y_vals = sim_y_vals,
+        sim_weights=sim_weights, set_labels=set_labels,
+        data_x_vals=data_x_vals, data_y_vals=data_y_vals,
+        plotting_opts = plotting_options
+    )
+    for a in plotting_products['axes']:
+        plotting_products['axes'][a].set_yscale('log')
+        plotting_products['axes'][a].set_xlabel(plotting_options['xlabel'])
+        plotting_products['axes'][a].set_ylabel(plotting_options['ylabel'])
+    for a in plotting_products['cbars']:
+        plotting_products['cbars'][a].set_label(plotting_options['zlabel'])
+    plotting_products['cbars']['ratio'].set_label("Ratio")
+        
+    fig.tight_layout()
+    fig.savefig('plots/hist2d_q_czen_datamc.png', dpi=300)
