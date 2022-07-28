@@ -23,7 +23,7 @@ alt_speed_var = 'LineFit_redo'
 alt_ndoms_var = 'HitMultiplicityValues'
 alt_czen_var = 'LineFit_redo'
 do_efficiency = False
-do_plots = True
+do_plots = False
 
 log10_q_cut = np.log10(27500)
 q_cut = np.power(10., log10_q_cut)
@@ -52,13 +52,13 @@ juliet_species = ["nue", "numu", "nutau", "mu", "tau"]
 juliet_energy_levels = ["high_energy"]
 # juliet_species = ["nue"]
 # juliet_species = ["mu"]
-# juliet_species = []
+juliet_species = []
 
 corsika_sets = ["20787"]
-# corsika_sets = []
+corsika_sets = []
 
 nugen_sets = ["nue", "numu"]
-# nugen_sets = []
+nugen_sets = []
 
 burn_samples = ["IC86-I-pass2", "IC86-II-pass2", "IC86-III-pass2"]
 # burn_samples = ["IC86-II-pass2"]
@@ -315,9 +315,11 @@ for b in burn_samples:
     
     this_speed = data_file.get(alt_speed_var).get(speed_val)
 
-    # mask = (this_charge > q_cut) & (this_ndoms > ndom_cut) & (this_czen < -0.25)    
-    # runs = np.asarray(data_file.get("I3EventHeader").get("Run"))
-    # events = np.asfarray(data_file.get("I3EventHeader").get("Event"))
+    mask = (this_charge > q_cut) & (this_ndoms > ndom_cut) &  (this_speed < 0.2)
+    runs = np.asarray(data_file.get("I3EventHeader").get("Run"))
+    events = np.asfarray(data_file.get("I3EventHeader").get("Event"))
+    for c, q, r, e, sp in zip(this_czen[mask], this_charge[mask], runs[mask], events[mask], this_speed[mask]):
+        print(f"  Run {r}, Event {e}, Charge {q:.2f}, CZen {c:.2f}, Speed {sp:.2f}")
     # print(this_czen[mask])
     # print(this_charge[mask])
     # print(runs[mask])
