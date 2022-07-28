@@ -31,6 +31,15 @@ run_no = 123640
 evt_no = 1035095
 file_list = glob.glob("/data/exp/IceCube/2014/filtered/level2pass2a/0102/Run00123640/*_00000002.i3.zst")
 
+run_no = 121240
+evt_no = 72944671
+file_list = glob.glob("/data/exp/IceCube/2012/filtered/level2pass2a/1203/Run00121240/*_00000201.i3.zst")
+
+
+run_no = 123310
+evt_no = 14737556
+file_list = glob.glob("/data/exp/IceCube/2013/filtered/level2pass2a/1128/Run00123310/*_00000040.i3.zst")
+
 
 
 tray = I3Tray()
