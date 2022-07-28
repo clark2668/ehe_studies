@@ -17,6 +17,9 @@ ndoms_var =  cfg_file['variables']['ndoms']['variable']
 ndoms_val =  cfg_file['variables']['ndoms']['value']
 czen_var = cfg_file['variables']['zenith']['variable']
 czen_val = cfg_file['variables']['zenith']['value']
+speed_var = cfg_file['variables']['speed']['variable']
+speed_val = cfg_file['variables']['speed']['value']
+alt_speed_var = 'LineFit_redo'
 alt_ndoms_var = 'HitMultiplicityValues'
 alt_czen_var = 'LineFit_redo'
 do_efficiency = False
@@ -79,6 +82,9 @@ ndoms_bin_centers = plotting.get_bin_centers(ndoms_bins)
 czen_bins = np.linspace(-1, 1, 40)
 czen_bin_centers = plotting.get_bin_centers(czen_bins)
 
+speed_bins = np.linspace(0, 0.5, 50)
+speed_bin_centers = plotting.get_bin_centers(speed_bins)
+
 
 #############################
 # ehe/cosmogenic flux (juliet)
@@ -89,6 +95,7 @@ ehe_ndoms = np.asarray([])
 ehe_czen = np.asarray([])
 ehe_speed = np.asarray([])
 ehe_L2_mask = np.asarray([])
+ehe_speed = np.asarray([])
 
 ehe_energy_weights_nocuts = None
 ehe_energy_weights_after_L2 = None
@@ -102,6 +109,7 @@ for s in juliet_species:
         charge = the_f.get_node(f'/{charge_var}').col(f'{charge_val}')
         ndoms = the_f.get_node(f'/{ndoms_var}').col(f'{ndoms_val}')
         czen = np.cos(the_f.get_node(f'/{czen_var}').col(f'{czen_val}'))
+        speed = the_f.get_node(f'/{speed_var}').col(f'{speed_val}')
         n_gen = cfg_file['juliet'][s][l]['n_files'] * evts_per_file
 
         weights = weighting.calc_juliet_weight_from_weight_dict_and_prop_matrix(
@@ -112,6 +120,7 @@ for s in juliet_species:
         ehe_charge = np.concatenate((ehe_charge, charge))
         ehe_ndoms = np.concatenate((ehe_ndoms, ndoms))
         ehe_czen = np.concatenate((ehe_czen, czen))
+        ehe_speed = np.concatenate((ehe_speed, speed))
 
         L2_q_mask = charge > q_cut
         L2_ndoms_mask = ndoms > ndom_cut
@@ -208,6 +217,7 @@ cor_charge = np.asarray([])
 cor_ndoms = np.asarray([])
 cor_weights = np.asarray([])
 cor_czen = np.asarray([])
+cor_speed = np.asarray([])
 for c in corsika_sets:
     print("Working on corsika {}".format(c))
     cor_file = pd.HDFStore(cfg_file['corsika'][c]['file'])
@@ -215,23 +225,26 @@ for c in corsika_sets:
         cfg_file['corsika'][c]['n_files']
         )
     this_cor_charge = cor_weighter.get_column(charge_var, charge_val)
-    q_mask = this_cor_charge > q_cut_for_plot
     try:
-        this_cor_ndoms = cor_weighter.get_column(ndoms_var, ndoms_val)[q_mask]
+        this_cor_ndoms = cor_weighter.get_column(ndoms_var, ndoms_val)
     except:
-        this_cor_ndoms = cor_weighter.get_column(alt_ndoms_var, ndoms_val)[q_mask]
+        this_cor_ndoms = cor_weighter.get_column(alt_ndoms_var, ndoms_val)
 
     try:
-        this_cor_czen = np.cos(cor_weighter.get_column(czen_var, czen_val))[q_mask]
+        this_cor_czen = np.cos(cor_weighter.get_column(czen_var, czen_val))
     except:
-        this_cor_czen = np.cos(cor_weighter.get_column(alt_czen_var, czen_val))[q_mask]
-
-    this_cor_weights = cor_weighter.get_weights(cr_flux)[q_mask] * livetime
+        this_cor_czen = np.cos(cor_weighter.get_column(alt_czen_var, czen_val))
     
+    this_cor_speed = cor_weighter.get_column(alt_speed_var, speed_val)
+
+    this_cor_weights = cor_weighter.get_weights(cr_flux) * livetime
+
+    q_mask = this_cor_charge > q_cut_for_plot
     cor_charge = np.concatenate((cor_charge, this_cor_charge[q_mask]))
-    cor_czen = np.concatenate((cor_czen, this_cor_czen))
-    cor_ndoms = np.concatenate((cor_ndoms, this_cor_ndoms))
-    cor_weights = np.concatenate((cor_weights, this_cor_weights))
+    cor_czen = np.concatenate((cor_czen, this_cor_czen[q_mask]))
+    cor_ndoms = np.concatenate((cor_ndoms, this_cor_ndoms[q_mask]))
+    cor_weights = np.concatenate((cor_weights, this_cor_weights[q_mask]))
+    cor_speed = np.concatenate((cor_speed, this_cor_speed[q_mask]))
     cor_file.close()
 
 
@@ -241,6 +254,7 @@ for c in corsika_sets:
 nugen_charges = np.asarray([])
 nugen_ndoms = np.asarray([])
 nugen_czens = np.asarray([])
+nugen_speeds = np.asarray([])
 nugen_atmo_weights = np.asarray([])
 nugen_astro_weights = np.asarray([])
 for n in nugen_sets:
@@ -262,6 +276,9 @@ for n in nugen_sets:
     except:
         this_nugen_czen = np.cos(cor_weighter.get_column(alt_czen_var, czen_val))
     
+    this_nugen_speed = nugen_weighter.get_column(alt_speed_var, speed_val)
+    
+    nugen_speeds = np.concatenate((nugen_speeds, this_nugen_speed[q_mask]))
     nugen_charges = np.concatenate((nugen_charges, this_nugen_charge[q_mask]))
     nugen_ndoms = np.concatenate((nugen_ndoms, this_nugen_ndoms[q_mask]))
     nugen_czens = np.concatenate((nugen_czens, this_nugen_czen[q_mask]))
@@ -280,6 +297,7 @@ for n in nugen_sets:
 data_charges = np.asarray([])
 data_ndoms = np.asarray([])
 data_czen = np.asarray([])
+data_speed = np.asarray([])
 for b in burn_samples:
     print("Working on burn samples {}".format(b))
     data_file = pd.HDFStore(cfg_file['burn_sample'][b]['file'])
@@ -294,6 +312,8 @@ for b in burn_samples:
         this_czen = np.cos(np.asarray(data_file.get(czen_var).get(czen_val)))
     except:
         this_czen = np.cos(np.asarray(data_file.get(alt_czen_var).get(czen_val)))
+    
+    this_speed = data_file.get(alt_speed_var).get(speed_val)
 
     # mask = (this_charge > q_cut) & (this_ndoms > ndom_cut) & (this_czen < -0.25)    
     # runs = np.asarray(data_file.get("I3EventHeader").get("Run"))
@@ -303,6 +323,7 @@ for b in burn_samples:
     # print(runs[mask])
     # print(events[mask])
     
+    data_speed = np.concatenate((data_speed, this_speed[q_mask]))
     data_charges = np.concatenate((data_charges, this_charge[q_mask]))
     data_ndoms = np.concatenate((data_ndoms, this_ndoms[q_mask]))
     data_czen = np.concatenate((data_czen, this_czen[q_mask]))
@@ -418,6 +439,40 @@ if do_plots:
     fig.tight_layout()
     fig.savefig('plots/hist_czen.png')
 
+
+    #############################
+    # histogram of linespeed
+    #############################
+    
+    sim_vars={
+        'cor': cor_speed[cor_L2_mask],
+        'nugen_atmo': nugen_speeds[nugen_L2_mask],
+        'nugen_astro': nugen_speeds[nugen_L2_mask],
+        'ehe': ehe_speed[ehe_L2_mask]
+    }
+    sim_weights={
+        'cor': cor_weights[cor_L2_mask],
+        'nugen_atmo': nugen_atmo_weights[nugen_L2_mask],
+        'nugen_astro': nugen_astro_weights[nugen_L2_mask],
+        'ehe': ehe_weights[ehe_L2_mask]
+    }
+    fig, ax, axr = plotting.do_1D_data_mc_comparison(
+        var_bins = speed_bins, sim_vars = sim_vars,
+        sim_weights = sim_weights, sim_labels = sim_labels,
+        data=data_speed[data_L2_mask]
+    )
+    ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
+        mode="expand", borderaxespad=0, ncol=2,
+        title="L3 (Q > {:d}, NDoms > {:d})".format(int(q_cut), int(ndom_cut))
+    )    
+    ax.set_yscale('log')
+    ax.set_ylim([1E-7, 1E5])
+    ax.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
+    axr.set_ylabel('Data/Sim')
+    axr.set_xlabel(r'LineFit Speed')
+    fig.tight_layout()
+    fig.savefig('plots/hist_speed.png')
+
     #############################
     # 2D: charge vs zenith
     #############################
@@ -470,3 +525,60 @@ if do_plots:
         
     fig.tight_layout()
     fig.savefig('plots/hist2d_q_czen_datamc.png', dpi=300)
+
+
+
+    #############################
+    # 2D: charge vs linefit speed
+    #############################
+    
+    sim_y_vals = {
+        'cor': cor_charge[cor_L2_mask],
+        'nugen_atmo': nugen_charges[nugen_L2_mask],
+        'nugen_astro': nugen_charges[nugen_L2_mask],
+        'ehe': ehe_charge[ehe_L2_mask]
+    }
+    sim_x_vals = {
+        'cor': cor_speed[cor_L2_mask],
+        'nugen_atmo': nugen_speeds[nugen_L2_mask],
+        'nugen_astro': nugen_speeds[nugen_L2_mask],
+        'ehe': ehe_speed[ehe_L2_mask]
+    }
+    set_labels={
+        'cor': r'Atm $\mu$ (H4a)',
+        'nugen_atmo': r'Atm $\nu$ (H3a, Sibyll 2.3c)',
+        'nugen_astro': r'Astro $\nu$ (north tracks, $\nu_{e}$ + $\nu_{\mu}$ only)',
+        'ehe': r'Cosmo $\nu$ (Ahlers GZK)',
+        'data': 'Burn Sample ({:.2f} days)'.format(livetime/(60*60*24))
+    }
+    data_y_vals = data_charges[data_L2_mask]
+    data_x_vals = data_speed[data_L2_mask]
+    my_map = plt.cm.plasma
+    plotting_options = {
+        'xlabel': r'LineFit Speed',
+        'ylabel': 'Q / PE',
+        'zlabel': 'Number of Events',
+        'cmap': my_map,
+        'norm': colors.LogNorm(),
+        'zlims':  (1E-5, 1E2)
+    }
+        
+    fig, plotting_products = plotting.do_2D_data_mc_comparison(
+        bins_x=speed_bins, bins_y = charge_bins,
+        sim_x_vals=sim_x_vals, sim_y_vals = sim_y_vals,
+        sim_weights=sim_weights, set_labels=set_labels,
+        data_x_vals=data_x_vals, data_y_vals=data_y_vals,
+        plotting_opts = plotting_options
+    )
+    for a in plotting_products['axes']:
+        plotting_products['axes'][a].set_yscale('log')
+        plotting_products['axes'][a].set_xlabel(plotting_options['xlabel'])
+        plotting_products['axes'][a].set_ylabel(plotting_options['ylabel'])
+    for a in plotting_products['cbars']:
+        plotting_products['cbars'][a].set_label(plotting_options['zlabel'])
+    plotting_products['cbars']['ratio'].set_label("Ratio")
+        
+    fig.tight_layout()
+    fig.savefig('plots/hist2d_q_speed_datamc.png', dpi=300)
+
+    del fig, plotting_products
