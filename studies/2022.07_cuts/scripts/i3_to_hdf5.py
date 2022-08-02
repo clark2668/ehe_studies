@@ -1,5 +1,5 @@
 #!/bin/sh /cvmfs/icecube.opensciencegrid.org/py3-v4.1.1/icetray-start
-#METAPROJECT /home/brian/IceCube/ehe/software/build_icetray/
+#METAPROJECT combo/V01-01-00
 
 from icecube import icetray, dataio, dataclasses, common_variables, linefit
 from I3Tray import I3Tray
@@ -24,13 +24,28 @@ filenamelist = []
 filenamelist.append(args.input_file)
 
 tray = I3Tray()
+tray.context['I3FileStager'] = dataio.get_stagers()
 tray.AddModule("I3Reader", filenamelist=filenamelist)
 
+# high Q filter (must have >1000 PE)
+def highQfilter(frame):
+    try:
+        charge = frame.Get("Homogenized_QTot")
+        if charge >= 1E3:
+            return 1
+        else:
+            return 0
+    except:
+        return 0
+
+tray.AddModule(highQfilter, 'highQ',
+    Streams=[icetray.I3Frame.Physics],
+    )
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
     Output=f'{args.output_file}.hdf5', 
     Keys=[
-        'I3EventHeader', 'CorsikaWeightMap', 'PolyplopiaPrimary', 
+        'I3EventHeader', 'CorsikaWeightMap', 'PolyplopiaPrimary', 'I3MCWeightDict',
         'CVMultiplicity', 'CVStatistics', 'Homogenized_QTot', 'EHELineFit',
         'LineFit'
     ],
