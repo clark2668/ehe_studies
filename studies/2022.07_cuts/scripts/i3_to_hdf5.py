@@ -31,7 +31,8 @@ tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf',
     Output=f'{args.output_file}.hdf5', 
     Keys=[
         'I3EventHeader', 'CorsikaWeightMap', 'PolyplopiaPrimary', 
-        'CVMultiplicity', 'CVStatistics', 'Homogenized_QTot', 'EHELineFit'
+        'CVMultiplicity', 'CVStatistics', 'Homogenized_QTot', 'EHELineFit',
+        'LineFit'
     ],
     SubEventStreams=['InIceSplit', 'Final']
     )
