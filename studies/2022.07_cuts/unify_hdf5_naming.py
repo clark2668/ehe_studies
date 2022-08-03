@@ -23,7 +23,8 @@ files_to_fix = [
     # "numu_high_energy_l2_prime_1k_merged.hd5",
     # "nutau_high_energy_l2_prime_1k_merged.hd5",
     # "tau_high_energy_l2_prime_1k_merged.hd5"
-    "combo_v2_21218.hdf5"
+    # "combo_v2_21218.hdf5"
+    "nue_high_energy_l2_prime_1k_merged_csms.hd5"
 ]
 
 for f_to_fix in files_to_fix:
