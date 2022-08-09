@@ -15,14 +15,14 @@ charge_val = cfg_file['variables']['charge']['value']
 livetime = 60*60*24*365 # 1 year
 
 def astro_flux(energy):
-    # flux of mu @ 100 TeV (basically the per-flavor, per-particle flux)
+    # flux of mu @ 100 TeV (per-flavor, per-particle flux)
     return 1.44e-18 / 2 * (energy/1e5)**-2.37
 
 
 which_cx = 'cteq5'
 qmin = 1E3
 
-flavor_selection = 'numu'
+flavor_selection = 'nue'
 selection = {
     'nue': 0,
     'numu': 1

@@ -34,3 +34,4 @@ def make_1D_juliet_nugen_comparison(
     axr.axhline(0, linestyle='--')
 
     return fig, ax, axr
+
