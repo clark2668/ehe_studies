@@ -42,12 +42,29 @@ tray.AddModule(highQfilter, 'highQ',
     Streams=[icetray.I3Frame.Physics],
     )
 
+def find_final_neutrino(frame, mctree_name):
+    mcTree = frame[mctree_name]
+    # primaryNeutrino = dataclasses.get_most_energetic_primary(mcTree)
+    primaries = mcTree.primaries
+    primaryNeutrino = primaries[0]
+    frame["PrimaryEvent"] = primaryNeutrino
+
+tray.AddModule(find_final_neutrino, 'findNeutrino',
+    mctree_name = 'I3MCTree',
+    Streams=[icetray.I3Frame.Physics]
+    )
+    
+
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
     Output=f'{args.output_file}.hdf5', 
     Keys=[
         'I3EventHeader', 'CorsikaWeightMap', 'PolyplopiaPrimary', 'I3MCWeightDict',
         'CVMultiplicity', 'CVStatistics', 'Homogenized_QTot', 'EHELineFit',
-        'LineFit'
+        'LineFit', 'PrimaryEvent', 'I3JulietPrimaryParticle', 
+        'PropagationMatrixNuE', 'PropagationMatrixNuMu', 'PropagationMatrixNuTau',
+        'JulietWeightDict', 
+        'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF', 'EHEPortiaEventSummarySRT'
+        
     ],
     SubEventStreams=['InIceSplit', 'Final']
     )
