@@ -2,13 +2,15 @@ import numpy as np
 import os
 from pathlib import Path
 
-output_directory_head = '/disk20/users/brian/IceCube/sim/CORSIKA-in-ice/level4/hdf5'
+# output_directory_head = '/disk20/users/brian/IceCube/sim/CORSIKA-in-ice/level4/hdf5'
+output_directory_head = '/disk20/users/brian/IceCube/juliet'
 
 # datasets = [21962, 22023]
-datasets = [21962]
+datasets = [22023]
+# datasets = ['nue_high_energy', 'numu_high_energy', 'nutau_high_energy', 'mu_high_energy', 'tau_high_energy']
+datasets = ['mu_high_energy']
 for d in datasets:
     print(d)
-    
     
     dag_file_name = f'dagman_{d}.dag'
     instructions = ""
