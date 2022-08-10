@@ -73,11 +73,11 @@ burn_sample:
 
 nugen:
   nue:
-    # file: "/disk20/users/brian/IceCube/sim/nugen/combo_21218.hdf5"
+    file: "/disk20/users/brian/IceCube/sim/nugen/combo_21218.hdf5"
     # file: "/disk20/users/brian/IceCube/unified_naming/original/combo_21218.hdf5"
-    # n_files: 1000
-    file: "/disk20/users/brian/IceCube/unified_naming/original/combo_v2_21218.hdf5"
-    n_files: 11991
+    n_files: 1000
+    # file: "/disk20/users/brian/IceCube/unified_naming/original/combo_v2_21218.hdf5"
+    # n_files: 11991
   numu:
     # file: "/disk20/users/brian/IceCube/sim/nugen/combo_21220.hdf5"
     file: "/disk20/users/brian/IceCube/unified_naming/original/combo_21220.hdf5"

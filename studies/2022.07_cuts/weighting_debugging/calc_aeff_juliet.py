@@ -1,3 +1,7 @@
+'''
+Calculate the juliet effective area, including cuts, and save to npz file for plotting later.
+'''
+
 import numpy as np
 import tables, yaml, copy
 from eheanalysis import weighting, plotting, analysis_9yr
@@ -6,7 +10,7 @@ from matplotlib import style
 import pandas as pd
 style.use('/home/brian/IceCube/ehe/max_tools/EHE_analysis/eheanalysis/ehe.mplstyle')
 
-cfg_file = 'config.yaml'
+cfg_file = '../config.yaml'
 cfg_file = yaml.safe_load(open(cfg_file))
 
 which_cx = 'cteq5'
@@ -15,7 +19,6 @@ qmin = 1E3
 # juliet
 juliet_species = ["nue", "numu", "nutau", "mu", "tau"]
 juliet_energy_levels = ["high_energy"]
-# juliet_species = ["numu"]
 neutrino_species = ["nue", "numu", "nutau"]
 
 energy_bins, energy_bin_centers = weighting.get_juliet_enu_binning()
@@ -109,51 +112,14 @@ for iS, s in enumerate(juliet_species):
         
         the_f.close()
 
-fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(2,3, figsize=(15,10))
-linestyles = ['-', '--', ':', '-.', '-', '--']
-e_mask = energy_bin_centers < 1E9 # block out energies for which we don't have surface fluxes yet
-
-# plot all neutrinos together
-for iN, n in enumerate(nu_areas_sum):
-    ax1.plot( energy_bin_centers[e_mask], nu_areas_sum[n].sum(axis=0)[e_mask], 
-        linestyle=linestyles[iN], label='{}'.format(n), drawstyle='steps-mid', linewidth=2)
-
-# plot all surface fluxes together
-for iS, s in enumerate(species_areas_sum):
-    ax2.plot( energy_bin_centers[e_mask], species_areas_sum[s].sum(axis=0)[e_mask], 
-        linestyle=linestyles[iS], label='{}'.format(s), drawstyle='steps-mid', linewidth=2)
-
-# nue comparison
-ax4.plot( energy_bin_centers[e_mask], species_areas_sum['nue'].sum(axis=0)[e_mask], 
-         linewidth=2, label="New")
-ax4.plot(analysis_9yr.nue_es_9yr, analysis_9yr.nue_aeff_9yr, 
-         linestyle='--', linewidth=2, label="2013 paper")
-ax4.set_title(r"$\nu_{e}$")
-
-# numu comparison
-ax5.plot( energy_bin_centers[e_mask], species_areas_sum['numu'].sum(axis=0)[e_mask], 
-         linewidth=2, label="New")
-ax5.plot(analysis_9yr.numu_es_9yr, analysis_9yr.numu_aeff_9yr, 
-         linestyle='--', linewidth=2, label="2013 paper")
-ax5.set_title(r"$\nu_{\mu}$")
-
-# nutau comparison
-ax6.plot( energy_bin_centers[e_mask], species_areas_sum['nutau'].sum(axis=0)[e_mask], 
-         linewidth=2, label="New")
-ax6.plot(analysis_9yr.nutau_es_9yr, analysis_9yr.nutau_aeff_9yr, 
-         linestyle='--', linewidth=2, label="2013 paper")
-ax6.set_title(r"$\nu_{\tau}$")
-
-
-for ax in [ax1, ax2, ax3, ax4, ax5, ax6]:
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-    ax.set_ylabel(r"Eff Area / $m^2$")
-    ax.set_xlabel(r"E$_{\nu}$ / GeV")
-    ax.legend(loc="upper left")
-    ax.set_ylim([1E-1, 1E5])
-    ax.set_xlim([1E5, 1E11])
-
-plt.tight_layout()
-fig.savefig(f'./eff_area.png', dpi=300)
-del fig, ax1
+import pickle as pickle
+output = open('juliet_aeffs.pkl', 'wb')
+pickle.dump(
+    {
+        'energy_bins': energy_bins, 
+        'energy_bin_centers': energy_bin_centers,
+        'juliet_nu_aeffs': nu_areas_sum, 
+        'juliet_species_aeffs': species_areas_sum
+    },
+    output
+)
