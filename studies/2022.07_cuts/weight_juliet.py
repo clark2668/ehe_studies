@@ -10,11 +10,7 @@ from eheanalysis import weighting
 n_gen = 10000 * 150
 livetime = 86400 * 365 # 1 year
 
-# he_file = 'juliet_weight_test.hd5'
-# he_file = 'juliet_weight_test_vhe.hd5'
-# he_file = '/home/mmeier/data/simulations/table_based_sim/juliet/mu/high_energy/l2_prime/1/Level2_prime_00000001.hd5'
-he_file = '/home/mmeier/data/simulations/table_based_sim/juliet/mu/high_energy/l2_prime/mu_high_energy_l2_prime_1k_merged.hd5'
-he_file = '/disk20/users/brian/IceCube/unified_naming/original/nue_high_energy_l2_prime_1k_merged.hd5'
+he_file = '/disk20/users/brian/IceCube/juliet/mu_high_energy_merged_1k.hdf5'
 
 with tables.open_file(he_file) as f:
 
@@ -58,7 +54,7 @@ with tables.open_file(he_file) as f:
     ax = fig.add_subplot(111)
     bins = np.linspace(4, 12, 60)
     evs1,_ ,__ = ax.hist(np.log10(energies), bins=bins, weights=weights_from_dict, histtype='step', label='Juliet Precalc')
-    evs2,_ ,__ = ax.hist(np.log10(energies), bins=bins, weights=weights_from_calc, histtype='step', label='Redo', linestyle='--')
+    evs2,_ ,__ = ax.hist(np.log10(energies), bins=bins, weights=weights_from_calc, histtype='step', label='Max/Brian Calculation', linestyle='--')
     ax.set_yscale('log')
     ax.set_xlabel('Primary Energy log10(GeV)')
     ax.set_ylabel('Weighted Counts/Year')
