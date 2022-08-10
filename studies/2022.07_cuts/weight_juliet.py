@@ -19,17 +19,10 @@ with tables.open_file(he_file) as f:
 
     primary = f.get_node('/I3JulietPrimaryParticle')
     energies = primary.col('energy')
-
-    # weight_dict = f.get_node('/JulietWeightDict')
-    # prop_matrix = f.get_node('/PropagationMatrixNuTau').col('item').reshape(-1,140)
-    # prop_matrix += f.get_node('/PropagationMatrixNuMu').col('item').reshape(-1,140)
-    # prop_matrix += f.get_node('/PropagationMatrixNuE').col('item').reshape(-1,140)
     
     weight_dict, prop_matrix, evts_per_file = weighting.get_juliet_weightdict_and_propmatrix(f)
 
-    # print(weight_dict.colnames)
-
-    # get weights as they are pre-calculated
+    # get weights as they are pre-calculated by the I3JulietWeigher
     flux_key = 'JulietPropagationMatrixNeutrinoFlux24'
     weights_from_dict = weighting.calc_juliet_weight_from_weight_dict(
         weight_dict = weight_dict,
@@ -38,10 +31,12 @@ with tables.open_file(he_file) as f:
         livetime = livetime
     )
 
-    # get weights by calculating them ourselves
+    # Now, get weights by calculating them ourselves
+    # flux 24 is J(E)*E^2 = 10^-8 [GeV/cm2/s/sr]
     def sample_flux(e_in_gev):
         return 1E-8 * (e_in_gev ** -2.)
     
+    # convolve over the propagation matrices ourselves
     weights_from_calc = weighting.calc_juliet_weight_from_weight_dict_and_prop_matrix(
         weight_dict = weight_dict,
         prop_matrix = prop_matrix,
