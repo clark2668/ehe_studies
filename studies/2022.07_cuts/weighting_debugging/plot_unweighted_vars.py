@@ -8,14 +8,13 @@ from matplotlib import style
 import pandas as pd
 style.use('/home/brian/IceCube/ehe/max_tools/EHE_analysis/eheanalysis/ehe.mplstyle')
 
-cfg_file = 'config.yaml'
+cfg_file = '../config.yaml'
 cfg_file = yaml.safe_load(open(cfg_file))
 
 bins_czen = np.linspace(-1, 1, 20)
 bins_azi = np.linspace(0, 2*np.pi, 20)
 
 juliet_species = ["nue", "numu", "nutau", "mu", "tau"]
-# juliet_species = ["mu"]
 
 geo_info = np.load("dom_loc.npz")
 om_x = geo_info["om_x"]
@@ -30,8 +29,9 @@ for j in juliet_species:
     with tables.open_file(the_file) as f:
         juliet_primary = f.get_node('/I3JulietPrimaryParticle')
         first_mctree = f.get_node('/PrimaryEvent')
-        x, y = np.unique(first_mctree.col('pdg_encoding'), return_counts=True)
-        print(y)
+        impact_param = f.get_node('/ClosestApproach').col('value')
+        # x, y = np.unique(first_mctree.col('pdg_encoding'), return_counts=True)
+        # print(y)
         
         fig, (ax1, ax2) = plt.subplots(1,2, figsize=(10,5))
         evs1,_ ,__ = ax1.hist(np.cos(juliet_primary.col('zenith')), bins=bins_czen, 
@@ -52,6 +52,17 @@ for j in juliet_species:
         plt.tight_layout()
         fig.savefig(f'./unweighted_plots/unweighted_angles_{j}.png')
         del fig, ax1, ax2
+        
+        fig, ax = plt.subplots(1,1)
+        bins = np.linspace(0, 900, 20)
+        ax.hist(impact_param, histtype='step', linewidth=3, bins=bins)
+        ax.set_xlabel('Distance of Closest Approach to I3 Center / m ')
+        ax.set_ylabel("Unweighted Events")
+        ax.set_title(f"{j}")
+        ax.set_ylim([0, 16000])
+        plt.tight_layout()
+        fig.savefig(f'./unweighted_plots/unweighted_impactparam_{j}.png')
+        del fig, ax
         
         bins = [np.linspace(-1000, 1000, 51), np.linspace(-1000, 1000, 51)]
         
