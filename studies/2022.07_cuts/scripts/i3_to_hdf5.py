@@ -2,6 +2,7 @@
 #METAPROJECT combo/V01-01-00
 
 from icecube import icetray, dataio, dataclasses, common_variables, linefit
+from icecube import phys_services
 from I3Tray import I3Tray
 from icecube import hdfwriter
 import numpy as np
@@ -42,18 +43,34 @@ tray.AddModule(highQfilter, 'highQ',
     Streams=[icetray.I3Frame.Physics],
     )
 
-def find_final_neutrino(frame, mctree_name):
+def find_primary(frame, mctree_name):
     mcTree = frame[mctree_name]
-    # primaryNeutrino = dataclasses.get_most_energetic_primary(mcTree)
     primaries = mcTree.primaries
-    primaryNeutrino = primaries[0]
-    frame["PrimaryEvent"] = primaryNeutrino
+    primaryEvent = primaries[0]
+    frame["PrimaryEvent"] = primaryEvent
 
-tray.AddModule(find_final_neutrino, 'findNeutrino',
+tray.AddModule(find_primary, 'findNeutrino',
     mctree_name = 'I3MCTree',
     Streams=[icetray.I3Frame.Physics]
     )
-    
+
+
+def calculate_closest_approach(frame, primary_name):
+    primaryEvent = frame[primary_name]
+    position = primaryEvent.pos
+    direction = primaryEvent.dir
+    origin = dataclasses.I3Position(0., 0., 0.)
+    approach = (position + direction * (direction*(origin - position))).magnitude
+    # just to validate with standard tool (only really works for numu)
+    # approach_v2 = phys_services.I3Calculator.closest_approach_distance(primaryEvent,origin)
+    # print("Closest Approach me {}, Calc {}".format(approach, approach_v2))
+    frame["ClosestApproach"] = dataclasses.I3Double(approach)
+        
+tray.AddModule(calculate_closest_approach, 'calcClosest',
+    primary_name = 'PrimaryEvent',
+    Streams=[icetray.I3Frame.Physics]
+    )
+        
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
     Output=f'{args.output_file}.hdf5', 
@@ -63,7 +80,8 @@ tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf',
         'LineFit', 'PrimaryEvent', 'I3JulietPrimaryParticle', 
         'PropagationMatrixNuE', 'PropagationMatrixNuMu', 'PropagationMatrixNuTau',
         'JulietWeightDict', 
-        'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF', 'EHEPortiaEventSummarySRT'
+        'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF', 'EHEPortiaEventSummarySRT',
+        'ClosestApproach'
         
     ],
     SubEventStreams=['InIceSplit', 'Final']
