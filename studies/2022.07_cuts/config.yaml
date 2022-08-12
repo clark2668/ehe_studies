@@ -69,19 +69,22 @@ burn_sample:
     file: "/disk20/users/brian/IceCube/unified_naming/original/combo_IC86-III-pass2_L4.hdf5"
     livetime: 2948421.03
 
-
-
 nugen:
   nue:
-    file: "/disk20/users/brian/IceCube/sim/nugen/combo_21218.hdf5"
-    # file: "/disk20/users/brian/IceCube/unified_naming/original/combo_21218.hdf5"
-    n_files: 1000
-    # file: "/disk20/users/brian/IceCube/unified_naming/original/combo_v2_21218.hdf5"
-    # n_files: 11991
+    file: "/disk20/users/brian/IceCube/nugen/hdf5/merged_21218_2756files.hdf5"
+    n_files: 2756
+    # file: "/disk20/users/brian/IceCube/nugen/hdf5/merged_21218_998files.hdf5"
+    # n_files: 998
   numu:
-    file: "/disk20/users/brian/IceCube/sim/nugen/combo_21220.hdf5"
-    # file: "/disk20/users/brian/IceCube/unified_naming/original/combo_21220.hdf5"
-    n_files: 1000
+    file: "/disk20/users/brian/IceCube/nugen/hdf5/merged_21220_3000files.hdf5"
+    n_files: 3000
+    # file: "/disk20/users/brian/IceCube/nugen/hdf5/merged_21220_1000files.hdf5"
+    # n_files: 1000
+  nutau:
+    file: "/disk20/users/brian/IceCube/nugen/hdf5/merged_21221_3000files.hdf5"
+    n_files: 3000
+    # file: "/disk20/users/brian/IceCube/nugen/hdf5/merged_21221_1000files.hdf5"
+    # n_files: 1000
 
 
 corsika:

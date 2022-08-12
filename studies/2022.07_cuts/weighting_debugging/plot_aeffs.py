@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import style
 from eheanalysis import weighting, plotting, analysis_9yr
+style.use('/home/brian/IceCube/ehe/max_tools/EHE_analysis/eheanalysis/ehe.mplstyle')
 
 
 import pickle as pickle
@@ -44,27 +46,29 @@ ax3.set_title("NuGen")
 
 # nue comparison
 ax4.plot( energy_bin_centers[e_mask], juliet_nu_aeffs['nue'].sum(axis=0)[e_mask], 
-         linewidth=2, label="Juliet New")
+         linewidth=3, label="Juliet New")
 ax4.plot( energy_bin_centers, nugen_nu_aeffs['nue'][0], 
-         linewidth=2, label="NuGen", linestyle='-.')
+         linewidth=3, label="NuGen", linestyle='-.')
 ax4.plot(analysis_9yr.nue_es_9yr, analysis_9yr.nue_aeff_9yr, 
-         linestyle='--', linewidth=2, label="2013 paper")
+         linestyle='--', linewidth=3, label="2013 paper")
 ax4.set_title(r"$\nu_{e}$")
 
 # numu comparison
 ax5.plot( energy_bin_centers[e_mask], juliet_nu_aeffs['numu'].sum(axis=0)[e_mask], 
-         linewidth=2, label="Juliet New")
+         linewidth=3, label="Juliet New")
 ax5.plot( energy_bin_centers, nugen_nu_aeffs['numu'][0], 
-         linewidth=2, label="NuGen", linestyle='-.')
+         linewidth=3, label="NuGen", linestyle='-.')
 ax5.plot(analysis_9yr.numu_es_9yr, analysis_9yr.numu_aeff_9yr, 
-         linestyle='--', linewidth=2, label="2013 paper")
+         linestyle='--', linewidth=3, label="2013 paper")
 ax5.set_title(r"$\nu_{\mu}$")
 
 # nutau comparison
 ax6.plot( energy_bin_centers[e_mask], juliet_nu_aeffs['nutau'].sum(axis=0)[e_mask], 
-         linewidth=2, label="Juliet New")
+         linewidth=3, label="Juliet New")
+ax6.plot( energy_bin_centers, nugen_nu_aeffs['nutau'][0], 
+         linewidth=3, label="NuGen", linestyle='-.')
 ax6.plot(analysis_9yr.nutau_es_9yr, analysis_9yr.nutau_aeff_9yr, 
-         linestyle='--', linewidth=2, label="2013 paper")
+         linestyle='--', linewidth=3, label="2013 paper")
 ax6.set_title(r"$\nu_{\tau}$")
 
 

@@ -13,7 +13,7 @@ cfg_file = yaml.safe_load(open(cfg_file))
 which_cx = 'cteq5'
 qmin = 1E3
 
-neutrino_species = ["nue", "numu"]
+neutrino_species = ["nue", "numu", "nutau"]
 
 nugen_aeff = {
     

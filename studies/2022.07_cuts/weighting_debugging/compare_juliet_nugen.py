@@ -6,7 +6,7 @@ from matplotlib import style
 import pandas as pd
 style.use('/home/brian/IceCube/ehe/max_tools/EHE_analysis/eheanalysis/ehe.mplstyle')
 
-cfg_file = 'config.yaml'
+cfg_file = '../config.yaml'
 cfg_file = yaml.safe_load(open(cfg_file))
 charge_var = cfg_file['variables']['charge']['variable']
 charge_val = cfg_file['variables']['charge']['value']
@@ -20,12 +20,13 @@ def astro_flux(energy):
 
 
 which_cx = 'cteq5'
-qmin = 1E3
+qmin = 2E4
 
-flavor_selection = 'nue'
+flavor_selection = 'numu'
 selection = {
     'nue': 0,
-    'numu': 1
+    'numu': 1,
+    'nutau': 2
 }
 
 
@@ -105,6 +106,7 @@ fig, ax, axr = jnh.make_1D_juliet_nugen_comparison(
 ax.legend(loc="upper left")
 ax.set_ylabel("Events / {:.2f} days".format(livetime/60/60/24))
 ax.set_title('{}, juliet with {}'.format(flavor_selection, which_cx))
+ax.set_ylim([0, 0.5])
 axr.set_xlabel(r'cos($\theta$)')
 axr.set_ylabel('Juliet/NuGen - 1')
 axr.set_ylim([-0.25,0.25])
@@ -123,7 +125,7 @@ ax.legend(loc="upper left")
 ax.set_yscale('log')
 ax.set_title('{}, juliet with {}'.format(flavor_selection, which_cx))
 ax.set_ylabel("Events / {:.2f} days".format(livetime/60/60/24))
-ax.set_ylim([1E-2, 1E0])
+ax.set_ylim([1E-2, 5E0])
 axr.set_xscale('log')
 axr.set_xlabel(r'Charge / PE')
 axr.set_ylabel('Juliet/NuGen - 1')
@@ -146,7 +148,7 @@ ax.legend(loc="upper left")
 ax.set_yscale('log')
 ax.set_title('{}, juliet with {}'.format(flavor_selection, which_cx))
 ax.set_ylabel("Events / {:.2f} days".format(livetime/60/60/24))
-ax.set_ylim([1E-3, 1E1])
+ax.set_ylim([1E-3, 5E0])
 ax.legend(loc='upper right')
 axr.set_xscale('log')
 axr.set_xlabel(r'E$_{\nu}$ / GeV')
