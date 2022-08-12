@@ -1,6 +1,10 @@
-log    = /scratch/brian/trash/log/$(infile).log
-output = /scratch/brian/trash/out/$(infile).out
-error = /scratch/brian/trash/err/$(infile).err
+#log    = /scratch/brian/trash/log/$(infile).log
+#output = /scratch/brian/trash/out/$(infile).out
+#error = /scratch/brian/trash/err/$(infile).err
+
+log    = /condor/users/brian/trash/log/$(infile).log
+output = /condor/users/brian/trash/out/$(infile).out
+error = /condor/users/brian/trash/err/$(infile).err
 
 request_cpus = 1
 request_memory = 1GB

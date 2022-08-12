@@ -44,7 +44,10 @@ tray.AddModule(highQfilter, 'highQ',
     )
 
 def find_primary(frame, mctree_name):
-    mcTree = frame[mctree_name]
+    try:
+        mcTree = frame[mctree_name]
+    except:
+        mcTree = frame['I3MCTree_preMuonProp'] # get this if the other isn't available
     primaries = mcTree.primaries
     primaryEvent = primaries[0]
     frame["PrimaryEvent"] = primaryEvent
