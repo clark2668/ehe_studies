@@ -1,0 +1,37 @@
+CONFIG config.dagman
+
+JOB job1 job.sub
+VARS job1 year="2010"
+
+JOB job2 job.sub
+VARS job2 year="2011"
+
+JOB job3 job.sub
+VARS job3 year="2012"
+
+JOB job4 job.sub
+VARS job4 year="2013"
+
+JOB job5 job.sub
+VARS job5 year="2014"
+
+JOB job6 job.sub
+VARS job6 year="2015"
+
+JOB job7 job.sub
+VARS job7 year="2016"
+
+JOB job8 job.sub
+VARS job8 year="2017"
+
+JOB job9 job.sub
+VARS job9 year="2018"
+
+JOB job10 job.sub
+VARS job10 year="2019"
+
+JOB job11 job.sub
+VARS job11 year="2020"
+
+JOB job12 job.sub
+VARS job12 year="2021"
