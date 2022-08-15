@@ -58,22 +58,24 @@ tray.AddModule(find_primary, 'findNeutrino',
     )
 
 
-def calculate_closest_approach(frame, primary_name):
-    primaryEvent = frame[primary_name]
-    position = primaryEvent.pos
-    direction = primaryEvent.dir
-    origin = dataclasses.I3Position(0., 0., 0.)
-    approach = (position + direction * (direction*(origin - position))).magnitude
-    # just to validate with standard tool (only really works for numu)
-    # approach_v2 = phys_services.I3Calculator.closest_approach_distance(primaryEvent,origin)
-    # print("Closest Approach me {}, Calc {}".format(approach, approach_v2))
-    frame["ClosestApproach"] = dataclasses.I3Double(approach)
+# def calculate_closest_approach(frame, primary_name):
+#     primaryEvent = frame[primary_name]
+#     position = primaryEvent.pos
+#     direction = primaryEvent.dir
+#     origin = dataclasses.I3Position(0., 0., 0.)
+#     approach = (position + direction * (direction*(origin - position))).magnitude
+#     # just to validate with standard tool (only really works for numu)
+#     # approach_v2 = phys_services.I3Calculator.closest_approach_distance(primaryEvent,origin)
+#     # print("Closest Approach me {}, Calc {}".format(approach, approach_v2))
+#     frame["ClosestApproach"] = dataclasses.I3Double(approach)
         
-tray.AddModule(calculate_closest_approach, 'calcClosest',
-    primary_name = 'PrimaryEvent',
-    Streams=[icetray.I3Frame.Physics]
-    )
-        
+# tray.AddModule(calculate_closest_approach, 'calcClosest',
+#     primary_name = 'PrimaryEvent',
+#     Streams=[icetray.I3Frame.Physics]
+#     )
+
+def calculate_saturatedness(frame):
+     
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
     Output=f'{args.output_file}.hdf5', 
