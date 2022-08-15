@@ -49,8 +49,8 @@ for iS, s in enumerate(juliet_species):
         muon_bundle_pass = analysis_9yr.muon_bundle_cut_pass_9yr(recozen, npe)
         track_quality_pass = analysis_9yr.track_quality_cut_pass_9yr(fitqual, npe)
         total_pass = np.logical_and(muon_bundle_pass, track_quality_pass)
-        muon_bundle_pass_3yr = analysis_9yr.muon_bundle_cut_pass_3yr(recozen, npe)
-        total_pass = muon_bundle_pass_3yr
+        # muon_bundle_pass_3yr = analysis_9yr.muon_bundle_cut_pass_3yr(recozen, npe)
+        # total_pass = muon_bundle_pass_3yr
 
         # first, get the weighting for this species specifically
         area = weighting.calc_juliet_effective_area(
@@ -64,8 +64,8 @@ for iS, s in enumerate(juliet_species):
         for iN, n in enumerate(neutrino_species):
             print("  Working on neutrino species {}".format(n))
             prop_i = prop_matrix[iN]
-            any_nans = np.isnan(np.asarray(prop_i.col('item').reshape(-1, 140))).any()
-            print("    Have any nans {}".format(any_nans))
+            # any_nans = np.isnan(np.asarray(prop_i.col('item').reshape(-1, 140))).any()
+            # print("    Have any nans {}".format(any_nans))
             area = weighting.calc_juliet_effective_area(
                 energies = energies, weight_dict=weight_dict, n_gen = n_gen,
                 energy_bins = energy_bins,  prop_matrix=prop_i,

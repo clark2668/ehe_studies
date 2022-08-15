@@ -22,7 +22,7 @@ def astro_flux(energy):
 which_cx = 'cteq5'
 qmin = 2E4
 
-flavor_selection = 'numu'
+flavor_selection = 'nutau'
 selection = {
     'nue': 0,
     'numu': 1,
