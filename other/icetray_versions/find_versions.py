@@ -1,6 +1,11 @@
 #!/bin/sh /cvmfs/icecube.opensciencegrid.org/py3-v4.1.1/icetray-start
 #METAPROJECT /data/user/brianclark/IceCube/EHE/software/build_icetray
 
+'''
+Piece of code to loop over I frames and pull out icetray svn versions
+'''
+
+
 import numpy as np
 from tqdm import tqdm
 from icecube import icetray, dataio, portia, ophelia

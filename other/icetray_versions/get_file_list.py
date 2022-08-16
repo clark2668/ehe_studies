@@ -3,6 +3,9 @@ Save the path to the first data file in a run to a list
 (faster to access later)
 '''
 
+# good info on using the good run list
+# https://wiki.icecube.wisc.edu/index.php/Goodrunlist
+# ditto: https://wiki.icecube.wisc.edu/index.php/Offline_Processing_L2_and_L3#Find_the_Data_Folder_and_the_GCD_File
 
 from icecube.phys_services import goodrunlist
 import numpy as np
