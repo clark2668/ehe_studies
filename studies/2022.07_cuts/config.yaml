@@ -15,40 +15,24 @@ variables:
 juliet:
   nue:
     high_energy:
-      # file: "/home/mmeier/data/simulations/table_based_sim/juliet/nue/high_energy/l2_prime/nue_high_energy_l2_prime_1k_merged.hd5"
-      # file: "/home/mmeier/data/simulations/table_based_sim/juliet/nue/high_energy/l2_prime/1/Level2_prime_00000001.hd5"
-      # file_cteq5: "/disk20/users/brian/IceCube/unified_naming/original/nue_high_energy_l2_prime_1k_merged.hd5"
-      file_cteq5: "/disk20/users/brian/IceCube/juliet/nue_high_energy_merged_1k.hdf5"
-      file_csms: "/disk20/users/brian/IceCube/unified_naming/original/nue_high_energy_l2_prime_1k_merged_csms.hd5"
-      n_files: 1000
+      file_cteq5: "/disk20/users/brian/IceCube/juliet/nue_high_energy_merged_998files.hdf5"
+      n_files: 998
   numu:
     high_energy:
-      # file: "/home/mmeier/data/simulations/table_based_sim/juliet/numu/high_energy/l2_prime/numu_high_energy_l2_prime_1k_merged.hd5"
-      # file_cteq5: "/disk20/users/brian/IceCube/unified_naming/original/numu_high_energy_l2_prime_1k_merged.hd5"
-      file_cteq5: "/disk20/users/brian/IceCube/juliet/numu_high_energy_merged_1k.hdf5"
-      file_csms: "/disk20/users/brian/IceCube/unified_naming/original/numu_high_energy_l2_prime_1k_merged.hd5"
-      n_files: 1000
+      file_cteq5: "/disk20/users/brian/IceCube/juliet/numu_high_energy_merged_999files.hdf5"
+      n_files: 999
   nutau:
     high_energy:
-      # file: "/home/mmeier/data/simulations/table_based_sim/juliet/nutau/high_energy/l2_prime/nutau_high_energy_l2_prime_1k_merged.hd5"
-      # file_cteq5: "/disk20/users/brian/IceCube/unified_naming/original/nutau_high_energy_l2_prime_1k_merged.hd5"
-      file_cteq5: "/disk20/users/brian/IceCube/juliet/nutau_high_energy_merged_1k.hdf5"
-      file_csms: "/disk20/users/brian/IceCube/unified_naming/original/numu_high_energy_l2_prime_1k_merged.hd5"
-      n_files: 1000
+      file_cteq5: "/disk20/users/brian/IceCube/juliet/nutau_high_energy_merged_996files.hdf5"
+      n_files: 996
   mu:
     high_energy:
-      # file: "/home/mmeier/data/simulations/table_based_sim/juliet/mu/high_energy/l2_prime/mu_high_energy_l2_prime_1k_merged.hd5"
-      # file_cteq5: "/disk20/users/brian/IceCube/unified_naming/original/mu_high_energy_l2_prime_1k_merged.hd5"
-      file_cteq5: "/disk20/users/brian/IceCube/juliet/mu_high_energy_merged_1k.hdf5"
-      file_csms: "/disk20/users/brian/IceCube/unified_naming/original/numu_high_energy_l2_prime_1k_merged.hd5"
-      n_files: 1000
+      file_cteq5: "/disk20/users/brian/IceCube/juliet/mu_high_energy_merged_998files.hdf5"
+      n_files: 998
   tau:
     high_energy:
-      # file: "/home/mmeier/data/simulations/table_based_sim/juliet/tau/high_energy/l2_prime/tau_high_energy_l2_prime_1k_merged.hd5"
-      # file_cteq5: "/disk20/users/brian/IceCube/unified_naming/original/numu_high_energy_l2_prime_1k_merged.hd5"
-      file_cteq5: "/disk20/users/brian/IceCube/juliet/tau_high_energy_merged_1k.hdf5"
-      file_csms: "/disk20/users/brian/IceCube/unified_naming/original/tau_high_energy_l2_prime_1k_merged.hd5"
-      n_files: 1000
+      file_cteq5: "/disk20/users/brian/IceCube/juliet/tau_high_energy_merged_999files.hdf5"
+      n_files: 999
 
 
 burn_sample:
@@ -74,7 +58,7 @@ nugen:
     file: "/disk20/users/brian/IceCube/nugen/hdf5/merged_21218_11991files.hdf5"
     n_files: 11991
     # file: "/disk20/users/brian/IceCube/nugen/hdf5/merged_21218_2756files.hdf5"
-    # n_files: 2756
+    # n_files: 2756 
     # file: "/disk20/users/brian/IceCube/nugen/hdf5/merged_21218_998files.hdf5"
     # n_files: 998
   numu:
