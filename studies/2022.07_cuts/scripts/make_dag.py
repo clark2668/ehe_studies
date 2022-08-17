@@ -3,16 +3,16 @@ import os
 from pathlib import Path
 
 # output_directory_head = '/disk20/users/brian/IceCube/sim/CORSIKA-in-ice/level4/hdf5'
-# output_directory_head = '/disk20/users/brian/IceCube/juliet'
-output_directory_head = '/disk20/users/brian/IceCube/nugen/hdf5/'
+output_directory_head = '/disk20/users/brian/IceCube/juliet'
+# output_directory_head = '/disk20/users/brian/IceCube/nugen/hdf5/'
 
 # datasets = [21962, 22023]
 datasets = [22023]
 # datasets = ['nue_high_energy', 'numu_high_energy', 'nutau_high_energy', 'mu_high_energy', 'tau_high_energy']
 # datasets = ['mu_high_energy']
-datasets = ['numu_high_energy']
-# datasets = ['nue_high_energy', 'nutau_high_energy', 'mu_high_energy', 'tau_high_energy']
-datasets = [21218, 21220, 21221]
+# datasets = ['numu_high_energy']
+datasets = ['nue_high_energy', 'numu_high_energy', 'nutau_high_energy', 'tau_high_energy']
+# datasets = [21218, 21220, 21221]
 
 for d in datasets:
     print(d)

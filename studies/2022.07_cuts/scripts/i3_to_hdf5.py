@@ -74,8 +74,42 @@ tray.AddModule(find_primary, 'findNeutrino',
 #     Streams=[icetray.I3Frame.Physics]
 #     )
 
-def calculate_saturatedness(frame):
-     
+def count_cal_errata(frame):
+    if frame.Has('CalibrationErrata'):
+        cal_errata = frame.Get('CalibrationErrata')
+        len_cal_errata = len(cal_errata)
+        frame['LenCalErrata'] = icetray.I3Int(len_cal_errata)
+    else:
+        frame['LenCalErrata'] = icetray.I3Int(0)
+    # header = frame.Get("I3EventHeader")
+    # runid = header.run_id
+    # evid = header.event_id
+    # thelen = frame.Get("LenCalErrata")
+    # print(f"Run {runid}, Evid {evid}, Cal Err: {thelen}")
+
+tray.AddModule(count_cal_errata, 'count_cal_errata',
+                Streams=[icetray.I3Frame.Physics]
+                )
+
+
+def count_sat_windows(frame):
+    if frame.Has("SaturationWindows"):
+        sat_windows = frame.Get("SaturationWindows")
+        len_sat_windows = len(sat_windows)
+        frame['LenSatWindows'] = icetray.I3Int(len_sat_windows)
+    else:
+        frame['LenSatWindows'] = icetray.I3Int(0)
+    # header = frame.Get("I3EventHeader")
+    # runid = header.run_id
+    # evid = header.event_id
+    # thelen = frame.Get("LenSatWindows")
+    # print(f"Run {runid}, Evid {evid}, Cal Sat: {thelen}")
+   
+
+tray.AddModule(count_sat_windows, 'count_sat_windows',
+                Streams=[icetray.I3Frame.Physics]
+                )
+
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
     Output=f'{args.output_file}.hdf5', 
@@ -86,7 +120,7 @@ tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf',
         'PropagationMatrixNuE', 'PropagationMatrixNuMu', 'PropagationMatrixNuTau',
         'JulietWeightDict', 
         'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF', 'EHEPortiaEventSummarySRT',
-        'ClosestApproach'
+        'ClosestApproach', 'LenCalErrata', 'LenSatWindows'
         
     ],
     SubEventStreams=['InIceSplit', 'Final']
