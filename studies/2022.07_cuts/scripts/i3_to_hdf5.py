@@ -1,6 +1,7 @@
 #!/bin/sh /cvmfs/icecube.opensciencegrid.org/py3-v4.1.1/icetray-start
 #METAPROJECT combo/V01-01-00
 
+from multiprocessing.sharedctypes import Value
 from icecube import icetray, dataio, dataclasses, common_variables, linefit
 from icecube import phys_services
 from I3Tray import I3Tray
@@ -19,7 +20,23 @@ parser.add_argument("-o", type=str,
     help='''full path to the output file, without file extention. 
             That is, provide "test" not "test.i3.bz2"''',
     )
+parser.add_argument("-c", type=str,
+    dest="corsika_selection", required=False,
+    help="If you are processing Max's high energy corsika, do you want to select for proton or iron?"
+    )
 args = parser.parse_args()
+
+select_this_cor_species = None
+if args.corsika_selection:
+    cor_sel = args.corsika_selection.lower() # reduce to lower case
+    if not cor_sel in ["p", "fe"]:
+        raise ValueError(f"Corsika species {cor_sel} not supported")
+    if cor_sel == "p":
+        select_this_cor_species = dataclasses.I3Particle.PPlus
+    elif cor_sel == "fe":
+        select_this_cor_species = dataclasses.I3Particle.Fe56Nucleus
+    print(f"Selecting for corsika species {select_this_cor_species}")
+    
 
 filenamelist = []
 filenamelist.append(args.input_file)
@@ -27,6 +44,28 @@ filenamelist.append(args.input_file)
 tray = I3Tray()
 tray.context['I3FileStager'] = dataio.get_stagers()
 tray.AddModule("I3Reader", filenamelist=filenamelist)
+
+def filter_corsika_primary(frame, select_this_type):
+    
+    proton = dataclasses.I3Particle.PPlus
+    iron = dataclasses.I3Particle.Fe56Nucleus
+        
+    if frame.Has("CorsikaWeightMap"):
+        weight_map = frame.Get("CorsikaWeightMap")
+        primary_type = int(weight_map['PrimaryType'])
+        if(primary_type == select_this_type ):
+            print("Keep {}".format(primary_type))
+            return 1
+        else:
+            print("Trash {}".format(primary_type))
+            return 0
+    else:
+        return 0
+    
+tray.AddModule(filter_corsika_primary, 'filt_cor',
+    select_this_type = select_this_cor_species,
+    Streams=[icetray.I3Frame.DAQ, icetray.I3Frame.Physics]
+    )
 
 # high Q filter (must have >1000 PE)
 def highQfilter(frame):
@@ -109,6 +148,12 @@ def count_sat_windows(frame):
 tray.AddModule(count_sat_windows, 'count_sat_windows',
                 Streams=[icetray.I3Frame.Physics]
                 )
+
+tray.AddModule('I3Writer', 'writer',
+    # DropOrphanStreams=[icetray.I3Frame.DAQ],
+    Streams=[icetray.I3Frame.TrayInfo, icetray.I3Frame.DAQ, 
+             icetray.I3Frame.Physics, icetray.I3Frame.Simulation],
+    Filename=f'{args.output_file}.i3.zst')
 
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 

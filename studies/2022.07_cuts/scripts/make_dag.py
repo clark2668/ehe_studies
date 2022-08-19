@@ -2,21 +2,16 @@ import numpy as np
 import os
 from pathlib import Path
 
-# output_directory_head = '/disk20/users/brian/IceCube/sim/CORSIKA-in-ice/level4/hdf5'
-output_directory_head = '/disk20/users/brian/IceCube/juliet'
+output_directory_head = '/disk20/users/brian/IceCube/corsika/level4/hdf5'
+# output_directory_head = '/disk20/users/brian/IceCube/juliet'
 # output_directory_head = '/disk20/users/brian/IceCube/nugen/hdf5/'
 
-# datasets = [21962, 22023]
-datasets = [22023]
-# datasets = ['nue_high_energy', 'numu_high_energy', 'nutau_high_energy', 'mu_high_energy', 'tau_high_energy']
-# datasets = ['mu_high_energy']
-# datasets = ['numu_high_energy']
-datasets = ['nue_high_energy', 'numu_high_energy', 'nutau_high_energy', 'tau_high_energy']
-# datasets = [21218, 21220, 21221]
+datasets = ['nue_high_energy', 'numu_high_energy', 'nutau_high_energy', 'mu_high_energy', 'tau_high_energy']
+datasets = [21962, 22023]
 
 for d in datasets:
     print(d)
-    
+        
     dag_file_name = f'dagman_{d}.dag'
     instructions = ""
     instructions += 'CONFIG config.dagman\n'
@@ -29,8 +24,8 @@ for d in datasets:
     in_filelist = open(f'files_{d}.txt', 'r')
     for in_file in in_filelist.readlines():
 
-        # if main_index > 10:
-        # 	continue
+        # if main_index > 2:
+            # continue
 
         in_file = in_file.rstrip('\n') # remove the newline  
         in_dir, in_file = os.path.split(in_file) # split between path and filename
@@ -39,9 +34,23 @@ for d in datasets:
         out_dir = output_directory_head + f'/{d}/'+ f'/{in_mid_dir}/' 
         out_file = f'{in_file_noext}'
         
-        instructions = ""
-        instructions += f'JOB job_{main_index} job.sub \n'
-        instructions += f'VARS job_{main_index} indir="{in_dir}" infile="{in_file}" outdir="{out_dir}" outfile="{out_file}" \n\n'
+        if d not in [21962, 22023]:
+            instructions = ""
+            instructions += f'JOB job_{main_index} job.sub \n'
+            instructions += f'VARS job_{main_index} indir="{in_dir}" infile="{in_file}" outdir="{out_dir}" outfile="{out_file}" \n\n'
+        else:
+            # special
+            # in the case of EHE corsika, we want to write out two files
+            # one for proton, and one for iron
+            instructions = ""
+            instructions += f'JOB job_{main_index} job.sub \n'
+            instructions += f'VARS job_{main_index} indir="{in_dir}" infile="{in_file}" outdir="{out_dir}" outfile="{out_file}_p" corsel="p"\n\n'
+            main_index+=1
+            
+            instructions += ""
+            instructions += f'JOB job_{main_index} job.sub \n'
+            instructions += f'VARS job_{main_index} indir="{in_dir}" infile="{in_file}" outdir="{out_dir}" outfile="{out_file}_fe" corsel="fe"\n\n'
+
         
         with open(dag_file_name, 'a') as f:
             f.write(instructions)
