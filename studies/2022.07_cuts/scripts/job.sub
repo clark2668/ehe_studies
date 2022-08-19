@@ -10,6 +10,7 @@ should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 
 executable = job.sh
+#arguments = $(indir) $(infile) $(outdir) $(outfile) $(corsel)
 arguments = $(indir) $(infile) $(outdir) $(outfile) $(corsel)
 
 queue

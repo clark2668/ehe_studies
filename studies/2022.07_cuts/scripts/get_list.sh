@@ -5,17 +5,24 @@
 # ls /home/mmeier/data/simulations/table_based_sim/juliet/mu/high_energy/l2_prime/1/*.zst > files_mu_high_energy.txt
 # ls /home/mmeier/data/simulations/table_based_sim/juliet/tau/high_energy/l2_prime/1/*.zst > files_tau_high_energy.txt
 
-# ls /home/mmeier/data/simulations/table_based_sim/juliet/nue/very_high_energy/l2_prime_cteq/1/*.zst > files_nue_high_energy.txt
-# ls /home/mmeier/data/simulations/table_based_sim/juliet/numu/very_high_energy/l2_prime_cteq/1/*.zst > files_numu_high_energy.txt
-# ls /home/mmeier/data/simulations/table_based_sim/juliet/nutau/very_high_energy/l2_prime_cteq/1/*.zst > files_nutau_high_energy.txt
-# ls /home/mmeier/data/simulations/table_based_sim/juliet/mu/very_high_energy/l2_prime_cteq/1/*.zst > files_mu_high_energy.txt
-# ls /home/mmeier/data/simulations/table_based_sim/juliet/tau/very_high_energy/l2_prime_cteq/1/*.zst > files_tau_high_energy.txt
+# ls /home/mmeier/data/simulations/table_based_sim/juliet/nue/very_high_energy/l2_prime/1/*.zst > files_nue_very_high_energy.txt
+# ls /home/mmeier/data/simulations/table_based_sim/juliet/numu/very_high_energy/l2_prime/1/*.zst > files_numu_very_high_energy.txt
+# ls /home/mmeier/data/simulations/table_based_sim/juliet/nutau/very_high_energy/l2_prime/1/*.zst > files_nutau_very_high_energy.txt
+# ls /home/mmeier/data/simulations/table_based_sim/juliet/mu/very_high_energy/l2_prime/1/*.zst > files_mu_very_high_energy.txt
+# ls /home/mmeier/data/simulations/table_based_sim/juliet/tau/very_high_energy/l2_prime/1/*.zst > files_tau_very_high_energy.txt
 
 # hdfwriter-merge /disk20/users/brian/IceCube/juliet/nue_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/nue_high_energy_merged_998files.hdf5
 # hdfwriter-merge /disk20/users/brian/IceCube/juliet/numu_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/numu_high_energy_merged_999files.hdf5
 # hdfwriter-merge /disk20/users/brian/IceCube/juliet/nutau_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/nutau_high_energy_merged_996files.hdf5
 # hdfwriter-merge /disk20/users/brian/IceCube/juliet/mu_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/mu_high_energy_merged_998files.hdf5
 # hdfwriter-merge /disk20/users/brian/IceCube/juliet/tau_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/tau_high_energy_merged_999files.hdf5
+
+hdfwriter-merge /disk20/users/brian/IceCube/juliet/nue_very_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/nue_high_energy_merged_998files.hdf5
+hdfwriter-merge /disk20/users/brian/IceCube/juliet/numu_very_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/numu_high_energy_merged_999files.hdf5
+hdfwriter-merge /disk20/users/brian/IceCube/juliet/nutau_very_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/nutau_high_energy_merged_996files.hdf5
+hdfwriter-merge /disk20/users/brian/IceCube/juliet/mu_very_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/mu_high_energy_merged_998files.hdf5
+hdfwriter-merge /disk20/users/brian/IceCube/juliet/tau_very_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/tau_high_energy_merged_999files.hdf5
+
 
 # nugen stuff
 

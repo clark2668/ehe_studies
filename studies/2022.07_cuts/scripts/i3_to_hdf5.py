@@ -61,11 +61,12 @@ def filter_corsika_primary(frame, select_this_type):
             return 0
     else:
         return 0
-    
-tray.AddModule(filter_corsika_primary, 'filt_cor',
-    select_this_type = select_this_cor_species,
-    Streams=[icetray.I3Frame.DAQ, icetray.I3Frame.Physics]
-    )
+
+if select_this_cor_species is not None:
+    tray.AddModule(filter_corsika_primary, 'filt_cor',
+        select_this_type = select_this_cor_species,
+        Streams=[icetray.I3Frame.DAQ, icetray.I3Frame.Physics]
+        )
 
 # high Q filter (must have >1000 PE)
 def highQfilter(frame):
