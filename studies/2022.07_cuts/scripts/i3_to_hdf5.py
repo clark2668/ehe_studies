@@ -149,11 +149,11 @@ tray.AddModule(count_sat_windows, 'count_sat_windows',
                 Streams=[icetray.I3Frame.Physics]
                 )
 
-tray.AddModule('I3Writer', 'writer',
-    # DropOrphanStreams=[icetray.I3Frame.DAQ],
-    Streams=[icetray.I3Frame.TrayInfo, icetray.I3Frame.DAQ, 
-             icetray.I3Frame.Physics, icetray.I3Frame.Simulation],
-    Filename=f'{args.output_file}.i3.zst')
+# tray.AddModule('I3Writer', 'writer',
+#     # DropOrphanStreams=[icetray.I3Frame.DAQ],
+#     Streams=[icetray.I3Frame.TrayInfo, icetray.I3Frame.DAQ, 
+#              icetray.I3Frame.Physics, icetray.I3Frame.Simulation],
+#     Filename=f'{args.output_file}.i3.zst')
 
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
