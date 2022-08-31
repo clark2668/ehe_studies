@@ -22,6 +22,7 @@ nugen_nu_species = nugen_nu_aeffs.keys()
 fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(2,3, figsize=(15,10))
 linestyles = ['-', '--', ':', '-.', '-', '--']
 e_mask = energy_bin_centers < 1E9 # block out energies for which we don't have surface fluxes yet
+e_mask = energy_bin_centers < 1E20
 
 # plot all juliet neutrinos together
 for iN, n in enumerate(juliet_nu_species):
@@ -31,6 +32,7 @@ ax1.set_title("Juliet")
 
 # plot all juliet surface fluxes together
 for iS, s in enumerate(juliet_species):
+    print("Plot {}".format(s))
     ax2.plot( energy_bin_centers[e_mask], juliet_species_aeffs[s].sum(axis=0)[e_mask], 
         linestyle=linestyles[iS], label='{}'.format(s), linewidth=2)
 ax1.set_title("Juliet")
@@ -40,9 +42,6 @@ for iN, n in enumerate(nugen_nu_species):
         linestyle=linestyles[iN], label='{}'.format(n), linewidth=2)
 ax3.set_title("NuGen")
 
-
-
-# for iN, in in 
 
 # nue comparison
 ax4.plot( energy_bin_centers[e_mask], juliet_nu_aeffs['nue'].sum(axis=0)[e_mask], 

@@ -31,11 +31,11 @@ for iS, s in enumerate(neutrino_species):
     fitqual = the_f.get_node('/EHEOpheliaSRT_ImpLF').col('fitQuality')
     recozen = the_f.get_node('/EHEOpheliaParticleSRT_ImpLF').col('zenith')
     
-    muon_bundle_pass = analysis_9yr.muon_bundle_cut_pass_9yr(recozen, npe)
-    track_quality_pass = analysis_9yr.track_quality_cut_pass_9yr(fitqual, npe)
-    total_pass = np.logical_and(muon_bundle_pass, track_quality_pass)
-    # muon_bundle_pass_3yr = analysis_9yr.muon_bundle_cut_pass_3yr(recozen, npe)
-    # total_pass = muon_bundle_pass_3yr
+    # muon_bundle_pass = analysis_9yr.muon_bundle_cut_pass_9yr(recozen, npe)
+    # track_quality_pass = analysis_9yr.track_quality_cut_pass_9yr(fitqual, npe)
+    # total_pass = np.logical_and(muon_bundle_pass, track_quality_pass)
+    muon_bundle_pass_3yr = analysis_9yr.muon_bundle_cut_pass_3yr(recozen, npe)
+    total_pass = muon_bundle_pass_3yr
       
     ea_avg = w.effective_area(energy_bins, [-1, 1], total_pass)
     

@@ -13,12 +13,11 @@ style.use('/home/brian/IceCube/ehe/max_tools/EHE_analysis/eheanalysis/ehe.mplsty
 cfg_file = '../config.yaml'
 cfg_file = yaml.safe_load(open(cfg_file))
 
-which_cx = 'cteq5'
 qmin = 1E3
 
 # juliet
 juliet_species = ["nue", "numu", "nutau", "mu", "tau"]
-juliet_energy_levels = ["high_energy"]
+juliet_energy_levels = ["high_energy", "very_high_energy"]
 neutrino_species = ["nue", "numu", "nutau"]
 
 energy_bins, energy_bin_centers = weighting.get_juliet_enu_binning()
@@ -35,8 +34,8 @@ species_areas_sum = {
 for iS, s in enumerate(juliet_species):
     for l in juliet_energy_levels:
 
-        print("Working on juliet {}".format(s))
-        the_f = tables.open_file(cfg_file['juliet'][s][l][f'file_{which_cx}'])
+        print("Working on juliet species {}, energy level {}".format(s, l))
+        the_f = tables.open_file(cfg_file['juliet'][s][l][f'file'])
         weight_dict, prop_matrix, evts_per_file = weighting.get_juliet_weightdict_and_propmatrix(the_f)
         
         npe = the_f.get_node('/EHEPortiaEventSummarySRT').col('bestNPEbtw')
@@ -46,11 +45,11 @@ for iS, s in enumerate(juliet_species):
         truezen = the_f.get_node('/I3JulietPrimaryParticle').col('zenith')
         n_gen = cfg_file['juliet'][s][l]['n_files'] * evts_per_file
         
-        muon_bundle_pass = analysis_9yr.muon_bundle_cut_pass_9yr(recozen, npe)
-        track_quality_pass = analysis_9yr.track_quality_cut_pass_9yr(fitqual, npe)
-        total_pass = np.logical_and(muon_bundle_pass, track_quality_pass)
-        # muon_bundle_pass_3yr = analysis_9yr.muon_bundle_cut_pass_3yr(recozen, npe)
-        # total_pass = muon_bundle_pass_3yr
+        # muon_bundle_pass = analysis_9yr.muon_bundle_cut_pass_9yr(recozen, npe)
+        # track_quality_pass = analysis_9yr.track_quality_cut_pass_9yr(fitqual, npe)
+        # total_pass = np.logical_and(muon_bundle_pass, track_quality_pass)
+        muon_bundle_pass_3yr = analysis_9yr.muon_bundle_cut_pass_3yr(recozen, npe)
+        total_pass = muon_bundle_pass_3yr
 
         # first, get the weighting for this species specifically
         area = weighting.calc_juliet_effective_area(
@@ -58,7 +57,10 @@ for iS, s in enumerate(juliet_species):
             energy_bins = energy_bins,  prop_matrix=prop_matrix,
             selection_mask = total_pass
         )
-        species_areas_sum [s] = copy.deepcopy(area)
+        if s in species_areas_sum:
+            species_areas_sum [s] += copy.deepcopy(area)
+        else:
+            species_areas_sum [s] = copy.deepcopy(area)
         del area
 
         for iN, n in enumerate(neutrino_species):
