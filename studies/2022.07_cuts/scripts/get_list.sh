@@ -17,11 +17,11 @@
 # hdfwriter-merge /disk20/users/brian/IceCube/juliet/mu_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/mu_high_energy_merged_998files.hdf5
 # hdfwriter-merge /disk20/users/brian/IceCube/juliet/tau_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/tau_high_energy_merged_999files.hdf5
 
-hdfwriter-merge /disk20/users/brian/IceCube/juliet/nue_very_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/nue_high_energy_merged_998files.hdf5
-hdfwriter-merge /disk20/users/brian/IceCube/juliet/numu_very_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/numu_high_energy_merged_999files.hdf5
-hdfwriter-merge /disk20/users/brian/IceCube/juliet/nutau_very_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/nutau_high_energy_merged_996files.hdf5
-hdfwriter-merge /disk20/users/brian/IceCube/juliet/mu_very_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/mu_high_energy_merged_998files.hdf5
-hdfwriter-merge /disk20/users/brian/IceCube/juliet/tau_very_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/tau_high_energy_merged_999files.hdf5
+# hdfwriter-merge /disk20/users/brian/IceCube/juliet/nue_very_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/nue_very_high_energy_merged_999files.hdf5
+# hdfwriter-merge /disk20/users/brian/IceCube/juliet/numu_very_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/numu_very_high_energy_merged_999files.hdf5
+# hdfwriter-merge /disk20/users/brian/IceCube/juliet/nutau_very_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/nutau_very_high_energy_merged_999files.hdf5
+# hdfwriter-merge /disk20/users/brian/IceCube/juliet/mu_very_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/mu_very_high_energy_merged_999files.hdf5
+# hdfwriter-merge /disk20/users/brian/IceCube/juliet/tau_very_high_energy/1/*.hdf5 -o /disk20/users/brian/IceCube/juliet/tau_very_high_energy_merged_999files.hdf5
 
 
 # nugen stuff
@@ -45,6 +45,10 @@ hdfwriter-merge /disk20/users/brian/IceCube/juliet/tau_very_high_energy/1/*.hdf5
 
 # ls /disk20/users/brian/IceCube/corsika/level4/21962/0000000-0000999/* > files_21962.txt
 # ls /disk20/users/brian/IceCube/corsika/level4/22023/0000000-0000999/* > files_22023.txt
+
+ls /disk20/users/brian/IceCube/corsika/level4/21962/*/* > files_21962.txt
+ls /disk20/users/brian/IceCube/corsika/level4/22023/*/* > files_22023.txt
+
 
 #hdfwriter-merge /disk20/users/brian/IceCube/corsika/level4/hdf5/21962/*/*_p.hdf5 -o /disk20/users/brian/IceCube/corsika/level4/hdf5/corsika_21962_merged_p_998files.hdf5
 #hdfwriter-merge /disk20/users/brian/IceCube/corsika/level4/hdf5/22023/*/*_p.hdf5 -o /disk20/users/brian/IceCube/corsika/level4/hdf5/corsika_22023_merged_p_999files.hdf5
