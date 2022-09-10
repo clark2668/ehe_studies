@@ -46,11 +46,11 @@
 # ls /disk20/users/brian/IceCube/corsika/level4/21962/0000000-0000999/* > files_21962.txt
 # ls /disk20/users/brian/IceCube/corsika/level4/22023/0000000-0000999/* > files_22023.txt
 
-ls /disk20/users/brian/IceCube/corsika/level4/21962/*/* > files_21962.txt
-ls /disk20/users/brian/IceCube/corsika/level4/22023/*/* > files_22023.txt
+# ls /disk20/users/brian/IceCube/corsika/level4/21962/*/* > files_21962.txt
+# ls /disk20/users/brian/IceCube/corsika/level4/22023/*/* > files_22023.txt
 
 
-#hdfwriter-merge /disk20/users/brian/IceCube/corsika/level4/hdf5/21962/*/*_p.hdf5 -o /disk20/users/brian/IceCube/corsika/level4/hdf5/corsika_21962_merged_p_998files.hdf5
-#hdfwriter-merge /disk20/users/brian/IceCube/corsika/level4/hdf5/22023/*/*_p.hdf5 -o /disk20/users/brian/IceCube/corsika/level4/hdf5/corsika_22023_merged_p_999files.hdf5
-#hdfwriter-merge /disk20/users/brian/IceCube/corsika/level4/hdf5/21962/*/*_fe.hdf5 -o /disk20/users/brian/IceCube/corsika/level4/hdf5/corsika_21962_merged_fe_998files.hdf5
-#hdfwriter-merge /disk20/users/brian/IceCube/corsika/level4/hdf5/22023/*/*_fe.hdf5 -o /disk20/users/brian/IceCube/corsika/level4/hdf5/corsika_22023_merged_fe_999files.hdf5
+# hdfwriter-merge /disk20/users/brian/IceCube/corsika/level4/hdf5/21962/*/*_p.hdf5 -o /disk20/users/brian/IceCube/corsika/level4/hdf5/corsika_21962_merged_p_9969files.hdf5
+# hdfwriter-merge /disk20/users/brian/IceCube/corsika/level4/hdf5/22023/*/*_p.hdf5 -o /disk20/users/brian/IceCube/corsika/level4/hdf5/corsika_22023_merged_p_9991files.hdf5
+# hdfwriter-merge /disk20/users/brian/IceCube/corsika/level4/hdf5/21962/*/*_fe.hdf5 -o /disk20/users/brian/IceCube/corsika/level4/hdf5/corsika_21962_merged_fe_9969files.hdf5
+# hdfwriter-merge /disk20/users/brian/IceCube/corsika/level4/hdf5/22023/*/*_fe.hdf5 -o /disk20/users/brian/IceCube/corsika/level4/hdf5/corsika_22023_merged_fe_9991files.hdf5
