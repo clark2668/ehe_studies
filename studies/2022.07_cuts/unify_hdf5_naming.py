@@ -9,7 +9,8 @@ import h5py
 top_dir = "/disk20/users/brian/IceCube/corsika/"
 
 files_to_fix = [
-    "combo_20787.hdf5",
+    # "combo_20787.hdf5",
+    "combo_20787_smaller.hdf5"
 ]
 
 for f_to_fix in files_to_fix:
