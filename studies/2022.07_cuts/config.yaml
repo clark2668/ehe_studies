@@ -3,35 +3,50 @@ variables:
     variable: "Homogenized_QTot"
     value: "value"
   ndoms:
-    variable: "HitMultiplicityValues_unified"
+    variable: "CVMultiplicity"
     value: "n_hit_doms"
   speed:
-    variable: "LineFit_unified"
+    variable: "LineFit"
     value: "speed"
   zenith:
-    variable: "LineFit_unified"
+    variable: "LineFit"
     value: "zenith"
 
 juliet:
   nue:
     high_energy:
-      file_cteq5: "/disk20/users/brian/IceCube/juliet/nue_high_energy_merged_998files.hdf5"
+      file: "/disk20/users/brian/IceCube/juliet/nue_high_energy_merged_998files.hdf5"
       n_files: 998
+    very_high_energy:
+      file: "/disk20/users/brian/IceCube/juliet/nue_very_high_energy_merged_999files.hdf5"
+      n_files: 999 
   numu:
     high_energy:
-      file_cteq5: "/disk20/users/brian/IceCube/juliet/numu_high_energy_merged_999files.hdf5"
+      file: "/disk20/users/brian/IceCube/juliet/numu_high_energy_merged_999files.hdf5"
+      n_files: 999
+    very_high_energy:
+      file: "/disk20/users/brian/IceCube/juliet/numu_very_high_energy_merged_999files.hdf5"
       n_files: 999
   nutau:
     high_energy:
-      file_cteq5: "/disk20/users/brian/IceCube/juliet/nutau_high_energy_merged_996files.hdf5"
+      file: "/disk20/users/brian/IceCube/juliet/nutau_high_energy_merged_996files.hdf5"
       n_files: 996
+    very_high_energy:
+      file: "/disk20/users/brian/IceCube/juliet/nutau_very_high_energy_merged_999files.hdf5"
+      n_files: 999
   mu:
     high_energy:
-      file_cteq5: "/disk20/users/brian/IceCube/juliet/mu_high_energy_merged_998files.hdf5"
+      file: "/disk20/users/brian/IceCube/juliet/mu_high_energy_merged_998files.hdf5"
       n_files: 998
+    very_high_energy:
+      file: "/disk20/users/brian/IceCube/juliet/mu_very_high_energy_merged_999files.hdf5"
+      n_files: 999
   tau:
     high_energy:
-      file_cteq5: "/disk20/users/brian/IceCube/juliet/tau_high_energy_merged_999files.hdf5"
+      file: "/disk20/users/brian/IceCube/juliet/tau_high_energy_merged_999files.hdf5"
+      n_files: 999
+    very_high_energy:
+      file: "/disk20/users/brian/IceCube/juliet/tau_very_high_energy_merged_999files.hdf5"
       n_files: 999
 
 
@@ -79,8 +94,20 @@ nugen:
 
 corsika:
   "20787":
-    # file: "/disk20/users/brian/IceCube/sim/CORSIKA-in-ice/combo_20787.hdf5"
-    file: "/disk20/users/brian/IceCube/unified_naming/original/combo_20787.hdf5"
-    n_files: 10000
-    # file: "/disk20/users/brian/IceCube/sim/CORSIKA-in-ice/combo_20787_smaller.hdf5"
-    # n_files: 1000
+    # file: "/disk20/users/brian/IceCube/corsika/combo_20787.hdf5"
+    # n_files: 10000
+    file: "/disk20/users/brian/IceCube/corsika/combo_20787_smaller.hdf5"
+    n_files: 1000
+  "21962_fe":
+    file: "/disk20/users/brian/IceCube/corsika/level4/hdf5/corsika_21962_merged_fe_9969files.hdf5"
+    n_files: 9969
+  "21962_p":
+    file: "/disk20/users/brian/IceCube/corsika/level4/hdf5/corsika_21962_merged_p_9969files.hdf5"
+    n_files: 9969
+  "22023_fe":
+    file: "/disk20/users/brian/IceCube/corsika/level4/hdf5/corsika_22023_merged_fe_9991files.hdf5"
+    n_files: 9991
+  "22023_p":
+    file: "/disk20/users/brian/IceCube/corsika/level4/hdf5/corsika_22023_merged_p_9991files.hdf5"
+    n_files: 9991
+

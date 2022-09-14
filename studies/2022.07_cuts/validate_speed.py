@@ -3,6 +3,7 @@ Point of this script is to understand how well our proposed
 LineFit variable works in Juliet
 '''
 
+from sre_parse import fix_flags
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,15 +20,13 @@ cfg_file = 'config.yaml'
 cfg_file = yaml.safe_load(open(cfg_file))
 
 version = 'old'
-version = "new"
+# version = "new"
 if version == 'new':
     charge_var = cfg_file['variables']['charge']['variable']
     charge_val = cfg_file['variables']['charge']['value']
     ndoms_var =  cfg_file['variables']['ndoms']['variable']
-    cor_ndoms_var = 'HitMultiplicityValues'
     ndoms_val =  cfg_file['variables']['ndoms']['value']
     speed_var = cfg_file['variables']['speed']['variable']
-    cor_speed_var = "LineFit_redo"
     speed_val = cfg_file['variables']['speed']['value']
     speed_bins = np.linspace(0, 2, 601)
     speed_label = "LineFit Speed"
@@ -39,10 +38,8 @@ elif version == 'old':
     charge_var = "EHEPortiaEventSummarySRT"
     charge_val = "bestNPEbtw"
     ndoms_var =  "EHEPortiaEventSummarySRT"
-    cor_ndoms_var = "EHEPortiaEventSummarySRT"
     ndoms_val =  "NCHbtw"
     speed_var = "EHEOpheliaSRT_ImpLF"
-    cor_speed_var = speed_var
     speed_val = "fitQuality"
     speed_label = "Ophelia FitQual"
     speed_bins = np.linspace(0, 1000, 601)
@@ -140,9 +137,8 @@ for c in corsika_sets:
         cfg_file['corsika'][c]['n_files']
         )
     this_cor_charge = cor_weighter.get_column(charge_var, charge_val)
-    # special values for corsika (ugh)
-    this_cor_ndoms = cor_weighter.get_column(cor_ndoms_var, ndoms_val)
-    this_cor_speed = cor_weighter.get_column(cor_speed_var, speed_val)
+    this_cor_ndoms = cor_weighter.get_column(ndoms_var, ndoms_val)
+    this_cor_speed = cor_weighter.get_column(speed_var, speed_val)
     
     L2_q_mask = this_cor_charge > q_cut
     L2_ndom_mask = this_cor_ndoms > ndom_cut
@@ -152,8 +148,10 @@ for c in corsika_sets:
     cor_weights = np.concatenate((cor_weights, cor_weighter.get_weights(cr_flux)[L2_mask] * livetime))
     cor_file.close()
 
+
 #############################
-# histogram of speed
+# 1D histogram of speed, 
+# to see how our pivot point works out
 #############################
 
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, sharex=True, figsize=(15,5))
@@ -221,8 +219,6 @@ def scaling(ax):
     ax.set_xlim(speed_lims)
 for ax in [ax1, ax2, ax3]:
     scaling(ax)
-
-
 
 fig.tight_layout()
 fig.savefig(f'CascadeTrackSep_hist_{version}.png')
