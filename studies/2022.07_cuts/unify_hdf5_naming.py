@@ -7,10 +7,14 @@ so that the hit multiplicity and linefit variables all have the same name for un
 import h5py
 
 top_dir = "/disk20/users/brian/IceCube/corsika/"
+top_dir = "/disk20/users/brian/IceCube/data/"
 
 files_to_fix = [
     # "combo_20787.hdf5",
-    "combo_20787_smaller.hdf5"
+    # "combo_20787_smaller.hdf5"
+    "combo_IC86-I-pass2_L4.hdf5",
+    "combo_IC86-II-pass2_L4.hdf5",
+    "combo_IC86-III-pass2_L4.hdf5"
 ]
 
 for f_to_fix in files_to_fix:
