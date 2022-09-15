@@ -19,7 +19,7 @@ czen_var = cfg_file['variables']['zenith']['variable']
 czen_val = cfg_file['variables']['zenith']['value']
 speed_var = cfg_file['variables']['speed']['variable']
 speed_val = cfg_file['variables']['speed']['value']
-do_efficiency = False
+do_efficiency = True
 do_plots = True
 
 log10_q_cut = np.log10(27500)
@@ -46,21 +46,22 @@ def astro_flux(energy):
 # set up datasets
 # juliet (EHE neutrinos)
 juliet_species = ["nue", "numu", "nutau", "mu", "tau"]
-juliet_energy_levels = ["high_energy"]
+juliet_energy_levels = ["high_energy", "very_high_energy"]
 # juliet_species = ["nue"]
-# juliet_species = ["mu"]
-# juliet_species = []
 
 corsika_sets = ["20787"]
 # corsika_sets = []
 
-nugen_sets = ["nue", "numu"]
-# nugen_sets = []
+nugen_sets = ["nue", "numu", "nutau"]
+nugen_sets = ["nue"]
 
 burn_samples = ["IC86-I-pass2", "IC86-II-pass2", "IC86-III-pass2"]
 # burn_samples = ["IC86-II-pass2"]
 
 style.use('/home/brian/IceCube/ehe/max_tools/EHE_analysis/eheanalysis/ehe.mplstyle')
+# plt.rcParams.update({
+#     'font.size': '16',
+# })
 
 livetime = 0
 for b in burn_samples:
@@ -73,7 +74,7 @@ charge_bin_centers = plotting.get_bin_centers(charge_bins)
 charge_bins_noqcuts = np.logspace(2, 7, 16)
 charge_bin_centers_noqcuts = plotting.get_bin_centers(charge_bins_noqcuts)
 
-ndoms_bins = np.linspace(0,4000, 21)
+ndoms_bins = np.linspace(-10,2000, 21)
 ndoms_bin_centers = plotting.get_bin_centers(ndoms_bins)
 
 czen_bins = np.linspace(-1, 1, 21)
@@ -100,7 +101,7 @@ ehe_energy_weights_after_L2 = None
 for s in juliet_species:
     for l in juliet_energy_levels:
 
-        print(f"Working on juliet {s}")
+        print(f"Working on juliet {s}, {l}")
         the_f = tables.open_file(cfg_file['juliet'][s][l]['file'])
         weight_dict, prop_matrix, evts_per_file = weighting.get_juliet_weightdict_and_propmatrix(the_f)
         charge = the_f.get_node(f'/{charge_var}').col(f'{charge_val}')
@@ -203,7 +204,7 @@ if do_efficiency:
     ax3.set_title(title_for_summary)
 
     fig.tight_layout()
-    fig.savefig("plots/eff_L2.png")
+    fig.savefig("plots/eff_L2.png", dpi=300)
     del fig, ax1, ax2, ax3
 
 
