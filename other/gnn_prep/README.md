@@ -6,13 +6,13 @@ The first thing to do is to activate the "environment" to use. I've written a `e
 source env.sh
 ```
 
-Then, the first thing we need to do is get all of the data out of I3 format and into a format that's friendlier to plotting, like HDF5. Do to this, we can run the `get_from_i3.py` code. It take three arguments. The file we want to run on, given with the `-i` flag, the directory where we want the output writte, given by the `-o` flag.
+Then, the first thing we need to do is get all of the data out of I3 format and into a format that's friendlier to plotting, like HDF5. Do to this, we can run the `get_from_i3.py` code. It take three arguments. The file we want to run on, given with the `-i` flag, the path to the file where we want the output written, given by the `-o` flag.
 
 ```
-python get_from_i3.py -i /path/to/file.i3 -o /path/to/output/location
+python get_from_i3.py -i /path/to/file.i3 -o /path/to/output/file.hdf5
 ```
 
-If everything is going alright, it should produce a `output.hdf5` file.
+If everything is going alright, it should produce a `file.hdf5` file.
 
 Then, we can take that file as an input and read the results back out. This is where you'd imagine making your plots. You can give it the list of files to run over by using the `-f` flag.
 

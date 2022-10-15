@@ -1,3 +1,6 @@
+#!/bin/sh /cvmfs/icecube.opensciencegrid.org/py3-v4.1.1/icetray-start
+#METAPROJECT combo/V01-01-00
+
 # what I'm going to try and demonstrate in this code is how to loop over an I3 file
 # get out the interesting information (in this case, the energy)
 # and write that to an hdf5 file that you can analyze later
@@ -16,12 +19,12 @@ parser.add_argument("-i", type=str, nargs='+',
 	dest="input_files", required=True,
 	help="full path to the input file")
 parser.add_argument("-o", type=str, 
-	dest="ouput_dir", required=True,
-	help="directory where the output should be written to")
+	dest="output_file", required=True,
+	help="the full filename of the output file to be written to")
 
 args = parser.parse_args()
 input_files = args.input_files
-ouput_dir = args.ouput_dir
+output_file = args.output_file
 
 # these are arrays which will hold our output information
 energies = []
@@ -62,7 +65,7 @@ for file in input_files:
 energies = np.asarray(energies)
 # you will probably want to change the code a bit
 # so that the output file name 
-output_file_path = "{}/output.hdf5".format(ouput_dir)
+output_file_path = "{}".format(output_file)
 file_out = h5py.File(output_file_path, "w")
 data = file_out.create_group("data")
 data.create_dataset("energies",data=energies)
