@@ -43,7 +43,7 @@ for file in file_list:
 
     instructions = "" # clear the instructions line
     instructions += f'JOB job_{job_index} job.sub \n'
-    instructions += f'VARS job_{job_index} inputfile="{file}" outputfile="{output_file_dir}/{output_file}"\n\n'
+    instructions += f'VARS job_{job_index} inputfile="{file}" outputfile="{output_file_dir}/{output_file}" basename="{basename}"\n\n'
 
     # write it to the list of jobs to run
     with open(dag_file_name, 'a') as f:

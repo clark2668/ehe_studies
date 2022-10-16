@@ -1,8 +1,9 @@
-# !/bin/bash
+#!/usr/bin/bash
 
 # first, load variables
 inputfile=$1
 outputfile=$2
+basename=$3
 
 # define the path to the script
 script_path=/home/brianclark/IceCube/ehe_studies/other/gnn_prep

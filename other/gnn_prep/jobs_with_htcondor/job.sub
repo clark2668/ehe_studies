@@ -1,6 +1,6 @@
-log    = /scratch/brianclark/Gen2/log/convert.$(Process).log
-output = /scratch/brianclark/Gen2/out/convert.$(Process).out
-error  = /scratch/brianclark/Gen2/err/convert.$(Process).err
+log    = /scratch/brianclark/Gen2/log/convert.$(basename).log
+output = /scratch/brianclark/Gen2/out/convert.$(basename).out
+error  = /scratch/brianclark/Gen2/err/convert.$(basename).err
 
 request_cpus = 1
 request_memory = 1GB
@@ -11,6 +11,6 @@ when_to_transfer_output = ON_EXIT
 +TransferOutput = ""
 
 executable = job.sh
-arguments = $(inputfile) $(outputfile) 
+arguments = $(inputfile) $(outputfile) $(basename)
 
 queue
