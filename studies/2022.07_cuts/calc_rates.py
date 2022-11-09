@@ -1,6 +1,5 @@
 '''
-Point of this script is to understand how well our proposed
-LineFit variable works in Juliet
+Calculate the histogram of passing neutrinos vs energy
 '''
 
 from sre_parse import fix_flags
