@@ -12,4 +12,6 @@ script_path=/home/brian/IceCube/ehe/ehe_studies/studies/2022.07_cuts/scripts
 # echo $_CONDOR_SCRATCH_DIR
 
 # $script_path/i3_to_hdf5.py -i $input_file_dir/$input_file_name -o $output_file_dir/$output_file_name 
-$script_path/i3_to_hdf5.py -i $input_file_dir/$input_file_name -o $output_file_dir/$output_file_name -c $cor_sel
+# $script_path/i3_to_hdf5.py -i $input_file_dir/$input_file_name -o $output_file_dir/$output_file_name -c $cor_sel
+$script_path/i3_to_hdf5_sum_millipede_losses.py -i $input_file_dir/$input_file_name -o $output_file_dir/$output_file_name
+

@@ -2,8 +2,8 @@ import numpy as np
 import os
 from pathlib import Path
 
-output_directory_head = '/disk20/users/brian/IceCube/corsika/level4/hdf5'
-# output_directory_head = '/disk20/users/brian/IceCube/juliet'
+# output_directory_head = '/disk20/users/brian/IceCube/corsika/level4/hdf5'
+output_directory_head = '/disk20/users/brian/IceCube/juliet/millipede_study'
 # output_directory_head = '/disk20/users/brian/IceCube/nugen/hdf5/'
 
 datasets = ['nue_high_energy', 'numu_high_energy', 
@@ -13,6 +13,7 @@ datasets = ['nue_very_high_energy', 'numu_very_high_energy',
             'nutau_very_high_energy', 'mu_very_high_energy', 
             'tau_very_high_energy']
 datasets = [21962, 22023]
+datasets = ['numu_high_energy']
 
 for d in datasets:
     print(d)

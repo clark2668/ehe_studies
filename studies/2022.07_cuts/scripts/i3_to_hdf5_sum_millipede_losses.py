@@ -1,6 +1,5 @@
 #!/bin/sh /cvmfs/icecube.opensciencegrid.org/py3-v4.1.1/icetray-start
 #METAPROJECT /home/brian/IceCube/ehe/software/build_icetray
-######METAPROJECT combo/V01-01-00
 
 from multiprocessing.sharedctypes import Value
 from icecube import icetray, dataio, dataclasses, common_variables, linefit
@@ -11,10 +10,21 @@ import numpy as np
 
 import sys
 sys.path.append('/home/brian/IceCube/ehe/max_tools/build')
+from eheanalysis import millipede
 
-from ic3_labels.labels.utils import geometry
-from scipy.spatial import ConvexHull
+gcd_file = '/cvmfs/icecube.opensciencegrid.org/data/GCD/GeoCalibDetectorStatus_2020.Run134142.Pass2_V0.i3.gz'
+convex_hull = millipede.get_convex_hull(gcd_file)
 
+
+keeps = [
+        'I3EventHeader', 'CorsikaWeightMap', 'PolyplopiaPrimary', 'I3MCWeightDict',
+        'CVMultiplicity', 'CVStatistics', 'Homogenized_QTot', 'EHELineFit',
+        'LineFit', 'PrimaryEvent', 'I3JulietPrimaryParticle', 
+        'PropagationMatrixNuE', 'PropagationMatrixNuMu', 'PropagationMatrixNuTau',
+        'JulietWeightDict', 
+        'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF', 'EHEPortiaEventSummarySRT',
+        'ClosestApproach', 'LenCalErrata', 'LenSatWindows',
+    ]
 
 import argparse
 parser = argparse.ArgumentParser()
@@ -31,6 +41,8 @@ parser.add_argument("-c", type=str,
     dest="corsika_selection", required=False,
     help="If you are processing Max's high energy corsika, do you want to select for proton or iron?"
     )
+
+
 args = parser.parse_args()
 
 select_this_cor_species = None
@@ -103,81 +115,30 @@ tray.AddModule(find_primary, 'findNeutrino',
     mctree_name = 'I3MCTree',
     Streams=[icetray.I3Frame.Physics]
     )
+millipede_name='EHEMuMillipede_SplineMPEseed'
+tray.AddModule(millipede.SumMillipedeEnergyUnfolding,
+    millipede_name=f'{millipede_name}',
+    output_name=f'{millipede_name}_sum'
+    )
+keeps.append(f'{millipede_name}_sum')
+tray.AddModule(millipede.SumMillipedeEnergyUnfolding,
+    millipede_name=f'{millipede_name}',
+    output_name=f'{millipede_name}_sum_contained',
+    contained_only=True,
+    convex_hull = convex_hull
+    )
+keeps.append(f'{millipede_name}_sum_contained')
 
-#def sum_millipede_reco(frame):
-    
-
-# def calculate_closest_approach(frame, primary_name):
-#     primaryEvent = frame[primary_name]
-#     position = primaryEvent.pos
-#     direction = primaryEvent.dir
-#     origin = dataclasses.I3Position(0., 0., 0.)
-#     approach = (position + direction * (direction*(origin - position))).magnitude
-#     # just to validate with standard tool (only really works for numu)
-#     # approach_v2 = phys_services.I3Calculator.closest_approach_distance(primaryEvent,origin)
-#     # print("Closest Approach me {}, Calc {}".format(approach, approach_v2))
-#     frame["ClosestApproach"] = dataclasses.I3Double(approach)
-        
-# tray.AddModule(calculate_closest_approach, 'calcClosest',
-#     primary_name = 'PrimaryEvent',
-#     Streams=[icetray.I3Frame.Physics]
-#     )
-
-def count_cal_errata(frame):
-    if frame.Has('CalibrationErrata'):
-        cal_errata = frame.Get('CalibrationErrata')
-        len_cal_errata = len(cal_errata)
-        frame['LenCalErrata'] = icetray.I3Int(len_cal_errata)
-    else:
-        frame['LenCalErrata'] = icetray.I3Int(0)
-    # header = frame.Get("I3EventHeader")
-    # runid = header.run_id
-    # evid = header.event_id
-    # thelen = frame.Get("LenCalErrata")
-    # print(f"Run {runid}, Evid {evid}, Cal Err: {thelen}")
-
-tray.AddModule(count_cal_errata, 'count_cal_errata',
-                Streams=[icetray.I3Frame.Physics]
-                )
-
-
-def count_sat_windows(frame):
-    if frame.Has("SaturationWindows"):
-        sat_windows = frame.Get("SaturationWindows")
-        len_sat_windows = len(sat_windows)
-        frame['LenSatWindows'] = icetray.I3Int(len_sat_windows)
-    else:
-        frame['LenSatWindows'] = icetray.I3Int(0)
-    # header = frame.Get("I3EventHeader")
-    # runid = header.run_id
-    # evid = header.event_id
-    # thelen = frame.Get("LenSatWindows")
-    # print(f"Run {runid}, Evid {evid}, Cal Sat: {thelen}")
-   
-
-tray.AddModule(count_sat_windows, 'count_sat_windows',
-                Streams=[icetray.I3Frame.Physics]
-                )
-
-# tray.AddModule('I3Writer', 'writer',
-#     # DropOrphanStreams=[icetray.I3Frame.DAQ],
-#     Streams=[icetray.I3Frame.TrayInfo, icetray.I3Frame.DAQ, 
-#              icetray.I3Frame.Physics, icetray.I3Frame.Simulation],
-#     Filename=f'{args.output_file}.i3.zst')
+tray.AddModule('I3Writer', 'writer',
+    # DropOrphanStreams=[icetray.I3Frame.DAQ],
+    Streams=[icetray.I3Frame.TrayInfo, icetray.I3Frame.DAQ, 
+             icetray.I3Frame.Physics, icetray.I3Frame.Simulation],
+    Filename=f'{args.output_file}.i3.zst')
 
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
     Output=f'{args.output_file}.hdf5', 
-    Keys=[
-        'I3EventHeader', 'CorsikaWeightMap', 'PolyplopiaPrimary', 'I3MCWeightDict',
-        'CVMultiplicity', 'CVStatistics', 'Homogenized_QTot', 'EHELineFit',
-        'LineFit', 'PrimaryEvent', 'I3JulietPrimaryParticle', 
-        'PropagationMatrixNuE', 'PropagationMatrixNuMu', 'PropagationMatrixNuTau',
-        'JulietWeightDict', 
-        'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF', 'EHEPortiaEventSummarySRT',
-        'ClosestApproach', 'LenCalErrata', 'LenSatWindows'
-        
-    ],
+    Keys=keeps,
     SubEventStreams=['InIceSplit', 'Final']
     )
 
