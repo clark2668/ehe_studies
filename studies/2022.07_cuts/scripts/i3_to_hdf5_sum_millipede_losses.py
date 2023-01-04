@@ -23,7 +23,7 @@ keeps = [
         'PropagationMatrixNuE', 'PropagationMatrixNuMu', 'PropagationMatrixNuTau',
         'JulietWeightDict', 
         'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF', 'EHEPortiaEventSummarySRT',
-        'ClosestApproach', 'LenCalErrata', 'LenSatWindows',
+        'ClosestApproach', 'LenCalErrata', 'LenSatWindows', 'EHE_SplineMPE'
     ]
 
 import argparse
