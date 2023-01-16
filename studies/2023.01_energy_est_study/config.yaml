@@ -1,0 +1,25 @@
+variables:
+  charge:
+    variable: "Homogenized_QTot"
+    value: "value"
+    label: "HQtot log10(NPE)"
+  millipedeE:
+    variable: "EHEMuMillipede_SplineMPEseed_sum_contained"
+    value: "value"
+    label: "Millipede Unfolded Energy log10(GeV)"
+  splinempe_zenith:
+    variable: "EHE_SplineMPE"
+    value: "zenith"
+    label: "SplineMPE Zenith"
+  corsika_E:
+    variable: "PolyplopiaPrimary"
+    value: "energy"
+    label: "CR Energy log10(GeV)"
+  
+
+
+corsika:
+  "22023":
+    # file: "/disk20/users/brian/IceCube/corsika/millipede_study/merged_22023_4files.hdf5"
+    file: "/home/brian/IceCube/ehe/ehe_studies/studies/2023.01_energy_est_study/test.hdf5"
+    n_files: 4
