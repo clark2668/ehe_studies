@@ -23,7 +23,7 @@ keeps = [
         'PropagationMatrixNuE', 'PropagationMatrixNuMu', 'PropagationMatrixNuTau',
         'JulietWeightDict', 
         'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF', 'EHEPortiaEventSummarySRT',
-        'ClosestApproach', 'LenCalErrata', 'LenSatWindows', 'EHE_SplineMPE'
+        'LenCalErrata', 'LenSatWindows', 'EHE_SplineMPE'
     ]
 
 import argparse
@@ -111,16 +111,26 @@ def find_primary(frame, mctree_name):
     primaryEvent = primaries[0]
     frame["PrimaryEvent"] = primaryEvent
 
-tray.AddModule(find_primary, 'findNeutrino',
+tray.AddModule(find_primary, 'findPrimary',
     mctree_name = 'I3MCTree',
     Streams=[icetray.I3Frame.Physics]
     )
 millipede_name='EHEMuMillipede_SplineMPEseed'
+
+tray.AddModule(millipede.calculate_closest_approach,
+    primary_name='PrimaryEvent',
+    output_name='ClosestApproach',
+    Streams=[icetray.I3Frame.Physics]
+)
+keeps.append('ClosestApproach')
+keeps.append('ClosestApproach_mag')
+
 tray.AddModule(millipede.SumMillipedeEnergyUnfolding,
     millipede_name=f'{millipede_name}',
     output_name=f'{millipede_name}_sum'
     )
 keeps.append(f'{millipede_name}_sum')
+
 tray.AddModule(millipede.SumMillipedeEnergyUnfolding,
     millipede_name=f'{millipede_name}',
     output_name=f'{millipede_name}_sum_contained',
@@ -128,6 +138,7 @@ tray.AddModule(millipede.SumMillipedeEnergyUnfolding,
     convex_hull = convex_hull
     )
 keeps.append(f'{millipede_name}_sum_contained')
+
 
 tray.AddModule('I3Writer', 'writer',
     # DropOrphanStreams=[icetray.I3Frame.DAQ],
