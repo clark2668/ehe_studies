@@ -1,5 +1,6 @@
 #!/bin/sh /cvmfs/icecube.opensciencegrid.org/py3-v4.1.1/icetray-start
-#METAPROJECT /home/brian/IceCube/ehe/software/build_icetray
+#METAPROJECT /data/condor_builds/users/baclark/IceCube/ehe/software/bld_icetray/
+#####METAPROJECT /home/brian/IceCube/ehe/software/build_icetray
 
 from multiprocessing.sharedctypes import Value
 from icecube import icetray, dataio, dataclasses, common_variables, linefit
@@ -9,7 +10,8 @@ from icecube import hdfwriter
 import numpy as np
 
 import sys
-sys.path.append('/home/brian/IceCube/ehe/max_tools/build')
+sys.path.append('/data/condor_builds/users/baclark/IceCube/ehe/max_tools/build')
+# sys.path.append('/home/brian/IceCube/ehe/max_tools/build')
 from eheanalysis import millipede
 
 gcd_file = '/cvmfs/icecube.opensciencegrid.org/data/GCD/GeoCalibDetectorStatus_2020.Run134142.Pass2_V0.i3.gz'

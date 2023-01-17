@@ -5,8 +5,8 @@ from pathlib import Path
 # output_directory_head = '/disk20/users/brian/IceCube/corsika/level4/hdf5'
 # output_directory_head = '/disk20/users/brian/IceCube/juliet/millipede_study'
 # output_directory_head = '/disk20/users/brian/IceCube/nugen/hdf5/'
-output_directory_head = '/disk20/users/brian/IceCube/corsika/millipede_study'
-
+# output_directory_head = '/disk20/users/brian/IceCube/corsika/millipede_study'
+output_directory_head = '/data/i3store/users/baclark/CORSIKA-in-ice/millipede_study'
 
 datasets = ['nue_high_energy', 'numu_high_energy', 
             'nutau_high_energy', 'mu_high_energy', 
