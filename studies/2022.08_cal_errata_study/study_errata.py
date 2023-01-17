@@ -34,7 +34,7 @@ the_flux = {
 }
 
 
-lims = [1E-5, 1E2]
+lims = [1E-5, 1E3]
 
 livetime = 60*60*24*365
 
@@ -105,7 +105,9 @@ cor_err = np.asarray([])
 cor_sat = np.asarray([])
 cor_edet = np.asarray([])
 
-cor_sets = ['21962_p', '22023_p']
+cor_prim_species = 'fe'
+# cor_prim_species = 'p'
+cor_sets = [f'21962_{cor_prim_species}', f'22023_{cor_prim_species}']
 
 cr_flux_model = 'GaisserH4a'
 cr_flux = weighting.get_flux_model(cr_flux_model, 'corsika')
@@ -334,7 +336,7 @@ for e_slice in e_slices:
     
     fig.suptitle(f"{cor_sets}, {cr_flux_model}", size=20)
     fig.tight_layout()
-    fig.savefig(f"cal_issues_vs_czen_corsika_{cr_flux_model}_{slice_range[0]:.1e}_{slice_range[1]:.1e}.png", dpi=300)
+    fig.savefig(f"cal_issues_vs_czen_corsika_{cor_prim_species}_{cr_flux_model}_{slice_range[0]:.1e}_{slice_range[1]:.1e}.png", dpi=300)
     del fig, ax1, ax2
 
     
@@ -407,7 +409,7 @@ for ax in [ax1, ax2]:
 
 fig.suptitle(f"{species}, {the_flux['label']}", size=20)
 fig.tight_layout()
-fig.savefig(f"cal_issues_energy_slices_corsika_{cr_flux_model}.png")
+fig.savefig(f"cal_issues_energy_slices_corsika_{cor_prim_species}_{cr_flux_model}.png")
 
 
 # # bins = np.logspace(4, 10, 50)
