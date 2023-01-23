@@ -3,7 +3,7 @@
 #####METAPROJECT /home/brian/IceCube/ehe/software/build_icetray
 
 from multiprocessing.sharedctypes import Value
-from icecube import icetray, dataio, dataclasses, common_variables, linefit
+from icecube import icetray, dataio, dataclasses, common_variables, linefit, gulliver
 from icecube import phys_services
 from I3Tray import I3Tray
 from icecube import hdfwriter
@@ -25,7 +25,9 @@ keeps = [
         'PropagationMatrixNuE', 'PropagationMatrixNuMu', 'PropagationMatrixNuTau',
         'JulietWeightDict', 
         'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF', 'EHEPortiaEventSummarySRT',
-        'LenCalErrata', 'LenSatWindows', 'EHE_SplineMPE'
+        'LenCalErrata', 'LenSatWindows', 
+        'EHE_SplineMPE', 'EHE_SplineMPEFitParams', 'EHE_SplineMPEDirectHitsC',
+        'EHE_SplineMPE_TruncatedEnergy_SpiceMie_AllDOMS_Muon'
     ]
 
 import argparse
@@ -142,11 +144,12 @@ tray.AddModule(millipede.SumMillipedeEnergyUnfolding,
 keeps.append(f'{millipede_name}_sum_contained')
 
 
-tray.AddModule('I3Writer', 'writer',
-    # DropOrphanStreams=[icetray.I3Frame.DAQ],
-    Streams=[icetray.I3Frame.TrayInfo, icetray.I3Frame.DAQ, 
-             icetray.I3Frame.Physics, icetray.I3Frame.Simulation],
-    Filename=f'{args.output_file}.i3.zst')
+# don't save i3 output (to save space)
+# tray.AddModule('I3Writer', 'writer',
+#     # DropOrphanStreams=[icetray.I3Frame.DAQ],
+#     Streams=[icetray.I3Frame.TrayInfo, icetray.I3Frame.DAQ, 
+#              icetray.I3Frame.Physics, icetray.I3Frame.Simulation],
+#     Filename=f'{args.output_file}.i3.zst')
 
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
