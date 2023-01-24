@@ -16,7 +16,7 @@ datasets = ['nue_very_high_energy', 'numu_very_high_energy',
             'tau_very_high_energy']
 datasets = [21962, 22023]
 datasets = ['numu_high_energy']
-datasets = [22023]
+datasets = [21962]
 
 for d in datasets:
     print(d)

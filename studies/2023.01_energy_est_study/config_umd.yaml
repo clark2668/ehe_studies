@@ -7,6 +7,10 @@ variables:
     variable: "EHEMuMillipede_SplineMPEseed_sum_contained"
     value: "value"
     label: "Millipede Unfolded Energy log10(GeV)"
+  truncatedE:
+    variable: "EHE_SplineMPE_TruncatedEnergy_SpiceMie_AllDOMS_Muon"
+    value: "energy"
+    label: "Truncated Energy log10(GeV)"
   splinempe_zenith:
     variable: "EHE_SplineMPE"
     value: "zenith"
@@ -24,5 +28,8 @@ corsika:
     # file: "/home/brian/IceCube/ehe/ehe_studies/studies/2023.01_energy_est_study/test.hdf5"
     # file: "/data/i3store/users/baclark/CORSIKA-in-ice/millipede_study/22023/combo_corsika_22023_1kfiles.hdf5"
     # n_files: 1000
-    file: "/data/i3store/users/baclark/CORSIKA-in-ice/millipede_study/22023/combo_corsika_22023_5989files.hdf5"
-    n_files: 5989
+    file: "/data/i3store/users/baclark/CORSIKA-in-ice/millipede_study/22023/combo_corsika_22023_9991files.hdf5"
+    n_files: 9991
+  "21962":
+    file: "/data/i3home/baclark/i3store/CORSIKA-in-ice/millipede_study/21962/combo_corsika_21962_9969files.hdf5"
+    n_files: 9969
