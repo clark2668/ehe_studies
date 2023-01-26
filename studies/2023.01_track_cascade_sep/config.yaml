@@ -1,0 +1,57 @@
+variables:
+  hqtot:
+    variable: "Homogenized_QTot"
+    value: "value"
+    label: "HQtot log10(NPE)"
+  portia:
+    variable: "EHEPortiaEventSummarySRT"
+    value: "bestNPEbtw"
+    label: "Portia log10(NPE)"
+  speed:
+    variable: "LineFitEHE"
+    value: "speed"
+    label: "LineFit Speed"
+  redchisqu:
+    variable: "EHEOpheliaSRT_ImpLF"
+    value: "fitQuality"
+    label: "Ophelia FitQual"
+  ndoms:
+    variable: "CVMultiplicity"
+    value: "n_hit_doms"
+    label: "CVM Ndoms"
+  
+
+burn_sample:
+  IC86-I-pass2:
+    # file: "/disk20/users/brian/IceCube/data/combo_IC86-I-pass2.hdf5"
+    # file: "/disk20/users/brian/IceCube/data/combo_IC86-I-pass2_L4.hdf5"
+    file: "/disk20/users/brian/IceCube/data/combo_IC86-I-pass2_L4.hdf5"
+    livetime: 2721082.25
+  IC86-II-pass2:
+    # file: "/disk20/users/brian/IceCube/data/combo_IC86-II-pass2.hdf5"
+    # file: "/disk20/users/brian/IceCube/data/combo_IC86-II-pass2_smaller.hdf5"
+    # file: "/disk20/users/brian/IceCube/data/combo_IC86-II-pass2_L4.hdf5"
+    file: "/disk20/users/brian/IceCube/data/combo_IC86-II-pass2_L4.hdf5"
+    livetime: 2804133.57
+  IC86-III-pass2:
+    # file: "/disk20/users/brian/IceCube/data/combo_IC86-III-pass2.hdf5"
+    # file: "/disk20/users/brian/IceCube/data/combo_IC86-III-pass2_L4.hdf5"
+    file: "/disk20/users/brian/IceCube/data/combo_IC86-III-pass2_L4.hdf5"
+    livetime: 2948421.03
+
+
+juliet:
+  nue:
+    high_energy:
+      file: "/disk20/users/brian/IceCube/juliet/nue_high_energy/nue_high_energy_merged_998files.hdf5"
+      n_files: 998
+    very_high_energy:
+      file: "/disk20/users/brian/IceCube/juliet/nue_very_high_energy/nue_very_high_energy_merged_999files.hdf5"
+      n_files: 999
+  mu:
+    high_energy:
+      file: "/disk20/users/brian/IceCube/juliet/mu_high_energy/mu_high_energy_merged_999files.hdf5"
+      n_files: 999
+    very_high_energy:
+      file: "/disk20/users/brian/IceCube/juliet/mu_very_high_energy/mu_very_high_energy_merged_999files.hdf5"
+      n_files: 999
