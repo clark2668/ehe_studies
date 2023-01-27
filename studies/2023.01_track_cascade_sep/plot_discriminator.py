@@ -19,15 +19,15 @@ atmo_flux = weighting.get_flux_model('H3a_SIBYLL23C', 'nugen')
 
 style.use('/home/brian/IceCube/ehe/max_tools/EHE_analysis/eheanalysis/ehe.mplstyle')
 
-livetime = 98.07 * 24 * 60 * 60
+livetime = 365 * 24 * 60 * 60
 print(livetime)
 
 cfg_file = 'config.yaml'
 cfg_file = yaml.safe_load(open(cfg_file))
 
 juliet_species = ["nue", "mu"]
-# juliet_species = ["nue"]
 juliet_energy_levels = ["high_energy", "very_high_energy"]
+# juliet_energy_levels = ["very_high_energy"]
 
 which_method='new'
 if which_method is 'new':
@@ -36,12 +36,17 @@ if which_method is 'new':
     classifier_var = 'speed'
     classifier_bins = np.linspace(0, 0.5, 150)
     nue_cumulative_sign = -1
+    classifier_lims = [0, 0.5]
+    classifier_cut = 0.27
 if which_method is 'old':
     qcut = 25000
     charge_var = 'portia'
     classifier_var = 'redchisqu'
     classifier_bins = np.linspace(0, 1000, 601)
     nue_cumulative_sign = 1 
+    classifier_lims = [0, 500]
+    classifier_cut = 100
+
 
 
 ehe_weights ={
@@ -89,61 +94,111 @@ for s in juliet_species:
 
         the_f.close()
 
-
-fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15,5))
-lw = 2
 ehe_mask = {
     "nue": ehe_charge['nue']>qcut,
     "mu": ehe_charge['mu']>qcut
 }
-ax1.hist( 
-    ehe_classifier['nue'][ehe_mask['nue']], bins=classifier_bins, 
-    weights=ehe_weights["nue"][ehe_mask['nue']],
-    histtype='step', label=r'GZK $\nu_{e}$', linewidth=lw)
-n, b, p = ax1.hist( 
-    ehe_classifier['mu'][ehe_mask['mu']], bins=classifier_bins, 
-    weights=ehe_weights["mu"][ehe_mask['mu']],
-    histtype='step', label=r'GZK $\mu$', linewidth=lw)
-# ax1.hist( cor_speed, bins=speed_bins, weights=cor_weights,
-#         histtype='step', label='Corsika (H4a)', linewidth=lw)
-ax1.set_yscale('log')
-ax1.set_xlabel(cfg_file['variables'][classifier_var]['label'])
-ax1.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
-ax1.set_ylim([1E-7, 1E5])
-ax1.legend()
 
-ax2.hist( 
-    ehe_classifier['nue'][ehe_mask['nue']], bins=classifier_bins, 
-    weights=ehe_weights["nue"][ehe_mask['nue']],
-    histtype='step', linewidth=lw, density=True)
-ax2.hist( 
-    ehe_classifier['mu'][ehe_mask['mu']], bins=classifier_bins, 
-    weights=ehe_weights["mu"][ehe_mask['mu']],
-    histtype='step', linewidth=lw, density=True)
-# ax2.set_yscale('log')
-ax2.set_xlabel(cfg_file['variables'][classifier_var]['label'])
-ax2.set_ylabel('Density')
+make_plots = True
+if make_plots:
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15,5))
+    lw = 2
 
-ax3.hist( 
-    ehe_classifier['nue'][ehe_mask['nue']], bins=classifier_bins, 
-    weights=ehe_weights["nue"][ehe_mask['nue']],
-    histtype='step', linewidth=lw, density=True, cumulative=nue_cumulative_sign)
-ax3.hist( 
-    ehe_classifier['mu'][ehe_mask['mu']], bins=classifier_bins, 
-    weights=ehe_weights["mu"][ehe_mask['mu']],
-    histtype='step', linewidth=lw, density=True, cumulative=-nue_cumulative_sign)
-ax3.set_xlabel(cfg_file['variables'][classifier_var]['label'])
-ax3.set_ylabel('CDF')
-ax3.axvline(0.27, linestyle='--')
+    ax1.hist( 
+        ehe_classifier['nue'][ehe_mask['nue']], bins=classifier_bins, 
+        weights=ehe_weights["nue"][ehe_mask['nue']],
+        histtype='step', label=r'GZK $\nu_{e}$', linewidth=lw)
+    n, b, p = ax1.hist( 
+        ehe_classifier['mu'][ehe_mask['mu']], bins=classifier_bins, 
+        weights=ehe_weights["mu"][ehe_mask['mu']],
+        histtype='step', label=r'GZK $\mu$', linewidth=lw)
+    # ax1.hist( cor_speed, bins=speed_bins, weights=cor_weights,
+    #         histtype='step', label='Corsika (H4a)', linewidth=lw)
+    ax1.set_yscale('log')
+    ax1.set_xlabel(cfg_file['variables'][classifier_var]['label'])
+    ax1.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
+    ax1.set_ylim([1E-7, 1E1])
+    ax1.legend()
 
-expected_rate = np.sum(ehe_weights['mu'][ehe_mask['mu']])
-print(f"Expected mu rate: {expected_rate}")
+    ax2.hist( 
+        ehe_classifier['nue'][ehe_mask['nue']], bins=classifier_bins, 
+        weights=ehe_weights["nue"][ehe_mask['nue']],
+        histtype='step', linewidth=lw, density=True)
+    ax2.hist( 
+        ehe_classifier['mu'][ehe_mask['mu']], bins=classifier_bins, 
+        weights=ehe_weights["mu"][ehe_mask['mu']],
+        histtype='step', linewidth=lw, density=True)
+    # ax2.set_yscale('log')
+    ax2.set_xlabel(cfg_file['variables'][classifier_var]['label'])
+    ax2.set_ylabel('Density')
 
-def scaling(ax):
-    ax.set_xlim([0, 0.5])
-for ax in [ax1, ax2, ax3]:
-    scaling(ax)
+    ax3.hist( 
+        ehe_classifier['nue'][ehe_mask['nue']], bins=classifier_bins, 
+        weights=ehe_weights["nue"][ehe_mask['nue']],
+        histtype='step', linewidth=lw, density=True, cumulative=nue_cumulative_sign)
+    ax3.hist( 
+        ehe_classifier['mu'][ehe_mask['mu']], bins=classifier_bins, 
+        weights=ehe_weights["mu"][ehe_mask['mu']],
+        histtype='step', linewidth=lw, density=True, cumulative=-nue_cumulative_sign)
+    ax3.set_xlabel(cfg_file['variables'][classifier_var]['label'])
+    ax3.set_ylabel('CDF')
+
+    expected_rate = np.sum(ehe_weights['mu'][ehe_mask['mu']])
+    print(f"Expected mu rate: {expected_rate}")
+
+    def scaling(ax):
+        ax.set_xlim(classifier_lims)
+        ax.axvline(classifier_cut, linestyle='--')
+    for ax in [ax1, ax2, ax3]:
+        scaling(ax)
+
+    fig.tight_layout()
+    fig.savefig(f'./plots/classifier_{which_method}.png')
 
 
-fig.tight_layout()
-fig.savefig(f'classifier.png')
+
+
+make_confusion = True
+if make_confusion:
+    def score_classifier(classifier_results, version='new'):
+        # 0 means cascade, 1 means track
+        copy = classifier_results.copy()
+        if version is 'new':
+            copy[copy<0.27] =  0 # cascade
+            copy[copy>=0.27] = 1 # track
+        elif version is 'old':
+            copy[copy<=100] =  1 # track
+            copy[copy>100] =   0 # cascade
+        return copy
+
+    scores = {
+        "nue": score_classifier(ehe_classifier['nue'], which_method),
+        "mu": score_classifier(ehe_classifier['mu'], which_method)
+    }
+
+    y_pred = np.concatenate((
+        scores['nue'][ehe_mask['nue']], 
+        scores['mu'][ehe_mask['mu']]
+        ))
+    y_true = np.concatenate((
+        np.full_like(ehe_classifier['nue'], 0)[ehe_mask['nue']],
+        np.full_like(ehe_classifier['mu'],  1)[ehe_mask['mu']]
+    ))
+    y_weights = np.concatenate((
+        ehe_weights['nue'][ehe_mask['nue']],
+        ehe_weights['mu'][ehe_mask['mu']]
+    ))
+
+    from sklearn import metrics
+    confusion_matrix = metrics.confusion_matrix(
+        y_true, y_pred, 
+        sample_weight=y_weights, 
+        normalize='true'
+        )
+    cm_display = metrics.ConfusionMatrixDisplay(
+        confusion_matrix=confusion_matrix,
+        display_labels=['Cascade', 'Track']
+        )
+    cm_display.plot()
+    plt.tight_layout()
+    plt.savefig(f'./plots/confusion_{which_method}.png', dpi=300)
