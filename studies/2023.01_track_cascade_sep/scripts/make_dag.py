@@ -4,8 +4,9 @@ from pathlib import Path
 
 output_directory_head = '/disk20/users/brian/IceCube/juliet'
 
-datasets = ['nue_high_energy', 'nue_very_high_energy',
-            'mu_high_energy', 'mu_very_high_energy'
+datasets = ['numu_high_energy', 'numu_very_high_energy',
+            'nutau_high_energy', 'nutau_very_high_energy',
+            'tau_high_energy', 'tau_very_high_energy',
     ]
 # datasets = ['nue_high_energy']
 

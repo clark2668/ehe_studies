@@ -2,15 +2,14 @@
 
 
 # juliet HE
-# ls /home/mmeier/data/simulations/table_based_sim/juliet/numu/high_energy/L2/1/*.zst > files_numu_high_energy.txt
-# ls /home/mmeier/data/simulations/table_based_sim/juliet/nutau/high_energy/L2/1/*.zst > files_nutau_high_energy.txt
-# ls /home/mmeier/data/simulations/table_based_sim/juliet/tau/high_energy/L2/1/*.zst > files_tau_high_energy.txt
-
+ls /home/mmeier/data/simulations/table_based_sim/juliet/numu/high_energy/L2/1/*.zst > files_numu_high_energy.txt
+ls /home/mmeier/data/simulations/table_based_sim/juliet/nutau/high_energy/L2/1/*.zst > files_nutau_high_energy.txt
+ls /home/mmeier/data/simulations/table_based_sim/juliet/tau/high_energy/L2/1/*.zst > files_tau_high_energy.txt
 
 # juliet VHE
-# ls /home/mmeier/data/simulations/table_based_sim/juliet/numu/very_high_energy/l2_prime/1/*.zst > files_numu_very_high_energy.txt
-# ls /home/mmeier/data/simulations/table_based_sim/juliet/nutau/very_high_energy/l2_prime/1/*.zst > files_nutau_very_high_energy.txt
-# ls /home/mmeier/data/simulations/table_based_sim/juliet/tau/very_high_energy/l2_prime/1/*.zst > files_tau_very_high_energy.txt
+ls /home/mmeier/data/simulations/table_based_sim/juliet/numu/very_high_energy/l2_prime/1/*.zst > files_numu_very_high_energy.txt
+ls /home/mmeier/data/simulations/table_based_sim/juliet/nutau/very_high_energy/l2_prime/1/*.zst > files_nutau_very_high_energy.txt
+ls /home/mmeier/data/simulations/table_based_sim/juliet/tau/very_high_energy/l2_prime/1/*.zst > files_tau_very_high_energy.txt
 
 ## old L2? (Maybe max will tell me where they were moved to...)
 # ls /disk19/users/mmeier/simulations/table_based_sim/juliet/nue/high_energy_bugged/l2_prime/1/*.zst > files_nue_high_energy.txt
