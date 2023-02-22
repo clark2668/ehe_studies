@@ -17,17 +17,13 @@ gzk_partial = partial(gzk_flux, which_species="nue_sum")
 cr_flux = weighting.get_flux_model('GaisserH4a', 'corsika')
 atmo_flux = weighting.get_flux_model('H3a_SIBYLL23C', 'nugen')
 
-style.use('/home/brian/IceCube/ehe/max_tools/EHE_analysis/eheanalysis/ehe.mplstyle')
+style.use('/home/brian/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
 
 livetime = 365 * 24 * 60 * 60
 print(livetime)
 
 cfg_file = 'config.yaml'
 cfg_file = yaml.safe_load(open(cfg_file))
-
-juliet_species = ["nue", "mu"]
-juliet_energy_levels = ["high_energy", "very_high_energy"]
-# juliet_energy_levels = ["very_high_energy"]
 
 which_method='new'
 if which_method is 'new':
@@ -62,12 +58,22 @@ ehe_classifier = {
     "mu": np.asarray([])
 }
 
+
+juliet_species = ["nue", "mu"]
+juliet_energy_levels = ["high_energy", "very_high_energy"]
+juliet_energy_levels = ["high_energy"]
+# juliet_energy_levels = []
 events_per_file = {
     "nue_high_energy": 600,
     "nue_very_high_energy": 80,
     "mu_high_energy": 150,
     "mu_very_high_energy": 20
 }
+
+#############################
+# ehe/cosmogenic flux (juliet)
+#############################
+
 
 for s in juliet_species:
     for l in juliet_energy_levels:
@@ -99,6 +105,45 @@ ehe_mask = {
     "mu": ehe_charge['mu']>qcut
 }
 
+
+#############################
+# muon bundles (corsika)
+#############################
+
+cor_classifier = np.asarray([])
+cor_charge = np.asarray([])
+cor_weights = np.asarray([])
+
+corsika_sets = ["20787"]
+for c in corsika_sets:
+    print("Working on corsika {}".format(c))
+    cor_file = pd.HDFStore(cfg_file['corsika'][c]['file'])
+    cor_weighter = weighting.get_weighter( cor_file, 'corsika',
+        cfg_file['corsika'][c]['n_files']
+        )
+    this_cor_charge = cor_weighter.get_column(cfg_file['variables'][charge_var]['variable'], cfg_file['variables'][charge_var]['value'])
+    this_cor_classifier = cor_weighter.get_column(cfg_file['variables'][classifier_var]['variable'], cfg_file['variables'][classifier_var]['value'])
+    
+    L2_q_mask = this_cor_charge > qcut
+
+    cor_classifier = np.concatenate((cor_classifier, this_cor_classifier[L2_q_mask]))
+    cor_weights = np.concatenate((cor_weights, cor_weighter.get_weights(cr_flux)[L2_q_mask] * livetime))
+    cor_file.close()
+
+if which_method is 'new':
+    cor_track_mask = cor_classifier >= classifier_cut
+elif which_method is 'old':
+    cor_track_mask = cor_classifier <= classifier_cut
+
+cor_weight_total = np.sum(cor_weights)
+cor_weight_tracks = np.sum(cor_weights[cor_track_mask])
+cor_weight_cascades = np.sum(cor_weights[~cor_track_mask])
+cor_misclassifier = cor_weight_cascades/cor_weight_total
+print(f"Cor Correct: {cor_weight_tracks/cor_weight_total:.3f}")
+print(f"Cor False: {cor_misclassifier:.3f}")
+
+
+
 make_plots = True
 if make_plots:
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15,5))
@@ -112,12 +157,12 @@ if make_plots:
         ehe_classifier['mu'][ehe_mask['mu']], bins=classifier_bins, 
         weights=ehe_weights["mu"][ehe_mask['mu']],
         histtype='step', label=r'GZK $\mu$', linewidth=lw)
-    # ax1.hist( cor_speed, bins=speed_bins, weights=cor_weights,
-    #         histtype='step', label='Corsika (H4a)', linewidth=lw)
+    ax1.hist( cor_classifier, bins=classifier_bins, weights=cor_weights,
+            histtype='step', label='Corsika (H4a)', linewidth=lw)
     ax1.set_yscale('log')
     ax1.set_xlabel(cfg_file['variables'][classifier_var]['label'])
     ax1.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
-    ax1.set_ylim([1E-7, 1E1])
+    ax1.set_ylim([1E-6, 1E4])
     ax1.legend()
 
     ax2.hist( 
@@ -128,7 +173,11 @@ if make_plots:
         ehe_classifier['mu'][ehe_mask['mu']], bins=classifier_bins, 
         weights=ehe_weights["mu"][ehe_mask['mu']],
         histtype='step', linewidth=lw, density=True)
-    # ax2.set_yscale('log')
+    ax2.hist( 
+        cor_classifier, bins=classifier_bins, 
+        weights=cor_weights,
+        histtype='step', linewidth=lw, density=True)
+
     ax2.set_xlabel(cfg_file['variables'][classifier_var]['label'])
     ax2.set_ylabel('Density')
 
@@ -139,6 +188,10 @@ if make_plots:
     ax3.hist( 
         ehe_classifier['mu'][ehe_mask['mu']], bins=classifier_bins, 
         weights=ehe_weights["mu"][ehe_mask['mu']],
+        histtype='step', linewidth=lw, density=True, cumulative=-nue_cumulative_sign)
+    ax3.hist( 
+        cor_classifier, bins=classifier_bins, 
+        weights=cor_weights,
         histtype='step', linewidth=lw, density=True, cumulative=-nue_cumulative_sign)
     ax3.set_xlabel(cfg_file['variables'][classifier_var]['label'])
     ax3.set_ylabel('CDF')
@@ -153,12 +206,12 @@ if make_plots:
         scaling(ax)
 
     fig.tight_layout()
-    fig.savefig(f'./plots/classifier_{which_method}.png')
+    fig.savefig(f'./figs/classifier_{which_method}.png')
 
 
 
 
-make_confusion = True
+make_confusion = False
 if make_confusion:
     def score_classifier(classifier_results, version='new'):
         # 0 means cascade, 1 means track
@@ -201,4 +254,4 @@ if make_confusion:
         )
     cm_display.plot()
     plt.tight_layout()
-    plt.savefig(f'./plots/confusion_{which_method}.png', dpi=300)
+    plt.savefig(f'./figs/confusion_{which_method}.png', dpi=300)
