@@ -19,6 +19,7 @@ variables:
     variable: "CVMultiplicity"
     value: "n_hit_doms"
     label: "CVM Ndoms"
+   
   
 
 burn_sample:

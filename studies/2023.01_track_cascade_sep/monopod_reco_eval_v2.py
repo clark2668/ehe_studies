@@ -31,13 +31,15 @@ classifier_bins = np.linspace(0, 0.5, 150)
 classifier_cut = 0.27
 ndoms_cut = 100
 
-which_reco='splinempe'
+which_reco='monopod'
 if which_reco is 'splinempe':
     reco_name='EHE_SplineMPE'
 elif which_reco is 'monopod':
     reco_name='EHE_Monopod'
 elif which_reco is 'linefit':
     reco_name='EHELineFit'
+
+energy_reco = 'EHE_Monopod'
 
 ehe_weights ={
     "nue": np.asarray([]),
@@ -79,8 +81,14 @@ ehe_true_azi = {
     "nue": np.asarray([]),
     "mu": np.asarray([])
 }
-
-
+ehe_true_e = {
+    "nue": np.asarray([]),
+    "mu": np.asarray([])
+}
+ehe_reco_e = {
+    "nue": np.asarray([]),
+    "mu": np.asarray([])
+}
 
 juliet_species = ["nue"]
 juliet_energy_levels = ["high_energy"]
@@ -114,6 +122,8 @@ for s in juliet_species:
         reco_azi = the_f.get_node(f"/{reco_name}").col("azimuth")
         truth_zen = the_f.get_node("/PolyplopiaPrimary").col("zenith")
         truth_azi = the_f.get_node("/PolyplopiaPrimary").col("azimuth")
+        true_e = the_f.get_node(f"/EMEquivVisDepE").col('value')
+        reco_e = the_f.get_node(f"/{energy_reco}").col("energy")
 
         n_gen = cfg_file['juliet'][s][l]['n_files'] * evts_per_file
 
@@ -132,6 +142,9 @@ for s in juliet_species:
         
         ehe_true_zen[s] = np.concatenate((ehe_true_zen[s], copy.deepcopy(truth_zen)))
         ehe_true_azi[s] = np.concatenate((ehe_true_azi[s], copy.deepcopy(truth_azi)))
+
+        ehe_true_e[s] = np.concatenate((ehe_true_e[s], copy.deepcopy(true_e)))
+        ehe_reco_e[s] = np.concatenate((ehe_reco_e[s], copy.deepcopy(reco_e)))
 
         the_f.close()
 
@@ -162,117 +175,175 @@ if make_plots:
     norm = colors.LogNorm()
     czen_bins = np.linspace(-1, 1, 40)
     azi_bins = np.linspace(0,np.pi*2, 40)
+    e_bins = np.logspace(np.log10(1E6),np.log10(1E10),40)
 
-    # zenith
-    fig = plt.figure(figsize=(7,5))
-    ax = fig.add_subplot(111)
-    vals, xedges, yedges, im = plotting.make_2D_hist(
-        ax, 
-        np.cos(ehe_true_zen['nue'][ehe_mask['nue']]), 
-        np.cos(ehe_reco_zen['nue'][ehe_mask['nue']]),
-        bins=czen_bins, cmap=plt.cm.viridis,
-        weights=ehe_weights['nue'][ehe_mask['nue']],
-        norm=norm,
-        xlabel='True czen',
-        ylabel='Reco czen',
-        title=f"{which_reco}"
-    )
-    cbar = plt.colorbar(im, ax=ax, label='Evts/Year')
-    x, y_med, y_lo, y_hi = plotting.find_contours_2D(
-        x_values=np.cos(ehe_true_zen['nue'][ehe_mask['nue']]),
-        y_values=np.cos(ehe_reco_zen['nue'][ehe_mask['nue']]),
-        xbins=xedges,
-    )
-    ax.plot(x, y_med, 'r-', label='Median')
-    ax.plot(x, y_lo, 'r-.')
-    ax.plot(x, y_hi, 'r-.', label='68% contour')
-    ax.legend()
+    do_e = True
+    if do_e:
 
-    im.set_clim(clims)
-    fig.tight_layout()
-    fig.savefig(f'./figs/reco_czen_{which_reco}.png')
-    del fig, ax, im
+        # energy
+        fig = plt.figure(figsize=(7,5))
+        ax = fig.add_subplot(111)
+        vals, xedges, yedges, im = plotting.make_2D_hist(
+            ax, 
+            ehe_true_e['nue'][ehe_mask['nue']],
+            ehe_reco_e['nue'][ehe_mask['nue']],
+            bins=e_bins, cmap=plt.cm.viridis,
+            weights=ehe_weights['nue'][ehe_mask['nue']],
+            norm=norm,
+            xlabel='True EM Equiv Vis Energy [GeV]',
+            ylabel='Reco Energy [GeV]',
+            title=f"{which_reco}"
+        )
+        cbar = plt.colorbar(im, ax=ax, label='Evts/Year')
+        x, y_med, y_lo, y_hi = plotting.find_contours_2D(
+            x_values=ehe_true_e['nue'][ehe_mask['nue']],
+            y_values=ehe_reco_e['nue'][ehe_mask['nue']],
+            xbins=xedges,
+        )
+        ax.plot(x, y_med, 'r-', label='Median')
+        ax.plot(x, y_lo, 'r-.')
+        ax.plot(x, y_hi, 'r-.', label='68% contour')
+        ax.legend()
+        ax.set_xscale('log')
+        ax.set_yscale('log')
 
-    # delta zenith
-    dczen_bins = np.linspace(-0.25,0.25,40)
-    if which_reco is 'splinempe':
-        dczen_bins = np.linspace(-2,2,40)
-    fig = plt.figure(figsize=(7,5))
-    ax = fig.add_subplot(111)
-    n, b, p = ax.hist(
-        np.cos(ehe_true_zen['nue'][ehe_mask['nue']])-np.cos(ehe_reco_zen['nue'][ehe_mask['nue']]),
-        weights=ehe_weights['nue'][ehe_mask['nue']],
-        bins=dczen_bins,
-        histtype='step',
-        lw=3,
-    )
-    m, r1, r2 = plotting.get_median_quantiles(
-        np.cos(ehe_true_zen['nue'][ehe_mask['nue']])-np.cos(ehe_reco_zen['nue'][ehe_mask['nue']]),
-        weights=ehe_weights['nue'][ehe_mask['nue']]
-    )
-    maxval = max(n)
-    ax.vlines(m, 0, maxval, 'C1', linestyle='--', label='Median {:.2f}'.format(m))
-    ax.vlines(r1, 0, maxval, 'C1', linestyle=':', label='68%: [{:.2f}, {:.2f}]'.format(r1,r2))
-    ax.vlines(r2, 0, maxval, 'C1', linestyle=':')
-    ax.legend()
-    ax.set_xlabel('True-Reco Czen'); ax.set_ylabel('Evts/Yr')
-    ax.set_title(f"{which_reco}")
-    fig.tight_layout()
-    fig.savefig(f'./figs/delta_czen_{which_reco}.png')
-    del fig, ax
+        im.set_clim(clims)
+        fig.tight_layout()
+        fig.savefig(f'./figs/reco_energy_monopod.png')
+        del fig, ax, im
+
+        # energy
+        fig = plt.figure(figsize=(7,5))
+        ax = fig.add_subplot(111)
+        x, y_med, y_lo, y_hi = plotting.find_contours_2D(
+            x_values=ehe_true_e['nue'][ehe_mask['nue']],
+            y_values=(ehe_reco_e['nue'][ehe_mask['nue']] - ehe_true_e['nue'][ehe_mask['nue']])/ehe_true_e['nue'][ehe_mask['nue']],
+            xbins=xedges,
+        )
+        ax.fill_between(x, y_med, y_hi, color='C0', alpha=0.2)
+        ax.fill_between(x,y_med, y_lo, color='C0', alpha=0.2)
+        ax.set_ylabel('(Reco-True)/True')
+        ax.set_xlabel('True EM Equiv Vis Energy [GeV]')
+        ax.set_xscale('log')
+        ax.set_ylim([-0.5,0.5])
+        ax.hlines(0.,1E6, 1E10, linestyles='--')
+        fig.tight_layout()
+        fig.savefig(f'./figs/reco_energy_resolution_monopod.png')
+        del fig, ax
+
+    do_dir = False
+    if do_dir:
+
+        # zenith
+        fig = plt.figure(figsize=(7,5))
+        ax = fig.add_subplot(111)
+        vals, xedges, yedges, im = plotting.make_2D_hist(
+            ax, 
+            np.cos(ehe_true_zen['nue'][ehe_mask['nue']]), 
+            np.cos(ehe_reco_zen['nue'][ehe_mask['nue']]),
+            bins=czen_bins, cmap=plt.cm.viridis,
+            weights=ehe_weights['nue'][ehe_mask['nue']],
+            norm=norm,
+            xlabel='True czen',
+            ylabel='Reco czen',
+            title=f"{which_reco}"
+        )
+        cbar = plt.colorbar(im, ax=ax, label='Evts/Year')
+        x, y_med, y_lo, y_hi = plotting.find_contours_2D(
+            x_values=np.cos(ehe_true_zen['nue'][ehe_mask['nue']]),
+            y_values=np.cos(ehe_reco_zen['nue'][ehe_mask['nue']]),
+            xbins=xedges,
+        )
+        ax.plot(x, y_med, 'r-', label='Median')
+        ax.plot(x, y_lo, 'r-.')
+        ax.plot(x, y_hi, 'r-.', label='68% contour')
+        ax.legend()
+
+        im.set_clim(clims)
+        fig.tight_layout()
+        fig.savefig(f'./figs/reco_czen_{which_reco}.png')
+        del fig, ax, im
+
+        # delta zenith
+        dczen_bins = np.linspace(-0.25,0.25,40)
+        if which_reco is 'splinempe':
+            dczen_bins = np.linspace(-2,2,40)
+        fig = plt.figure(figsize=(7,5))
+        ax = fig.add_subplot(111)
+        n, b, p = ax.hist(
+            np.cos(ehe_true_zen['nue'][ehe_mask['nue']])-np.cos(ehe_reco_zen['nue'][ehe_mask['nue']]),
+            weights=ehe_weights['nue'][ehe_mask['nue']],
+            bins=dczen_bins,
+            histtype='step',
+            lw=3,
+        )
+        m, r1, r2 = plotting.get_median_quantiles(
+            np.cos(ehe_true_zen['nue'][ehe_mask['nue']])-np.cos(ehe_reco_zen['nue'][ehe_mask['nue']]),
+            weights=ehe_weights['nue'][ehe_mask['nue']]
+        )
+        maxval = max(n)
+        ax.vlines(m, 0, maxval, 'C1', linestyle='--', label='Median {:.2f}'.format(m))
+        ax.vlines(r1, 0, maxval, 'C1', linestyle=':', label='68%: [{:.2f}, {:.2f}]'.format(r1,r2))
+        ax.vlines(r2, 0, maxval, 'C1', linestyle=':')
+        ax.legend()
+        ax.set_xlabel('True-Reco Czen'); ax.set_ylabel('Evts/Yr')
+        ax.set_title(f"{which_reco}")
+        fig.tight_layout()
+        fig.savefig(f'./figs/delta_czen_{which_reco}.png')
+        del fig, ax
 
 
-    # azimuth
-    fig = plt.figure(figsize=(7,5))
-    ax = fig.add_subplot(111)
-    vals, xedges, yedges, im = plotting.make_2D_hist(
-        ax, 
-        ehe_true_azi['nue'][ehe_mask['nue']], 
-        ehe_reco_azi['nue'][ehe_mask['nue']],
-        bins=azi_bins, cmap=plt.cm.viridis,
-        weights=ehe_weights['nue'][ehe_mask['nue']],
-        norm=norm,
-        xlabel='True azi',
-        ylabel='Reco azi',
-        title=f"{which_reco}"
-    )
-    cbar = plt.colorbar(im, ax=ax, label='Evts/Year')
-    x, y_med, y_lo, y_hi = plotting.find_contours_2D(
-        x_values=ehe_true_azi['nue'][ehe_mask['nue']],
-        y_values=ehe_reco_azi['nue'][ehe_mask['nue']],
-        xbins=xedges,
-    )
-    ax.plot(x, y_med, 'r-', label='Median')
-    ax.plot(x, y_lo, 'r-.')
-    ax.plot(x, y_hi, 'r-.', label='68% contour')
-    ax.legend()
+        # azimuth
+        fig = plt.figure(figsize=(7,5))
+        ax = fig.add_subplot(111)
+        vals, xedges, yedges, im = plotting.make_2D_hist(
+            ax, 
+            ehe_true_azi['nue'][ehe_mask['nue']], 
+            ehe_reco_azi['nue'][ehe_mask['nue']],
+            bins=azi_bins, cmap=plt.cm.viridis,
+            weights=ehe_weights['nue'][ehe_mask['nue']],
+            norm=norm,
+            xlabel='True azi',
+            ylabel='Reco azi',
+            title=f"{which_reco}"
+        )
+        cbar = plt.colorbar(im, ax=ax, label='Evts/Year')
+        x, y_med, y_lo, y_hi = plotting.find_contours_2D(
+            x_values=ehe_true_azi['nue'][ehe_mask['nue']],
+            y_values=ehe_reco_azi['nue'][ehe_mask['nue']],
+            xbins=xedges,
+        )
+        ax.plot(x, y_med, 'r-', label='Median')
+        ax.plot(x, y_lo, 'r-.')
+        ax.plot(x, y_hi, 'r-.', label='68% contour')
+        ax.legend()
 
-    im.set_clim(clims)
-    fig.tight_layout()
-    fig.savefig(f'./figs/reco_azi_{which_reco}.png')
-    del fig, ax, im
+        im.set_clim(clims)
+        fig.tight_layout()
+        fig.savefig(f'./figs/reco_azi_{which_reco}.png')
+        del fig, ax, im
 
-    # delta azimuth
-    fig = plt.figure(figsize=(7,5))
-    ax = fig.add_subplot(111)
-    n, b, p = ax.hist(
-        np.rad2deg(ehe_true_azi['nue'][ehe_mask['nue']]-ehe_reco_azi['nue'][ehe_mask['nue']]),
-        weights=ehe_weights['nue'][ehe_mask['nue']],
-        bins=np.linspace(-10,10,40),
-        histtype='step',
-        lw=3,
-    )
-    m, r1, r2 = plotting.get_median_quantiles(
-        np.rad2deg(ehe_true_azi['nue'][ehe_mask['nue']]-ehe_reco_azi['nue'][ehe_mask['nue']]),
-        weights=ehe_weights['nue'][ehe_mask['nue']]
-    )
-    maxval = max(n)
-    ax.vlines(m, 0, maxval, 'C1', linestyle='--', label='Median {:.2f}'.format(m))
-    ax.vlines(r1, 0, maxval, 'C1', linestyle=':', label='68%: [{:.2f}, {:.2f}]'.format(r1,r2))
-    ax.vlines(r2, 0, maxval, 'C1', linestyle=':')
-    ax.legend()
-    ax.set_xlabel('True-Reco Azi [deg]'); ax.set_ylabel('Evts/Yr')
-    ax.set_title(f"{which_reco}")
-    fig.tight_layout()
-    fig.savefig(f'./figs/delta_azi_{which_reco}.png')
-    del fig, ax
+        # delta azimuth
+        fig = plt.figure(figsize=(7,5))
+        ax = fig.add_subplot(111)
+        n, b, p = ax.hist(
+            np.rad2deg(ehe_true_azi['nue'][ehe_mask['nue']]-ehe_reco_azi['nue'][ehe_mask['nue']]),
+            weights=ehe_weights['nue'][ehe_mask['nue']],
+            bins=np.linspace(-10,10,40),
+            histtype='step',
+            lw=3,
+        )
+        m, r1, r2 = plotting.get_median_quantiles(
+            np.rad2deg(ehe_true_azi['nue'][ehe_mask['nue']]-ehe_reco_azi['nue'][ehe_mask['nue']]),
+            weights=ehe_weights['nue'][ehe_mask['nue']]
+        )
+        maxval = max(n)
+        ax.vlines(m, 0, maxval, 'C1', linestyle='--', label='Median {:.2f}'.format(m))
+        ax.vlines(r1, 0, maxval, 'C1', linestyle=':', label='68%: [{:.2f}, {:.2f}]'.format(r1,r2))
+        ax.vlines(r2, 0, maxval, 'C1', linestyle=':')
+        ax.legend()
+        ax.set_xlabel('True-Reco Azi [deg]'); ax.set_ylabel('Evts/Yr')
+        ax.set_title(f"{which_reco}")
+        fig.tight_layout()
+        fig.savefig(f'./figs/delta_azi_{which_reco}.png')
+        del fig, ax
