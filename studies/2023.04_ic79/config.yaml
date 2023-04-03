@@ -1,0 +1,26 @@
+variables:
+  charge:
+    variable: "Homogenized_QTot"
+    value: "value"
+    label: "HQtot log10(NPE)"
+  speed:
+    variable: "EHELineFit"
+    value: "speed"
+    label: "LineFit Speed"
+  ndoms:
+    variable: "CVMultiplicity"
+    value: "n_hit_doms"
+    label: "CVM Ndoms"
+   
+  
+
+burn_sample:
+  IC79-2010-pass2:
+    file: "/data/user/brianclark/IceCube/EHE/level4_v2/IC79-2010-pass2.hdf5"
+    livetime: 2895525.80
+    # livetime 100%: 27131341.07
+
+  IC86-2011-pass2:
+    file: "/data/user/brianclark/IceCube/EHE/level4_v2/IC86-2011-pass2.hdf5"
+    livetime: 2721082.25
+
