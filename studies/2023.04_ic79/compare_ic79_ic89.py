@@ -40,10 +40,17 @@ qbin_centers = var_bin_centers = get_bin_centers(q_bins)
 ic79_sum, b = np.histogram(ic79_dict['charge'][ic79_dict['qmask']],bins=q_bins)
 ic86_sum, b = np.histogram(ic86_dict['charge'][ic86_dict['qmask']],bins=q_bins)
 
+do_rescale = True
+ic79_rescale = 1.
+ic86_rescale = 1.
+if do_rescale:
+    ic79_rescale = 1/ic79_dict['livetime']*livetime
+    ic86_rescale = 1/ic86_dict['livetime']*livetime
+
 # rescale to 1 year
 ic79_sum, b, p = ax.hist(
     x=qbin_centers,
-    weights=ic79_sum/ic79_dict['livetime']*livetime,
+    weights=ic79_sum*ic79_rescale,
     bins=q_bins,
     label='IC79',
     histtype='step', lw=2
@@ -51,7 +58,7 @@ ic79_sum, b, p = ax.hist(
 
 ic86_sum, b, p = ax.hist(
     x=qbin_centers,
-    weights=ic86_sum/ic86_dict['livetime']*livetime,
+    weights=ic86_sum*ic86_rescale,
     bins=q_bins,
     label='IC86',
     histtype='step', lw=2
@@ -67,12 +74,15 @@ ax.legend()
 ax.set_yscale('log')
 ax.set_xscale('log')
 # ax.set_ylim([1E-5, 1E4])
-ax.set_ylabel('Events / {:.2f} days (rescaled)'.format(livetime/(60*60*24)))
+ax.set_ylabel('Events')
+if do_rescale:
+    ax.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
 axr.set_ylabel('IC79/IC86')
 axr.set_xlabel(r'Charge')
 # axr.set_ylim([0.5,1.5])
 axr.grid()
 axr.axhline(y=1,linestyle='--', color='red')
+ax.set_title(f"Rescale Livetime? {do_rescale}")
 fig.tight_layout()
-fig.savefig('plots/charge.png')
+fig.savefig(f'plots/charge_rescale_{do_rescale}.png', dpi=300)
 del fig, ax, axr
