@@ -2,13 +2,15 @@ import numpy as np
 import os
 from pathlib import Path
 
-output_directory_head = '/disk20/users/brian/IceCube/juliet/level5'
+# output_directory_head = '/disk20/users/brian/IceCube/juliet/level5'
+output_directory_head = '/data/i3home/baclark/i3store/nugen/level5/'
 
 datasets = [
             # 'numu_high_energy', 'numu_very_high_energy',
             # 'nutau_high_energy', 'nutau_very_high_energy',
             # 'tau_high_energy', 'tau_very_high_energy',
-            'nue_high_energy'#, 'nue_very_high_energy'
+            #'nue_high_energy'#, 'nue_very_high_energy',
+            "21218"
     ]
 
 for d in datasets:
