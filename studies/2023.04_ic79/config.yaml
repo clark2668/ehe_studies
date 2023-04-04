@@ -3,6 +3,10 @@ variables:
     variable: "Homogenized_QTot"
     value: "value"
     label: "HQtot log10(NPE)"
+  zenith:
+    variable: "EHE_SplineMPE"
+    value: "zenith"
+    label: "SplineMPE Zenith"
   speed:
     variable: "EHELineFit"
     value: "speed"
