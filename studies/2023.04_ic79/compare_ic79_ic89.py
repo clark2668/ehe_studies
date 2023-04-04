@@ -15,6 +15,7 @@ livetime = 365*24*60*60
 cfg_file = 'config.yaml'
 cfg_file = yaml.safe_load(open(cfg_file))
 
+fixy = 2895525.80/2721082.25
 
 def harvest_values(cfg_file, dataset):
     return_dict = {}
@@ -30,9 +31,9 @@ def harvest_values(cfg_file, dataset):
 ic79_dict = harvest_values(cfg_file, 'IC79-2010-pass2')
 ic86_dict = harvest_values(cfg_file, 'IC86-2011-pass2')
 
-fig, (ax, axr) = plt.subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [3, 1]})
+fig, (ax, axr) = plt.subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [4, 2]})
 
-q_bins = np.logspace(4,6,10)
+q_bins = np.logspace(4,6,20)
 def get_bin_centers(bins):
     return (bins[1:] + bins[:-1]) * 0.5
 qbin_centers = var_bin_centers = get_bin_centers(q_bins)
@@ -44,8 +45,8 @@ do_rescale = True
 ic79_rescale = 1.
 ic86_rescale = 1.
 if do_rescale:
-    ic79_rescale = 1/ic79_dict['livetime']*livetime
-    ic86_rescale = 1/ic86_dict['livetime']*livetime
+    ic79_rescale = 1/ic79_dict['livetime']*fixy
+    ic86_rescale = 1/ic86_dict['livetime']
 
 # rescale to 1 year
 ic79_sum, b, p = ax.hist(
@@ -74,12 +75,13 @@ ax.legend()
 ax.set_yscale('log')
 ax.set_xscale('log')
 # ax.set_ylim([1E-5, 1E4])
-ax.set_ylabel('Events')
+# ax.set_ylabel("Hz")
 if do_rescale:
-    ax.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
+    # ax.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
+    ax.set_ylabel("Hz")
 axr.set_ylabel('IC79/IC86')
 axr.set_xlabel(r'Charge')
-# axr.set_ylim([0.5,1.5])
+axr.set_ylim([0.8,1.1])
 axr.grid()
 axr.axhline(y=1,linestyle='--', color='red')
 ax.set_title(f"Rescale Livetime? {do_rescale}")
