@@ -16,7 +16,8 @@ from eheanalysis import weighting, plotting, cuts
 gzk_flux = fluxes.EHEFlux("cosmogenic_ahlers2010_1E18")
 gzk_partial = partial(gzk_flux, which_species="nue_sum") 
 
-style.use('/home/brian/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
+# style.use('/home/brian/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
+style.use('/data/i3home/baclark/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
 
 livetime = 365 * 24 * 60 * 60
 print(livetime)
@@ -106,14 +107,16 @@ events_per_file = {
 
 
 for s in juliet_species:
-    for l in juliet_energy_levels:
+    if 1==1:
+    # for l in juliet_energy_levels:
 
-        print(f"Working on juliet {s} {l}")
+        # print(f"Working on juliet {s} {l}")
 
-        the_f = tables.open_file(cfg_file['juliet'][s][l]['file'])
-        weight_dict, prop_matrix, evts_per_file = weighting.get_juliet_weightdict_and_propmatrix(the_f)
+        the_f = tables.open_file(cfg_file['nugen']['21218']['file'])
+        # the_f = tables.open_file(cfg_file['juliet'][s][l]['file'])
+        # weight_dict, prop_matrix, evts_per_file = weighting.get_juliet_weightdict_and_propmatrix(the_f)
 
-        evts_per_file = events_per_file[f"{s}_{l}"] # override to fix L2 issue
+        # evts_per_file = events_per_file[f"{s}_{l}"] # override to fix L2 issue
 
         charge = the_f.get_node(f"/{cfg_file['variables'][charge_var]['variable']}").col(f"{cfg_file['variables'][charge_var]['value']}")
         ndoms = the_f.get_node(f"/{cfg_file['variables']['ndoms']['variable']}").col(f"{cfg_file['variables']['ndoms']['value']}")
@@ -125,12 +128,13 @@ for s in juliet_species:
         true_e = the_f.get_node(f"/EMEquivVisDepE").col('value')
         reco_e = the_f.get_node(f"/{energy_reco}").col("energy")
 
-        n_gen = cfg_file['juliet'][s][l]['n_files'] * evts_per_file
+        # n_gen = cfg_file['juliet'][s][l]['n_files'] * evts_per_file
 
-        weights = weighting.calc_juliet_weight_from_weight_dict_and_prop_matrix(
-            weight_dict=weight_dict, prop_matrix=prop_matrix, 
-            flux=gzk_partial, n_gen=n_gen, livetime=livetime,
-        )
+        # weights = weighting.calc_juliet_weight_from_weight_dict_and_prop_matrix(
+        #     weight_dict=weight_dict, prop_matrix=prop_matrix, 
+        #     flux=gzk_partial, n_gen=n_gen, livetime=livetime,
+        # )
+        weights = np.ones_like(charge)
 
         ehe_weights[s] = np.concatenate((ehe_weights[s], copy.deepcopy(abs(weights))))
         ehe_charge[s] = np.concatenate((ehe_charge[s], copy.deepcopy(charge)))
@@ -207,7 +211,7 @@ if make_plots:
         ax.set_xscale('log')
         ax.set_yscale('log')
 
-        im.set_clim(clims)
+        # im.set_clim(clims)
         fig.tight_layout()
         fig.savefig(f'./figs/reco_energy_monopod.png')
         del fig, ax, im
