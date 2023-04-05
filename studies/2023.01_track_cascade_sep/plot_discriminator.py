@@ -206,12 +206,12 @@ if make_plots:
         scaling(ax)
 
     fig.tight_layout()
-    fig.savefig(f'./figs/classifier_{which_method}.png')
+    fig.savefig(f'./figs/classifier_{which_method}.png', dpi=300)
 
 
 
 
-make_confusion = False
+make_confusion = True
 if make_confusion:
     def score_classifier(classifier_results, version='new'):
         # 0 means cascade, 1 means track
