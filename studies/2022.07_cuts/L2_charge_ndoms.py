@@ -47,7 +47,9 @@ def astro_flux(energy):
 # juliet (EHE neutrinos)
 juliet_species = ["nue", "numu", "nutau", "mu", "tau"]
 juliet_energy_levels = ["high_energy", "very_high_energy"]
-# juliet_species = ["nue"]
+juliet_species = ["nue"]
+juliet_energy_levels = ["high_energy"]
+
 
 corsika_sets = ["20787"]
 # corsika_sets = []
@@ -58,7 +60,7 @@ nugen_sets = ["nue"]
 burn_samples = ["IC86-I-pass2", "IC86-II-pass2", "IC86-III-pass2"]
 # burn_samples = ["IC86-II-pass2"]
 
-style.use('/home/brian/IceCube/ehe/max_tools/EHE_analysis/eheanalysis/ehe.mplstyle')
+# style.use('/home/brian/IceCube/ehe/max_tools/EHE_analysis/eheanalysis/ehe.mplstyle')
 # plt.rcParams.update({
 #     'font.size': '16',
 # })
@@ -373,44 +375,44 @@ if do_plots:
     del fig, ax, axr
 
     
-    #############################
-    # histogram of cos(zen) 
-    #############################
+    # #############################
+    # # histogram of cos(zen) 
+    # #############################
     
-    cor_L2_mask = (cor_charge > q_cut) & (cor_ndoms > ndom_cut)
-    nugen_L2_mask = (nugen_charges > q_cut) & (nugen_ndoms > ndom_cut)
-    ehe_L2_mask = (ehe_charge > q_cut) & (ehe_ndoms > ndom_cut)
-    data_L2_mask = (data_charges > q_cut) & (data_ndoms > ndom_cut)
+    # cor_L2_mask = (cor_charge > q_cut) & (cor_ndoms > ndom_cut)
+    # nugen_L2_mask = (nugen_charges > q_cut) & (nugen_ndoms > ndom_cut)
+    # ehe_L2_mask = (ehe_charge > q_cut) & (ehe_ndoms > ndom_cut)
+    # data_L2_mask = (data_charges > q_cut) & (data_ndoms > ndom_cut)
 
-    sim_vars={
-        'cor': cor_czen[cor_L2_mask],
-        'nugen_atmo': nugen_czens[nugen_L2_mask],
-        'nugen_astro': nugen_czens[nugen_L2_mask],
-        'ehe': ehe_czen[ehe_L2_mask]
-    }
-    sim_weights={
-        'cor': cor_weights[cor_L2_mask],
-        'nugen_atmo': nugen_atmo_weights[nugen_L2_mask],
-        'nugen_astro': nugen_astro_weights[nugen_L2_mask],
-        'ehe': ehe_weights[ehe_L2_mask]
-    }
-    fig, ax, axr = plotting.do_1D_data_mc_comparison(
-        var_bins = czen_bins, sim_vars = sim_vars,
-        sim_weights = sim_weights, sim_labels = sim_labels,
-        data=data_czen[data_L2_mask]
-    )
-    ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
-        mode="expand", borderaxespad=0, ncol=2,
-        title="L3 (Q > {:d}, NDoms > {:d})".format(int(q_cut), int(ndom_cut))
-    )    
-    ax.set_yscale('log')
-    ax.set_ylim([1E-5, 1E4])
-    ax.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
-    axr.set_ylabel('Data/Sim')
-    axr.set_xlabel(r'cos($\theta$)')
-    fig.tight_layout()
-    fig.savefig('plots/hist_czen.png')
-    del fig, ax, axr
+    # sim_vars={
+    #     'cor': cor_czen[cor_L2_mask],
+    #     'nugen_atmo': nugen_czens[nugen_L2_mask],
+    #     'nugen_astro': nugen_czens[nugen_L2_mask],
+    #     'ehe': ehe_czen[ehe_L2_mask]
+    # }
+    # sim_weights={
+    #     'cor': cor_weights[cor_L2_mask],
+    #     'nugen_atmo': nugen_atmo_weights[nugen_L2_mask],
+    #     'nugen_astro': nugen_astro_weights[nugen_L2_mask],
+    #     'ehe': ehe_weights[ehe_L2_mask]
+    # }
+    # fig, ax, axr = plotting.do_1D_data_mc_comparison(
+    #     var_bins = czen_bins, sim_vars = sim_vars,
+    #     sim_weights = sim_weights, sim_labels = sim_labels,
+    #     data=data_czen[data_L2_mask]
+    # )
+    # ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
+    #     mode="expand", borderaxespad=0, ncol=2,
+    #     title="L3 (Q > {:d}, NDoms > {:d})".format(int(q_cut), int(ndom_cut))
+    # )    
+    # ax.set_yscale('log')
+    # ax.set_ylim([1E-5, 1E4])
+    # ax.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
+    # axr.set_ylabel('Data/Sim')
+    # axr.set_xlabel(r'cos($\theta$)')
+    # fig.tight_layout()
+    # fig.savefig('plots/hist_czen.png')
+    # del fig, ax, axr
 
 
     #############################
@@ -459,108 +461,108 @@ if do_plots:
     # 2D: charge vs zenith
     #############################
     
-    sim_y_vals = {
-        'cor': cor_charge[cor_L2_mask],
-        'nugen_atmo': nugen_charges[nugen_L2_mask],
-        'nugen_astro': nugen_charges[nugen_L2_mask],
-        'ehe': ehe_charge[ehe_L2_mask]
-    }
-    sim_x_vals = {
-        'cor': cor_czen[cor_L2_mask],
-        'nugen_atmo': nugen_czens[nugen_L2_mask],
-        'nugen_astro': nugen_czens[nugen_L2_mask],
-        'ehe': ehe_czen[ehe_L2_mask]
-    }
-    set_labels={
-        'cor': r'Atm $\mu$ (H4a)',
-        'nugen_atmo': r'Atm $\nu$ (H3a, Sibyll 2.3c)',
-        'nugen_astro': r'Astro $\nu$ (north tracks, $\nu_{e}$ + $\nu_{\mu}$ only)',
-        'ehe': r'Cosmo $\nu$ (Ahlers GZK)',
-        'data': 'Burn Sample ({:.2f} days)'.format(livetime/(60*60*24))
-    }
-    data_y_vals = data_charges[data_L2_mask]
-    data_x_vals = data_czen[data_L2_mask]
-    my_map = plt.cm.plasma
-    plotting_options = {
-        'xlabel': r'cos($\theta$)',
-        'ylabel': 'Q / PE',
-        'zlabel': 'Number of Events',
-        'cmap': my_map,
-        'norm': colors.LogNorm(),
-        'zlims':  (1E-5, 1E2)
-    }
+    # sim_y_vals = {
+    #     'cor': cor_charge[cor_L2_mask],
+    #     'nugen_atmo': nugen_charges[nugen_L2_mask],
+    #     'nugen_astro': nugen_charges[nugen_L2_mask],
+    #     'ehe': ehe_charge[ehe_L2_mask]
+    # }
+    # sim_x_vals = {
+    #     'cor': cor_czen[cor_L2_mask],
+    #     'nugen_atmo': nugen_czens[nugen_L2_mask],
+    #     'nugen_astro': nugen_czens[nugen_L2_mask],
+    #     'ehe': ehe_czen[ehe_L2_mask]
+    # }
+    # set_labels={
+    #     'cor': r'Atm $\mu$ (H4a)',
+    #     'nugen_atmo': r'Atm $\nu$ (H3a, Sibyll 2.3c)',
+    #     'nugen_astro': r'Astro $\nu$ (north tracks, $\nu_{e}$ + $\nu_{\mu}$ only)',
+    #     'ehe': r'Cosmo $\nu$ (Ahlers GZK)',
+    #     'data': 'Burn Sample ({:.2f} days)'.format(livetime/(60*60*24))
+    # }
+    # data_y_vals = data_charges[data_L2_mask]
+    # data_x_vals = data_czen[data_L2_mask]
+    # my_map = plt.cm.plasma
+    # plotting_options = {
+    #     'xlabel': r'cos($\theta$)',
+    #     'ylabel': 'Q / PE',
+    #     'zlabel': 'Number of Events',
+    #     'cmap': my_map,
+    #     'norm': colors.LogNorm(),
+    #     'zlims':  (1E-5, 1E2)
+    # }
         
-    fig, plotting_products = plotting.do_2D_data_mc_comparison(
-        bins_x=czen_bins, bins_y = charge_bins,
-        sim_x_vals=sim_x_vals, sim_y_vals = sim_y_vals,
-        sim_weights=sim_weights, set_labels=set_labels,
-        data_x_vals=data_x_vals, data_y_vals=data_y_vals,
-        plotting_opts = plotting_options
-    )
-    for a in plotting_products['axes']:
-        plotting_products['axes'][a].set_yscale('log')
-        plotting_products['axes'][a].set_xlabel(plotting_options['xlabel'])
-        plotting_products['axes'][a].set_ylabel(plotting_options['ylabel'])
-    for a in plotting_products['cbars']:
-        plotting_products['cbars'][a].set_label(plotting_options['zlabel'])
-    plotting_products['cbars']['ratio'].set_label("Ratio")
+    # fig, plotting_products = plotting.do_2D_data_mc_comparison(
+    #     bins_x=czen_bins, bins_y = charge_bins,
+    #     sim_x_vals=sim_x_vals, sim_y_vals = sim_y_vals,
+    #     sim_weights=sim_weights, set_labels=set_labels,
+    #     data_x_vals=data_x_vals, data_y_vals=data_y_vals,
+    #     plotting_opts = plotting_options
+    # )
+    # for a in plotting_products['axes']:
+    #     plotting_products['axes'][a].set_yscale('log')
+    #     plotting_products['axes'][a].set_xlabel(plotting_options['xlabel'])
+    #     plotting_products['axes'][a].set_ylabel(plotting_options['ylabel'])
+    # for a in plotting_products['cbars']:
+    #     plotting_products['cbars'][a].set_label(plotting_options['zlabel'])
+    # plotting_products['cbars']['ratio'].set_label("Ratio")
         
-    fig.tight_layout()
-    fig.savefig('plots/hist2d_q_czen_datamc.png', dpi=300)
-    del fig, plotting_products    
+    # fig.tight_layout()
+    # fig.savefig('plots/hist2d_q_czen_datamc.png', dpi=300)
+    # del fig, plotting_products    
 
 
     #############################
     # 2D: charge vs linefit speed
     #############################
     
-    sim_y_vals = {
-        'cor': cor_charge[cor_L2_mask],
-        'nugen_atmo': nugen_charges[nugen_L2_mask],
-        'nugen_astro': nugen_charges[nugen_L2_mask],
-        'ehe': ehe_charge[ehe_L2_mask]
-    }
-    sim_x_vals = {
-        'cor': cor_speed[cor_L2_mask],
-        'nugen_atmo': nugen_speeds[nugen_L2_mask],
-        'nugen_astro': nugen_speeds[nugen_L2_mask],
-        'ehe': ehe_speed[ehe_L2_mask]
-    }
-    set_labels={
-        'cor': r'Atm $\mu$ (H4a)',
-        'nugen_atmo': r'Atm $\nu$ (H3a, Sibyll 2.3c)',
-        'nugen_astro': r'Astro $\nu$ (north tracks, $\nu_{e}$ + $\nu_{\mu}$ only)',
-        'ehe': r'Cosmo $\nu$ (Ahlers GZK)',
-        'data': 'Burn Sample ({:.2f} days)'.format(livetime/(60*60*24))
-    }
-    data_y_vals = data_charges[data_L2_mask]
-    data_x_vals = data_speed[data_L2_mask]
-    my_map = plt.cm.plasma
-    plotting_options = {
-        'xlabel': r'LineFit Speed',
-        'ylabel': 'Q / PE',
-        'zlabel': 'Number of Events',
-        'cmap': my_map,
-        'norm': colors.LogNorm(),
-        'zlims':  (1E-5, 1E2)
-    }
+    # sim_y_vals = {
+    #     'cor': cor_charge[cor_L2_mask],
+    #     'nugen_atmo': nugen_charges[nugen_L2_mask],
+    #     'nugen_astro': nugen_charges[nugen_L2_mask],
+    #     'ehe': ehe_charge[ehe_L2_mask]
+    # }
+    # sim_x_vals = {
+    #     'cor': cor_speed[cor_L2_mask],
+    #     'nugen_atmo': nugen_speeds[nugen_L2_mask],
+    #     'nugen_astro': nugen_speeds[nugen_L2_mask],
+    #     'ehe': ehe_speed[ehe_L2_mask]
+    # }
+    # set_labels={
+    #     'cor': r'Atm $\mu$ (H4a)',
+    #     'nugen_atmo': r'Atm $\nu$ (H3a, Sibyll 2.3c)',
+    #     'nugen_astro': r'Astro $\nu$ (north tracks, $\nu_{e}$ + $\nu_{\mu}$ only)',
+    #     'ehe': r'Cosmo $\nu$ (Ahlers GZK)',
+    #     'data': 'Burn Sample ({:.2f} days)'.format(livetime/(60*60*24))
+    # }
+    # data_y_vals = data_charges[data_L2_mask]
+    # data_x_vals = data_speed[data_L2_mask]
+    # my_map = plt.cm.plasma
+    # plotting_options = {
+    #     'xlabel': r'LineFit Speed',
+    #     'ylabel': 'Q / PE',
+    #     'zlabel': 'Number of Events',
+    #     'cmap': my_map,
+    #     'norm': colors.LogNorm(),
+    #     'zlims':  (1E-5, 1E2)
+    # }
         
-    fig, plotting_products = plotting.do_2D_data_mc_comparison(
-        bins_x=speed_bins, bins_y = charge_bins,
-        sim_x_vals=sim_x_vals, sim_y_vals = sim_y_vals,
-        sim_weights=sim_weights, set_labels=set_labels,
-        data_x_vals=data_x_vals, data_y_vals=data_y_vals,
-        plotting_opts = plotting_options
-    )
-    for a in plotting_products['axes']:
-        plotting_products['axes'][a].set_yscale('log')
-        plotting_products['axes'][a].set_xlabel(plotting_options['xlabel'])
-        plotting_products['axes'][a].set_ylabel(plotting_options['ylabel'])
-    for a in plotting_products['cbars']:
-        plotting_products['cbars'][a].set_label(plotting_options['zlabel'])
-    plotting_products['cbars']['ratio'].set_label("Ratio")
+    # fig, plotting_products = plotting.do_2D_data_mc_comparison(
+    #     bins_x=speed_bins, bins_y = charge_bins,
+    #     sim_x_vals=sim_x_vals, sim_y_vals = sim_y_vals,
+    #     sim_weights=sim_weights, set_labels=set_labels,
+    #     data_x_vals=data_x_vals, data_y_vals=data_y_vals,
+    #     plotting_opts = plotting_options
+    # )
+    # for a in plotting_products['axes']:
+    #     plotting_products['axes'][a].set_yscale('log')
+    #     plotting_products['axes'][a].set_xlabel(plotting_options['xlabel'])
+    #     plotting_products['axes'][a].set_ylabel(plotting_options['ylabel'])
+    # for a in plotting_products['cbars']:
+    #     plotting_products['cbars'][a].set_label(plotting_options['zlabel'])
+    # plotting_products['cbars']['ratio'].set_label("Ratio")
         
-    fig.tight_layout()
-    fig.savefig('plots/hist2d_q_speed_datamc.png', dpi=300)
+    # fig.tight_layout()
+    # fig.savefig('plots/hist2d_q_speed_datamc.png', dpi=300)
 
-    del fig, plotting_products
+    # del fig, plotting_products
