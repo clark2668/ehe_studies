@@ -30,7 +30,7 @@ def harvest_values(cfg_file, dataset):
     return_dict['livetime'] = cfg_file['burn_sample'][dataset]['livetime']
     the_f.close()
     
-    L1_mask = return_dict['charge'] > 1E3
+    L1_mask = return_dict['charge'] > 1E4
 
     q_mask = return_dict['charge'] > 27500
     ndoms_mask = return_dict['ndoms'] > 100
