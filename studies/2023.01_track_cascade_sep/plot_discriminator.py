@@ -25,7 +25,7 @@ print(livetime)
 cfg_file = 'config.yaml'
 cfg_file = yaml.safe_load(open(cfg_file))
 
-which_method='new'
+which_method='old'
 if which_method is 'new':
     qcut = 27500
     charge_var = 'hqtot'
@@ -61,7 +61,7 @@ ehe_classifier = {
 
 juliet_species = ["nue", "mu"]
 juliet_energy_levels = ["high_energy", "very_high_energy"]
-juliet_energy_levels = ["high_energy"]
+# juliet_energy_levels = ["high_energy"]
 # juliet_energy_levels = []
 events_per_file = {
     "nue_high_energy": 600,
