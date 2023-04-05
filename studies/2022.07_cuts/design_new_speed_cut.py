@@ -66,12 +66,13 @@ atmo_flux = weighting.get_flux_model('H3a_SIBYLL23C', 'nugen')
 
 burn_samples = ["IC86-I-pass2", "IC86-II-pass2", "IC86-III-pass2"]
 
-style.use('/home/brian/IceCube/ehe/max_tools/EHE_analysis/eheanalysis/ehe.mplstyle')
+style.use('/home/brian/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
 
 livetime = 0
 for b in burn_samples:
     livetime += cfg_file['burn_sample'][b]['livetime']
 livetime = 203.8 * 24 * 60 * 60 # seconds (203.8 days to seconds)
+livetime = 365 * 24 * 60 * 60
 print("Total livetime {:1f} ({:.1f} days)".format(livetime, livetime/60/60/24))
 
 #############################
@@ -154,7 +155,7 @@ ehe_L2_mask = np.asarray([])
 
 juliet_species = ["nue", "numu", "nutau", "mu", "tau"]
 juliet_energy_levels = ["high_energy", "very_high_energy"]
-# juliet_species = ["numu"]
+# juliet_species = ["nue"]
 # juliet_energy_levels = ["high_energy"]
 # juliet_species = []
 
