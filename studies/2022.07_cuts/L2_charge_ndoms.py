@@ -47,8 +47,8 @@ def astro_flux(energy):
 # juliet (EHE neutrinos)
 juliet_species = ["nue", "numu", "nutau", "mu", "tau"]
 juliet_energy_levels = ["high_energy", "very_high_energy"]
-juliet_species = ["nue"]
-juliet_energy_levels = ["high_energy"]
+# juliet_species = ["nue"]
+# juliet_energy_levels = ["high_energy"]
 
 
 corsika_sets = ["20787"]
@@ -60,7 +60,7 @@ nugen_sets = ["nue"]
 burn_samples = ["IC86-I-pass2", "IC86-II-pass2", "IC86-III-pass2"]
 # burn_samples = ["IC86-II-pass2"]
 
-# style.use('/home/brian/IceCube/ehe/max_tools/EHE_analysis/eheanalysis/ehe.mplstyle')
+style.use('/home/brian/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
 # plt.rcParams.update({
 #     'font.size': '16',
 # })
@@ -210,359 +210,359 @@ if do_efficiency:
     del fig, ax1, ax2, ax3
 
 
-#############################
-# muon bundles (corsika)
-#############################
-cor_charge = np.asarray([])
-cor_ndoms = np.asarray([])
-cor_weights = np.asarray([])
-cor_czen = np.asarray([])
-cor_speed = np.asarray([])
-for c in corsika_sets:
-    print("Working on corsika {}".format(c))
-    cor_file = pd.HDFStore(cfg_file['corsika'][c]['file'])
-    cor_weighter = weighting.get_weighter( cor_file, 'corsika',
-        cfg_file['corsika'][c]['n_files']
-        )
-    this_cor_charge = cor_weighter.get_column(charge_var, charge_val)
-    this_cor_ndoms = cor_weighter.get_column(ndoms_var, ndoms_val)
-    this_cor_czen = np.cos(cor_weighter.get_column(czen_var, czen_val))    
-    this_cor_speed = cor_weighter.get_column(speed_var, speed_val)
-    this_cor_weights = cor_weighter.get_weights(cr_flux) * livetime
+# #############################
+# # muon bundles (corsika)
+# #############################
+# cor_charge = np.asarray([])
+# cor_ndoms = np.asarray([])
+# cor_weights = np.asarray([])
+# cor_czen = np.asarray([])
+# cor_speed = np.asarray([])
+# for c in corsika_sets:
+#     print("Working on corsika {}".format(c))
+#     cor_file = pd.HDFStore(cfg_file['corsika'][c]['file'])
+#     cor_weighter = weighting.get_weighter( cor_file, 'corsika',
+#         cfg_file['corsika'][c]['n_files']
+#         )
+#     this_cor_charge = cor_weighter.get_column(charge_var, charge_val)
+#     this_cor_ndoms = cor_weighter.get_column(ndoms_var, ndoms_val)
+#     this_cor_czen = np.cos(cor_weighter.get_column(czen_var, czen_val))    
+#     this_cor_speed = cor_weighter.get_column(speed_var, speed_val)
+#     this_cor_weights = cor_weighter.get_weights(cr_flux) * livetime
 
-    q_mask = this_cor_charge > q_cut_for_plot
-    cor_charge = np.concatenate((cor_charge, this_cor_charge[q_mask]))
-    cor_czen = np.concatenate((cor_czen, this_cor_czen[q_mask]))
-    cor_ndoms = np.concatenate((cor_ndoms, this_cor_ndoms[q_mask]))
-    cor_weights = np.concatenate((cor_weights, this_cor_weights[q_mask]))
-    cor_speed = np.concatenate((cor_speed, this_cor_speed[q_mask]))
-    cor_file.close()
+#     q_mask = this_cor_charge > q_cut_for_plot
+#     cor_charge = np.concatenate((cor_charge, this_cor_charge[q_mask]))
+#     cor_czen = np.concatenate((cor_czen, this_cor_czen[q_mask]))
+#     cor_ndoms = np.concatenate((cor_ndoms, this_cor_ndoms[q_mask]))
+#     cor_weights = np.concatenate((cor_weights, this_cor_weights[q_mask]))
+#     cor_speed = np.concatenate((cor_speed, this_cor_speed[q_mask]))
+#     cor_file.close()
 
 
-#############################
-# atmospheric and astrophysical neutrinos (nugen)
-#############################
-nugen_charges = np.asarray([])
-nugen_ndoms = np.asarray([])
-nugen_czens = np.asarray([])
-nugen_speeds = np.asarray([])
-nugen_atmo_weights = np.asarray([])
-nugen_astro_weights = np.asarray([])
-for n in nugen_sets:
-    print("Working on nugen {}".format(n))
-    nugen_file = pd.HDFStore(cfg_file['nugen'][n]['file'])
-    nugen_weighter = weighting.get_weighter( nugen_file,  'nugen',
-        cfg_file['nugen'][n]['n_files']
-        )
-    this_nugen_charge = np.asarray(nugen_weighter.get_column(charge_var, charge_val))
-    q_mask = this_nugen_charge > q_cut_for_plot
+# #############################
+# # atmospheric and astrophysical neutrinos (nugen)
+# #############################
+# nugen_charges = np.asarray([])
+# nugen_ndoms = np.asarray([])
+# nugen_czens = np.asarray([])
+# nugen_speeds = np.asarray([])
+# nugen_atmo_weights = np.asarray([])
+# nugen_astro_weights = np.asarray([])
+# for n in nugen_sets:
+#     print("Working on nugen {}".format(n))
+#     nugen_file = pd.HDFStore(cfg_file['nugen'][n]['file'])
+#     nugen_weighter = weighting.get_weighter( nugen_file,  'nugen',
+#         cfg_file['nugen'][n]['n_files']
+#         )
+#     this_nugen_charge = np.asarray(nugen_weighter.get_column(charge_var, charge_val))
+#     q_mask = this_nugen_charge > q_cut_for_plot
     
-    this_nugen_ndoms = np.asarray(nugen_weighter.get_column(ndoms_var, ndoms_val))
-    this_nugen_czen = np.cos(nugen_weighter.get_column(czen_var, czen_val))
-    this_nugen_speed = nugen_weighter.get_column(speed_var, speed_val)
+#     this_nugen_ndoms = np.asarray(nugen_weighter.get_column(ndoms_var, ndoms_val))
+#     this_nugen_czen = np.cos(nugen_weighter.get_column(czen_var, czen_val))
+#     this_nugen_speed = nugen_weighter.get_column(speed_var, speed_val)
        
-    nugen_speeds = np.concatenate((nugen_speeds, this_nugen_speed[q_mask]))
-    nugen_charges = np.concatenate((nugen_charges, this_nugen_charge[q_mask]))
-    nugen_ndoms = np.concatenate((nugen_ndoms, this_nugen_ndoms[q_mask]))
-    nugen_czens = np.concatenate((nugen_czens, this_nugen_czen[q_mask]))
+#     nugen_speeds = np.concatenate((nugen_speeds, this_nugen_speed[q_mask]))
+#     nugen_charges = np.concatenate((nugen_charges, this_nugen_charge[q_mask]))
+#     nugen_ndoms = np.concatenate((nugen_ndoms, this_nugen_ndoms[q_mask]))
+#     nugen_czens = np.concatenate((nugen_czens, this_nugen_czen[q_mask]))
     
-    this_nugen_atmo_weights = nugen_weighter.get_weights(atmo_flux) * livetime
-    nugen_atmo_weights = np.concatenate((nugen_atmo_weights, this_nugen_atmo_weights[q_mask]))
+#     this_nugen_atmo_weights = nugen_weighter.get_weights(atmo_flux) * livetime
+#     nugen_atmo_weights = np.concatenate((nugen_atmo_weights, this_nugen_atmo_weights[q_mask]))
 
-    this_nugen_astro_weights = nugen_weighter.get_weights(astro_flux) * livetime
-    nugen_astro_weights = np.concatenate((nugen_astro_weights, this_nugen_astro_weights[q_mask]))
-    nugen_file.close()
+#     this_nugen_astro_weights = nugen_weighter.get_weights(astro_flux) * livetime
+#     nugen_astro_weights = np.concatenate((nugen_astro_weights, this_nugen_astro_weights[q_mask]))
+#     nugen_file.close()
 
 
-#############################
-# data
-#############################
-data_charges = np.asarray([])
-data_ndoms = np.asarray([])
-data_czen = np.asarray([])
-data_speed = np.asarray([])
-for b in burn_samples:
-    print("Working on burn samples {}".format(b))
-    data_file = pd.HDFStore(cfg_file['burn_sample'][b]['file'])
-    this_charge = np.asarray(data_file.get(charge_var).get(charge_val))
-    q_mask = this_charge > q_cut_for_plot
-    this_ndoms = np.asarray(data_file.get(ndoms_var).get(ndoms_val))
-    this_czen = np.cos(np.asarray(data_file.get(czen_var).get(czen_val)))
-    this_speed = data_file.get(speed_var).get(speed_val)
+# #############################
+# # data
+# #############################
+# data_charges = np.asarray([])
+# data_ndoms = np.asarray([])
+# data_czen = np.asarray([])
+# data_speed = np.asarray([])
+# for b in burn_samples:
+#     print("Working on burn samples {}".format(b))
+#     data_file = pd.HDFStore(cfg_file['burn_sample'][b]['file'])
+#     this_charge = np.asarray(data_file.get(charge_var).get(charge_val))
+#     q_mask = this_charge > q_cut_for_plot
+#     this_ndoms = np.asarray(data_file.get(ndoms_var).get(ndoms_val))
+#     this_czen = np.cos(np.asarray(data_file.get(czen_var).get(czen_val)))
+#     this_speed = data_file.get(speed_var).get(speed_val)
 
-    # mask = (this_charge > q_cut) & (this_ndoms > ndom_cut) &  (this_speed < 0.2)
-    # runs = np.asarray(data_file.get("I3EventHeader").get("Run"))
-    # events = np.asfarray(data_file.get("I3EventHeader").get("Event"))
-    # for c, q, r, e, sp in zip(this_czen[mask], this_charge[mask], runs[mask], events[mask], this_speed[mask]):
-    #     print(f"  Run {r}, Event {e}, Charge {q:.2f}, CZen {c:.2f}, Speed {sp:.2f}")
+#     # mask = (this_charge > q_cut) & (this_ndoms > ndom_cut) &  (this_speed < 0.2)
+#     # runs = np.asarray(data_file.get("I3EventHeader").get("Run"))
+#     # events = np.asfarray(data_file.get("I3EventHeader").get("Event"))
+#     # for c, q, r, e, sp in zip(this_czen[mask], this_charge[mask], runs[mask], events[mask], this_speed[mask]):
+#     #     print(f"  Run {r}, Event {e}, Charge {q:.2f}, CZen {c:.2f}, Speed {sp:.2f}")
     
-    data_speed = np.concatenate((data_speed, this_speed[q_mask]))
-    data_charges = np.concatenate((data_charges, this_charge[q_mask]))
-    data_ndoms = np.concatenate((data_ndoms, this_ndoms[q_mask]))
-    data_czen = np.concatenate((data_czen, this_czen[q_mask]))
-    data_file.close()
+#     data_speed = np.concatenate((data_speed, this_speed[q_mask]))
+#     data_charges = np.concatenate((data_charges, this_charge[q_mask]))
+#     data_ndoms = np.concatenate((data_ndoms, this_ndoms[q_mask]))
+#     data_czen = np.concatenate((data_czen, this_czen[q_mask]))
+#     data_file.close()
 
-if do_plots:
+# if do_plots:
 
-    #############################
-    # histogram of charge 
-    #############################
+#     #############################
+#     # histogram of charge 
+#     #############################
 
-    ehe_q_mask = ehe_charge > q_cut_for_plot
-    sim_vars={
-        'cor': cor_charge,
-        'nugen_atmo': nugen_charges,
-        'nugen_astro': nugen_charges,
-        'ehe': ehe_charge[ehe_q_mask]
-    }
-    sim_weights={
-        'cor': cor_weights,
-        'nugen_atmo': nugen_atmo_weights,
-        'nugen_astro': nugen_astro_weights,
-        'ehe': ehe_weights[ehe_q_mask]
-    }
-    sim_labels={
-        'cor': r'Atm $\mu$ (H4a)',
-        'nugen_atmo': r'Atm $\nu$ (H3a, Sibyll 2.3c)',
-        'nugen_astro': r'Astro $\nu$ (north tracks, $\nu_{e}$ + $\nu_{\mu}$ only)',
-        'ehe': r'Cosmo $\nu$ (Ahlers GZK)'
-    }
+#     ehe_q_mask = ehe_charge > q_cut_for_plot
+#     sim_vars={
+#         'cor': cor_charge,
+#         'nugen_atmo': nugen_charges,
+#         'nugen_astro': nugen_charges,
+#         'ehe': ehe_charge[ehe_q_mask]
+#     }
+#     sim_weights={
+#         'cor': cor_weights,
+#         'nugen_atmo': nugen_atmo_weights,
+#         'nugen_astro': nugen_astro_weights,
+#         'ehe': ehe_weights[ehe_q_mask]
+#     }
+#     sim_labels={
+#         'cor': r'Atm $\mu$ (H4a)',
+#         'nugen_atmo': r'Atm $\nu$ (H3a, Sibyll 2.3c)',
+#         'nugen_astro': r'Astro $\nu$ (north tracks, $\nu_{e}$ + $\nu_{\mu}$ only)',
+#         'ehe': r'Cosmo $\nu$ (Ahlers GZK)'
+#     }
     
-    fig, ax, axr = plotting.do_1D_data_mc_comparison(
-        var_bins = charge_bins, sim_vars = sim_vars,
-        sim_weights = sim_weights, sim_labels = sim_labels,
-        data=data_charges
-    )
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-    ax.set_ylim([1E-4, 1E5])
-    ax.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
-    axr.set_ylabel('Data/Sim')
-    axr.set_xlabel('Q / PE')
-    ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
-        mode="expand", borderaxespad=0, ncol=2)
-    fig.tight_layout()
-    fig.savefig('plots/hist_q.png')
-    del fig, ax, axr
+#     fig, ax, axr = plotting.do_1D_data_mc_comparison(
+#         var_bins = charge_bins, sim_vars = sim_vars,
+#         sim_weights = sim_weights, sim_labels = sim_labels,
+#         data=data_charges
+#     )
+#     ax.set_xscale('log')
+#     ax.set_yscale('log')
+#     ax.set_ylim([1E-4, 1E5])
+#     ax.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
+#     axr.set_ylabel('Data/Sim')
+#     axr.set_xlabel('Q / PE')
+#     ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
+#         mode="expand", borderaxespad=0, ncol=2)
+#     fig.tight_layout()
+#     fig.savefig('plots/hist_q.png')
+#     del fig, ax, axr
     
     
-    #############################
-    # histogram of ndoms
-    #############################
+#     #############################
+#     # histogram of ndoms
+#     #############################
 
-    sim_vars={
-        'cor': cor_ndoms,
-        'nugen_atmo': nugen_ndoms,
-        'nugen_astro': nugen_ndoms,
-        'ehe': ehe_ndoms[ehe_q_mask]
-    }
-    fig, ax, axr = plotting.do_1D_data_mc_comparison(
-        var_bins = ndoms_bins, sim_vars = sim_vars,
-        sim_weights = sim_weights, sim_labels = sim_labels,
-        data=data_ndoms
-    )
-    ax.set_yscale('log')
-    ax.set_ylim([1E-7, 1E5])
-    ax.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
-    axr.set_xlabel('N DOMs')
-    axr.set_ylabel('Data/Sim')
-    ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
-        mode="expand", borderaxespad=0, ncol=2,
-        title="Q > {:.2f}".format(q_cut_for_plot)
-    )
-    fig.tight_layout()
-    fig.savefig('plots/hist_ndoms.png')
-    del fig, ax, axr
-
-    
-    # #############################
-    # # histogram of cos(zen) 
-    # #############################
-    
-    # cor_L2_mask = (cor_charge > q_cut) & (cor_ndoms > ndom_cut)
-    # nugen_L2_mask = (nugen_charges > q_cut) & (nugen_ndoms > ndom_cut)
-    # ehe_L2_mask = (ehe_charge > q_cut) & (ehe_ndoms > ndom_cut)
-    # data_L2_mask = (data_charges > q_cut) & (data_ndoms > ndom_cut)
-
-    # sim_vars={
-    #     'cor': cor_czen[cor_L2_mask],
-    #     'nugen_atmo': nugen_czens[nugen_L2_mask],
-    #     'nugen_astro': nugen_czens[nugen_L2_mask],
-    #     'ehe': ehe_czen[ehe_L2_mask]
-    # }
-    # sim_weights={
-    #     'cor': cor_weights[cor_L2_mask],
-    #     'nugen_atmo': nugen_atmo_weights[nugen_L2_mask],
-    #     'nugen_astro': nugen_astro_weights[nugen_L2_mask],
-    #     'ehe': ehe_weights[ehe_L2_mask]
-    # }
-    # fig, ax, axr = plotting.do_1D_data_mc_comparison(
-    #     var_bins = czen_bins, sim_vars = sim_vars,
-    #     sim_weights = sim_weights, sim_labels = sim_labels,
-    #     data=data_czen[data_L2_mask]
-    # )
-    # ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
-    #     mode="expand", borderaxespad=0, ncol=2,
-    #     title="L3 (Q > {:d}, NDoms > {:d})".format(int(q_cut), int(ndom_cut))
-    # )    
-    # ax.set_yscale('log')
-    # ax.set_ylim([1E-5, 1E4])
-    # ax.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
-    # axr.set_ylabel('Data/Sim')
-    # axr.set_xlabel(r'cos($\theta$)')
-    # fig.tight_layout()
-    # fig.savefig('plots/hist_czen.png')
-    # del fig, ax, axr
-
-
-    #############################
-    # histogram of linespeed
-    #############################
-    
-    sim_vars={
-        'cor': cor_speed[cor_L2_mask],
-        'nugen_atmo': nugen_speeds[nugen_L2_mask],
-        'nugen_astro': nugen_speeds[nugen_L2_mask],
-        'ehe': ehe_speed[ehe_L2_mask]
-    }
-    sim_weights={
-        'cor': cor_weights[cor_L2_mask],
-        'nugen_atmo': nugen_atmo_weights[nugen_L2_mask],
-        'nugen_astro': nugen_astro_weights[nugen_L2_mask],
-        'ehe': ehe_weights[ehe_L2_mask]
-    }
-    fig, ax, axr = plotting.do_1D_data_mc_comparison(
-        var_bins = speed_bins, sim_vars = sim_vars,
-        sim_weights = sim_weights, sim_labels = sim_labels,
-        data=data_speed[data_L2_mask]
-    )
-    ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
-        mode="expand", borderaxespad=0, ncol=2,
-        title="L3 (Q > {:d}, NDoms > {:d})".format(int(q_cut), int(ndom_cut))
-    )    
-    ax.set_yscale('log')
-    ax.set_ylim([1E-6, 1E5])
-    ax.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
-    axr.set_ylabel('Data/Sim')
-    axr.set_xlabel(r'LineFit Speed')
-    fig.tight_layout()
-    fig.savefig('plots/hist_speed.png')
-    del fig, ax, axr
+#     sim_vars={
+#         'cor': cor_ndoms,
+#         'nugen_atmo': nugen_ndoms,
+#         'nugen_astro': nugen_ndoms,
+#         'ehe': ehe_ndoms[ehe_q_mask]
+#     }
+#     fig, ax, axr = plotting.do_1D_data_mc_comparison(
+#         var_bins = ndoms_bins, sim_vars = sim_vars,
+#         sim_weights = sim_weights, sim_labels = sim_labels,
+#         data=data_ndoms
+#     )
+#     ax.set_yscale('log')
+#     ax.set_ylim([1E-7, 1E5])
+#     ax.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
+#     axr.set_xlabel('N DOMs')
+#     axr.set_ylabel('Data/Sim')
+#     ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
+#         mode="expand", borderaxespad=0, ncol=2,
+#         title="Q > {:.2f}".format(q_cut_for_plot)
+#     )
+#     fig.tight_layout()
+#     fig.savefig('plots/hist_ndoms.png')
+#     del fig, ax, axr
 
     
-    # finer binning for 2D plots
-    charge_bins = np.logspace(4, 7, 32)
-    charge_bin_centers = plotting.get_bin_centers(charge_bins)
+#     # #############################
+#     # # histogram of cos(zen) 
+#     # #############################
     
-    czen_bins = np.linspace(-1, 1, 41)
-    czen_bin_centers = plotting.get_bin_centers(czen_bins)
+#     # cor_L2_mask = (cor_charge > q_cut) & (cor_ndoms > ndom_cut)
+#     # nugen_L2_mask = (nugen_charges > q_cut) & (nugen_ndoms > ndom_cut)
+#     # ehe_L2_mask = (ehe_charge > q_cut) & (ehe_ndoms > ndom_cut)
+#     # data_L2_mask = (data_charges > q_cut) & (data_ndoms > ndom_cut)
 
-    #############################
-    # 2D: charge vs zenith
-    #############################
+#     # sim_vars={
+#     #     'cor': cor_czen[cor_L2_mask],
+#     #     'nugen_atmo': nugen_czens[nugen_L2_mask],
+#     #     'nugen_astro': nugen_czens[nugen_L2_mask],
+#     #     'ehe': ehe_czen[ehe_L2_mask]
+#     # }
+#     # sim_weights={
+#     #     'cor': cor_weights[cor_L2_mask],
+#     #     'nugen_atmo': nugen_atmo_weights[nugen_L2_mask],
+#     #     'nugen_astro': nugen_astro_weights[nugen_L2_mask],
+#     #     'ehe': ehe_weights[ehe_L2_mask]
+#     # }
+#     # fig, ax, axr = plotting.do_1D_data_mc_comparison(
+#     #     var_bins = czen_bins, sim_vars = sim_vars,
+#     #     sim_weights = sim_weights, sim_labels = sim_labels,
+#     #     data=data_czen[data_L2_mask]
+#     # )
+#     # ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
+#     #     mode="expand", borderaxespad=0, ncol=2,
+#     #     title="L3 (Q > {:d}, NDoms > {:d})".format(int(q_cut), int(ndom_cut))
+#     # )    
+#     # ax.set_yscale('log')
+#     # ax.set_ylim([1E-5, 1E4])
+#     # ax.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
+#     # axr.set_ylabel('Data/Sim')
+#     # axr.set_xlabel(r'cos($\theta$)')
+#     # fig.tight_layout()
+#     # fig.savefig('plots/hist_czen.png')
+#     # del fig, ax, axr
+
+
+#     #############################
+#     # histogram of linespeed
+#     #############################
     
-    # sim_y_vals = {
-    #     'cor': cor_charge[cor_L2_mask],
-    #     'nugen_atmo': nugen_charges[nugen_L2_mask],
-    #     'nugen_astro': nugen_charges[nugen_L2_mask],
-    #     'ehe': ehe_charge[ehe_L2_mask]
-    # }
-    # sim_x_vals = {
-    #     'cor': cor_czen[cor_L2_mask],
-    #     'nugen_atmo': nugen_czens[nugen_L2_mask],
-    #     'nugen_astro': nugen_czens[nugen_L2_mask],
-    #     'ehe': ehe_czen[ehe_L2_mask]
-    # }
-    # set_labels={
-    #     'cor': r'Atm $\mu$ (H4a)',
-    #     'nugen_atmo': r'Atm $\nu$ (H3a, Sibyll 2.3c)',
-    #     'nugen_astro': r'Astro $\nu$ (north tracks, $\nu_{e}$ + $\nu_{\mu}$ only)',
-    #     'ehe': r'Cosmo $\nu$ (Ahlers GZK)',
-    #     'data': 'Burn Sample ({:.2f} days)'.format(livetime/(60*60*24))
-    # }
-    # data_y_vals = data_charges[data_L2_mask]
-    # data_x_vals = data_czen[data_L2_mask]
-    # my_map = plt.cm.plasma
-    # plotting_options = {
-    #     'xlabel': r'cos($\theta$)',
-    #     'ylabel': 'Q / PE',
-    #     'zlabel': 'Number of Events',
-    #     'cmap': my_map,
-    #     'norm': colors.LogNorm(),
-    #     'zlims':  (1E-5, 1E2)
-    # }
+#     sim_vars={
+#         'cor': cor_speed[cor_L2_mask],
+#         'nugen_atmo': nugen_speeds[nugen_L2_mask],
+#         'nugen_astro': nugen_speeds[nugen_L2_mask],
+#         'ehe': ehe_speed[ehe_L2_mask]
+#     }
+#     sim_weights={
+#         'cor': cor_weights[cor_L2_mask],
+#         'nugen_atmo': nugen_atmo_weights[nugen_L2_mask],
+#         'nugen_astro': nugen_astro_weights[nugen_L2_mask],
+#         'ehe': ehe_weights[ehe_L2_mask]
+#     }
+#     fig, ax, axr = plotting.do_1D_data_mc_comparison(
+#         var_bins = speed_bins, sim_vars = sim_vars,
+#         sim_weights = sim_weights, sim_labels = sim_labels,
+#         data=data_speed[data_L2_mask]
+#     )
+#     ax.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left", 
+#         mode="expand", borderaxespad=0, ncol=2,
+#         title="L3 (Q > {:d}, NDoms > {:d})".format(int(q_cut), int(ndom_cut))
+#     )    
+#     ax.set_yscale('log')
+#     ax.set_ylim([1E-6, 1E5])
+#     ax.set_ylabel('Events / {:.2f} days'.format(livetime/(60*60*24)))
+#     axr.set_ylabel('Data/Sim')
+#     axr.set_xlabel(r'LineFit Speed')
+#     fig.tight_layout()
+#     fig.savefig('plots/hist_speed.png')
+#     del fig, ax, axr
+
+    
+#     # finer binning for 2D plots
+#     charge_bins = np.logspace(4, 7, 32)
+#     charge_bin_centers = plotting.get_bin_centers(charge_bins)
+    
+#     czen_bins = np.linspace(-1, 1, 41)
+#     czen_bin_centers = plotting.get_bin_centers(czen_bins)
+
+#     #############################
+#     # 2D: charge vs zenith
+#     #############################
+    
+#     # sim_y_vals = {
+#     #     'cor': cor_charge[cor_L2_mask],
+#     #     'nugen_atmo': nugen_charges[nugen_L2_mask],
+#     #     'nugen_astro': nugen_charges[nugen_L2_mask],
+#     #     'ehe': ehe_charge[ehe_L2_mask]
+#     # }
+#     # sim_x_vals = {
+#     #     'cor': cor_czen[cor_L2_mask],
+#     #     'nugen_atmo': nugen_czens[nugen_L2_mask],
+#     #     'nugen_astro': nugen_czens[nugen_L2_mask],
+#     #     'ehe': ehe_czen[ehe_L2_mask]
+#     # }
+#     # set_labels={
+#     #     'cor': r'Atm $\mu$ (H4a)',
+#     #     'nugen_atmo': r'Atm $\nu$ (H3a, Sibyll 2.3c)',
+#     #     'nugen_astro': r'Astro $\nu$ (north tracks, $\nu_{e}$ + $\nu_{\mu}$ only)',
+#     #     'ehe': r'Cosmo $\nu$ (Ahlers GZK)',
+#     #     'data': 'Burn Sample ({:.2f} days)'.format(livetime/(60*60*24))
+#     # }
+#     # data_y_vals = data_charges[data_L2_mask]
+#     # data_x_vals = data_czen[data_L2_mask]
+#     # my_map = plt.cm.plasma
+#     # plotting_options = {
+#     #     'xlabel': r'cos($\theta$)',
+#     #     'ylabel': 'Q / PE',
+#     #     'zlabel': 'Number of Events',
+#     #     'cmap': my_map,
+#     #     'norm': colors.LogNorm(),
+#     #     'zlims':  (1E-5, 1E2)
+#     # }
         
-    # fig, plotting_products = plotting.do_2D_data_mc_comparison(
-    #     bins_x=czen_bins, bins_y = charge_bins,
-    #     sim_x_vals=sim_x_vals, sim_y_vals = sim_y_vals,
-    #     sim_weights=sim_weights, set_labels=set_labels,
-    #     data_x_vals=data_x_vals, data_y_vals=data_y_vals,
-    #     plotting_opts = plotting_options
-    # )
-    # for a in plotting_products['axes']:
-    #     plotting_products['axes'][a].set_yscale('log')
-    #     plotting_products['axes'][a].set_xlabel(plotting_options['xlabel'])
-    #     plotting_products['axes'][a].set_ylabel(plotting_options['ylabel'])
-    # for a in plotting_products['cbars']:
-    #     plotting_products['cbars'][a].set_label(plotting_options['zlabel'])
-    # plotting_products['cbars']['ratio'].set_label("Ratio")
+#     # fig, plotting_products = plotting.do_2D_data_mc_comparison(
+#     #     bins_x=czen_bins, bins_y = charge_bins,
+#     #     sim_x_vals=sim_x_vals, sim_y_vals = sim_y_vals,
+#     #     sim_weights=sim_weights, set_labels=set_labels,
+#     #     data_x_vals=data_x_vals, data_y_vals=data_y_vals,
+#     #     plotting_opts = plotting_options
+#     # )
+#     # for a in plotting_products['axes']:
+#     #     plotting_products['axes'][a].set_yscale('log')
+#     #     plotting_products['axes'][a].set_xlabel(plotting_options['xlabel'])
+#     #     plotting_products['axes'][a].set_ylabel(plotting_options['ylabel'])
+#     # for a in plotting_products['cbars']:
+#     #     plotting_products['cbars'][a].set_label(plotting_options['zlabel'])
+#     # plotting_products['cbars']['ratio'].set_label("Ratio")
         
-    # fig.tight_layout()
-    # fig.savefig('plots/hist2d_q_czen_datamc.png', dpi=300)
-    # del fig, plotting_products    
+#     # fig.tight_layout()
+#     # fig.savefig('plots/hist2d_q_czen_datamc.png', dpi=300)
+#     # del fig, plotting_products    
 
 
-    #############################
-    # 2D: charge vs linefit speed
-    #############################
+#     #############################
+#     # 2D: charge vs linefit speed
+#     #############################
     
-    # sim_y_vals = {
-    #     'cor': cor_charge[cor_L2_mask],
-    #     'nugen_atmo': nugen_charges[nugen_L2_mask],
-    #     'nugen_astro': nugen_charges[nugen_L2_mask],
-    #     'ehe': ehe_charge[ehe_L2_mask]
-    # }
-    # sim_x_vals = {
-    #     'cor': cor_speed[cor_L2_mask],
-    #     'nugen_atmo': nugen_speeds[nugen_L2_mask],
-    #     'nugen_astro': nugen_speeds[nugen_L2_mask],
-    #     'ehe': ehe_speed[ehe_L2_mask]
-    # }
-    # set_labels={
-    #     'cor': r'Atm $\mu$ (H4a)',
-    #     'nugen_atmo': r'Atm $\nu$ (H3a, Sibyll 2.3c)',
-    #     'nugen_astro': r'Astro $\nu$ (north tracks, $\nu_{e}$ + $\nu_{\mu}$ only)',
-    #     'ehe': r'Cosmo $\nu$ (Ahlers GZK)',
-    #     'data': 'Burn Sample ({:.2f} days)'.format(livetime/(60*60*24))
-    # }
-    # data_y_vals = data_charges[data_L2_mask]
-    # data_x_vals = data_speed[data_L2_mask]
-    # my_map = plt.cm.plasma
-    # plotting_options = {
-    #     'xlabel': r'LineFit Speed',
-    #     'ylabel': 'Q / PE',
-    #     'zlabel': 'Number of Events',
-    #     'cmap': my_map,
-    #     'norm': colors.LogNorm(),
-    #     'zlims':  (1E-5, 1E2)
-    # }
+#     # sim_y_vals = {
+#     #     'cor': cor_charge[cor_L2_mask],
+#     #     'nugen_atmo': nugen_charges[nugen_L2_mask],
+#     #     'nugen_astro': nugen_charges[nugen_L2_mask],
+#     #     'ehe': ehe_charge[ehe_L2_mask]
+#     # }
+#     # sim_x_vals = {
+#     #     'cor': cor_speed[cor_L2_mask],
+#     #     'nugen_atmo': nugen_speeds[nugen_L2_mask],
+#     #     'nugen_astro': nugen_speeds[nugen_L2_mask],
+#     #     'ehe': ehe_speed[ehe_L2_mask]
+#     # }
+#     # set_labels={
+#     #     'cor': r'Atm $\mu$ (H4a)',
+#     #     'nugen_atmo': r'Atm $\nu$ (H3a, Sibyll 2.3c)',
+#     #     'nugen_astro': r'Astro $\nu$ (north tracks, $\nu_{e}$ + $\nu_{\mu}$ only)',
+#     #     'ehe': r'Cosmo $\nu$ (Ahlers GZK)',
+#     #     'data': 'Burn Sample ({:.2f} days)'.format(livetime/(60*60*24))
+#     # }
+#     # data_y_vals = data_charges[data_L2_mask]
+#     # data_x_vals = data_speed[data_L2_mask]
+#     # my_map = plt.cm.plasma
+#     # plotting_options = {
+#     #     'xlabel': r'LineFit Speed',
+#     #     'ylabel': 'Q / PE',
+#     #     'zlabel': 'Number of Events',
+#     #     'cmap': my_map,
+#     #     'norm': colors.LogNorm(),
+#     #     'zlims':  (1E-5, 1E2)
+#     # }
         
-    # fig, plotting_products = plotting.do_2D_data_mc_comparison(
-    #     bins_x=speed_bins, bins_y = charge_bins,
-    #     sim_x_vals=sim_x_vals, sim_y_vals = sim_y_vals,
-    #     sim_weights=sim_weights, set_labels=set_labels,
-    #     data_x_vals=data_x_vals, data_y_vals=data_y_vals,
-    #     plotting_opts = plotting_options
-    # )
-    # for a in plotting_products['axes']:
-    #     plotting_products['axes'][a].set_yscale('log')
-    #     plotting_products['axes'][a].set_xlabel(plotting_options['xlabel'])
-    #     plotting_products['axes'][a].set_ylabel(plotting_options['ylabel'])
-    # for a in plotting_products['cbars']:
-    #     plotting_products['cbars'][a].set_label(plotting_options['zlabel'])
-    # plotting_products['cbars']['ratio'].set_label("Ratio")
+#     # fig, plotting_products = plotting.do_2D_data_mc_comparison(
+#     #     bins_x=speed_bins, bins_y = charge_bins,
+#     #     sim_x_vals=sim_x_vals, sim_y_vals = sim_y_vals,
+#     #     sim_weights=sim_weights, set_labels=set_labels,
+#     #     data_x_vals=data_x_vals, data_y_vals=data_y_vals,
+#     #     plotting_opts = plotting_options
+#     # )
+#     # for a in plotting_products['axes']:
+#     #     plotting_products['axes'][a].set_yscale('log')
+#     #     plotting_products['axes'][a].set_xlabel(plotting_options['xlabel'])
+#     #     plotting_products['axes'][a].set_ylabel(plotting_options['ylabel'])
+#     # for a in plotting_products['cbars']:
+#     #     plotting_products['cbars'][a].set_label(plotting_options['zlabel'])
+#     # plotting_products['cbars']['ratio'].set_label("Ratio")
         
-    # fig.tight_layout()
-    # fig.savefig('plots/hist2d_q_speed_datamc.png', dpi=300)
+#     # fig.tight_layout()
+#     # fig.savefig('plots/hist2d_q_speed_datamc.png', dpi=300)
 
-    # del fig, plotting_products
+#     # del fig, plotting_products
