@@ -8,8 +8,8 @@ variables:
     value: "bestNPEbtw"
     label: "Portia log10(NPE)"
   speed:
-    # variable: "EHELineFit"
-    variable: "LineFitEHE"
+    variable: "EHELineFit"
+    # variable: "LineFitEHE"
     value: "speed"
     label: "LineFit Speed"
   redchisqu:
@@ -52,23 +52,23 @@ corsika:
 
 juliet:
   nue:
-    high_energy:
-      file: "/disk20/users/brian/IceCube/juliet/level4/nue_high_energy/nue_high_energy_merged_998files.hdf5"
-      n_files: 998
-    very_high_energy:
-      file: "/disk20/users/brian/IceCube/juliet/level4/nue_very_high_energy/nue_very_high_energy_merged_999files.hdf5"
-      n_files: 999
-    # for level5 tests
     # high_energy:
-      # file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy/merged_nue_high_energy_1kfiles.hdf5"
-      # n_files: 1000
-  mu:
+    #   file: "/disk20/users/brian/IceCube/juliet/level4/nue_high_energy/nue_high_energy_merged_998files.hdf5"
+    #   n_files: 998
+    # very_high_energy:
+    #   file: "/disk20/users/brian/IceCube/juliet/level4/nue_very_high_energy/nue_very_high_energy_merged_999files.hdf5"
+    #   n_files: 999
+    # for level5 tests
     high_energy:
-      file: "/disk20/users/brian/IceCube/juliet/level4/mu_high_energy/mu_high_energy_merged_999files.hdf5"
-      n_files: 999
-    very_high_energy:
-      file: "/disk20/users/brian/IceCube/juliet/level4/mu_very_high_energy/mu_very_high_energy_merged_999files.hdf5"
-      n_files: 999
+      file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_hitmakerfix/merged_nue_high_energy_hitmakerfix_1kfiles.hdf5"
+      n_files: 1000
+  # mu:
+  #   high_energy:
+  #     file: "/disk20/users/brian/IceCube/juliet/level4/mu_high_energy/mu_high_energy_merged_999files.hdf5"
+  #     n_files: 999
+  #   very_high_energy:
+  #     file: "/disk20/users/brian/IceCube/juliet/level4/mu_very_high_energy/mu_very_high_energy_merged_999files.hdf5"
+  #     n_files: 999
 
 
 

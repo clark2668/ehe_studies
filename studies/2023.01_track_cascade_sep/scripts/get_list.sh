@@ -2,11 +2,10 @@
 
 
 # juliet HE nue
-# ls /disk20/users/brian/IceCube/juliet/level5/nue_high_energy/1/*.zst > files_nue_high_energy.txt
-# ls /disk20/users/brian/IceCube/juliet/level5/nue_very_high_energy/1/*.zst > files_nue_very_high_energy.txt
+ls /disk20/users/brian/IceCube/juliet/level5/nue_high_energy_hitmakerfix/1/*.zst > files_nue_high_energy_hitmakerfix.txt
 
 # nugen L5
-ls /data/i3home/baclark/i3store/nugen/level5/21218/0*/*.zst > files_21218.txt
+# ls /data/i3home/baclark/i3store/nugen/level5/21218/0*/*.zst > files_21218.txt
 
 
 # juliet HE

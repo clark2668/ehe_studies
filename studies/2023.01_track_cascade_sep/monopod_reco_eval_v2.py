@@ -16,8 +16,8 @@ from eheanalysis import weighting, plotting, cuts
 gzk_flux = fluxes.EHEFlux("cosmogenic_ahlers2010_1E18")
 gzk_partial = partial(gzk_flux, which_species="nue_sum") 
 
-# style.use('/home/brian/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
-style.use('/data/i3home/baclark/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
+style.use('/home/brian/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
+# style.use('/data/i3home/baclark/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
 
 livetime = 365 * 24 * 60 * 60
 print(livetime)
@@ -107,13 +107,13 @@ events_per_file = {
 
 
 for s in juliet_species:
-    if 1==1:
-    # for l in juliet_energy_levels:
+    # if 1==1:
+    for l in juliet_energy_levels:
 
         # print(f"Working on juliet {s} {l}")
 
-        the_f = tables.open_file(cfg_file['nugen']['21218']['file'])
-        # the_f = tables.open_file(cfg_file['juliet'][s][l]['file'])
+        # the_f = tables.open_file(cfg_file['nugen']['21218']['file'])
+        the_f = tables.open_file(cfg_file['juliet'][s][l]['file'])
         # weight_dict, prop_matrix, evts_per_file = weighting.get_juliet_weightdict_and_propmatrix(the_f)
 
         # evts_per_file = events_per_file[f"{s}_{l}"] # override to fix L2 issue

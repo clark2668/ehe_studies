@@ -58,23 +58,23 @@ tray.AddModule(find_primary, 'findPrimary',
     )
 
 tray.AddModule(millipede.calculate_em_equiv_dep_energy,
-               mctree_name='I3MCTree_preMuonProp',
+               mctree_name='I3MCTree',
                primary_name='PrimaryEvent',
                output_name="EMEquivVisDepE"
                )
 keeps.extend(['EMEquivVisDepE'])
 
-# tray.Add('Delete', 
-#     Keys=['PropagationMatrixNuE', 'PropagationMatrixNuMu', 'PropagationMatrixNuTau',
-#     'JulietWeightDict'
-#     ]
-# )
+tray.Add('Delete', 
+    Keys=['PropagationMatrixNuE', 'PropagationMatrixNuMu', 'PropagationMatrixNuTau',
+    'JulietWeightDict'
+    ]
+)
 
-# # okay, now juliet weighting for L2 files
-# tray.AddModule(weighting_module.I3PropagationMatrixFiller,
-#                output_name='PropagationMatrix',
-#                propagation_matrix_dir='/data/IceCube/JULIeT/propMtxZeus/BB/HDF5',
-#                split_flavors=True)
+# okay, now juliet weighting for L2 files
+tray.AddModule(weighting_module.I3PropagationMatrixFiller,
+               output_name='PropagationMatrix',
+               propagation_matrix_dir='/data/IceCube/JULIeT/propMtxZeus/BB/HDF5',
+               split_flavors=True)
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
     Output=f'{args.output_file}.hdf5', 
