@@ -194,7 +194,8 @@ if make_plots:
             bins=e_bins, cmap=plt.cm.viridis,
             weights=ehe_weights['nue'][ehe_mask['nue']],
             norm=norm,
-            xlabel='True EM Equiv Vis Energy [GeV]',
+            # xlabel='True EM Equiv Vis Energy [GeV]',
+            xlabel='Dep Energy',
             ylabel='Reco Energy [GeV]',
             title=f"{which_reco}"
         )
@@ -227,7 +228,8 @@ if make_plots:
         ax.fill_between(x, y_med, y_hi, color='C0', alpha=0.2)
         ax.fill_between(x,y_med, y_lo, color='C0', alpha=0.2)
         ax.set_ylabel('(Reco-True)/True')
-        ax.set_xlabel('True EM Equiv Vis Energy [GeV]')
+        # ax.set_xlabel('True EM Equiv Vis Energy [GeV]')
+        ax.set_xlabel('Dep Energy')
         ax.set_xscale('log')
         ax.set_ylim([-0.05,0.15])
         ax.grid()
