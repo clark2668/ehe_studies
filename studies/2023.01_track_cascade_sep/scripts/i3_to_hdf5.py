@@ -94,12 +94,10 @@ keeps.extend(['DepE'])
 
 from ic3_labels.labels.utils import geometry
 def determine_containment(frame, hull, reco_particle_name, result_name):
-
     part = frame.Get(reco_particle_name)
     is_inside = geometry.point_is_inside(hull,
                                             (part.pos.x, part.pos.y, part.pos.z))
     frame.Put(result_name, icetray.I3Bool(is_inside))
-    print(f"Is Inside? {is_inside}")
 
 tray.AddModule(determine_containment, 'determineContainment', 
                hull=convex_hull,
