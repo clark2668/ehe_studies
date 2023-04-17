@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from multiprocessing.sharedctypes import Value
 from icecube import icetray, dataio, dataclasses, common_variables, linefit, gulliver
 from icecube import phys_services
 from I3Tray import I3Tray
