@@ -90,6 +90,10 @@ ehe_reco_e = {
     "nue": np.asarray([]),
     "mu": np.asarray([])
 }
+ehe_contaiment = {
+    "nue": np.asarray([]),
+    "mu": np.asarray([])
+}
 
 juliet_species = ["nue"]
 juliet_energy_levels = ["high_energy"]
@@ -100,6 +104,19 @@ events_per_file = {
     "mu_high_energy": 150,
     "mu_very_high_energy": 20
 }
+
+which_reco_e = 'depe'
+if which_reco_e is 'depe':
+    which_reco_e_var = 'DepE'
+    xlabel = 'Deposited Energy'
+elif which_reco_e is 'emequive':
+    which_reco_e_var = 'EMEquivVisDepE'
+    xlabel = 'EM Equiv Energy'
+which_reco_e_val = 'value'
+
+which_sample = 'cmc_fine'
+
+do_contained = True
 
 #############################
 # ehe/cosmogenic flux (juliet)
@@ -113,7 +130,7 @@ for s in juliet_species:
         # print(f"Working on juliet {s} {l}")
 
         # the_f = tables.open_file(cfg_file['nugen']['21218']['file'])
-        the_f = tables.open_file(cfg_file['juliet'][s][l]['file'])
+        the_f = tables.open_file(cfg_file['juliet'][s][l][which_sample]['file'])
         # weight_dict, prop_matrix, evts_per_file = weighting.get_juliet_weightdict_and_propmatrix(the_f)
 
         # evts_per_file = events_per_file[f"{s}_{l}"] # override to fix L2 issue
@@ -125,8 +142,10 @@ for s in juliet_species:
         reco_azi = the_f.get_node(f"/{reco_name}").col("azimuth")
         truth_zen = the_f.get_node("/PolyplopiaPrimary").col("zenith")
         truth_azi = the_f.get_node("/PolyplopiaPrimary").col("azimuth")
-        true_e = the_f.get_node(f"/EMEquivVisDepE").col('value')
+        # true_e = the_f.get_node(f"/EMEquivVisDepE").col('value')
+        true_e = the_f.get_node(f"/{which_reco_e_var}").col(f"{which_reco_e_val}")
         reco_e = the_f.get_node(f"/{energy_reco}").col("energy")
+        containment = the_f.get_node("/EHE_Monopod_Containment").col('value')
 
         # n_gen = cfg_file['juliet'][s][l]['n_files'] * evts_per_file
 
@@ -149,6 +168,7 @@ for s in juliet_species:
 
         ehe_true_e[s] = np.concatenate((ehe_true_e[s], copy.deepcopy(true_e)))
         ehe_reco_e[s] = np.concatenate((ehe_reco_e[s], copy.deepcopy(reco_e)))
+        ehe_contaiment[s] = np.concatenate((ehe_contaiment[s], copy.deepcopy(containment)))
 
         the_f.close()
 
@@ -163,9 +183,12 @@ for f in ehe_mask.keys():
     ndoms_mask = ehe_ndoms[f] > ndoms_cut
     track_qual_mask = cuts.track_quality_cut(ehe_classifier[f], ehe_charge[f])
     track_mask = ehe_classifier[f] < 0.27
+    contained_mask = ehe_contaiment[f] > 0
     total_mask = np.logical_and(q_mask, ndoms_mask)
     total_mask = np.logical_and(total_mask, track_qual_mask)
     total_mask = np.logical_and(total_mask, track_mask)
+    if do_contained:
+        total_mask = np.logical_and(total_mask, contained_mask)
     ehe_mask[f] = total_mask
     # ehe_mask[f] = ehe_charge[f] > 0
 
@@ -194,8 +217,7 @@ if make_plots:
             bins=e_bins, cmap=plt.cm.viridis,
             weights=ehe_weights['nue'][ehe_mask['nue']],
             norm=norm,
-            # xlabel='True EM Equiv Vis Energy [GeV]',
-            xlabel='Dep Energy',
+            xlabel=xlabel,
             ylabel='Reco Energy [GeV]',
             title=f"{which_reco}"
         )
@@ -211,10 +233,11 @@ if make_plots:
         ax.legend()
         ax.set_xscale('log')
         ax.set_yscale('log')
+        ax.set_title(f"{which_sample}, {which_reco_e}, Contained {do_contained}")
 
         # im.set_clim(clims)
         fig.tight_layout()
-        fig.savefig(f'./figs/reco_energy_monopod.png')
+        fig.savefig(f'./figs/reco_energy_monopod_{which_sample}_{which_reco_e}_contained_{do_contained}.png')
         del fig, ax, im
 
         # energy
@@ -225,17 +248,17 @@ if make_plots:
             y_values=(ehe_reco_e['nue'][ehe_mask['nue']] - ehe_true_e['nue'][ehe_mask['nue']])/ehe_true_e['nue'][ehe_mask['nue']],
             xbins=xedges,
         )
+        ax.set_title(f"{which_sample}, {which_reco_e}, Contained {do_contained}")
         ax.fill_between(x, y_med, y_hi, color='C0', alpha=0.2)
         ax.fill_between(x,y_med, y_lo, color='C0', alpha=0.2)
         ax.set_ylabel('(Reco-True)/True')
-        # ax.set_xlabel('True EM Equiv Vis Energy [GeV]')
-        ax.set_xlabel('Dep Energy')
+        ax.set_xlabel(xlabel)
         ax.set_xscale('log')
         ax.set_ylim([-0.05,0.15])
         ax.grid()
         ax.hlines(0.,1E6, 1E10, linestyles='--')
         fig.tight_layout()
-        fig.savefig(f'./figs/reco_energy_resolution_monopod.png')
+        fig.savefig(f'./figs/reco_energy_resolution_monopod_{which_sample}_{which_reco_e}_{do_contained}.png')
         del fig, ax
 
     do_dir = False

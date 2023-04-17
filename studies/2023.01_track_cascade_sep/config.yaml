@@ -60,10 +60,12 @@ juliet:
     #   n_files: 999
     # for level5 tests
     high_energy:
-      file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_hitmakerfix_nodc/merged_nue_high_energy_hitmakerfix_nohadcorr_1kfiles.hdf5"
+      cmc_fine:
+        n_files: 1000
+        file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine/merged_nue_high_energy_cmc_fine_1kfiles.hdf5"
+      # file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_hitmakerfix_nodc/merged_nue_high_energy_hitmakerfix_nohadcorr_1kfiles.hdf5"
       # file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_hitmakerfix/merged_nue_high_energy_hitmakerfix_1kfiles.hdf5"
       # file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_hitmakerfix_nodc/merged_nue_high_energy_hitmakerfix_nodc_1kfiles.hdf5"
-      n_files: 1000
   # mu:
   #   high_energy:
   #     file: "/disk20/users/brian/IceCube/juliet/level4/mu_high_energy/mu_high_energy_merged_999files.hdf5"
@@ -71,7 +73,6 @@ juliet:
   #   very_high_energy:
   #     file: "/disk20/users/brian/IceCube/juliet/level4/mu_very_high_energy/mu_very_high_energy_merged_999files.hdf5"
   #     n_files: 999
-
 
 
 nugen:

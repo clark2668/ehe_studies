@@ -9,7 +9,7 @@ datasets = [
             # 'numu_high_energy', 'numu_very_high_energy',
             # 'nutau_high_energy', 'nutau_very_high_energy',
             # 'tau_high_energy', 'tau_very_high_energy',
-            'nue_high_energy_hitmakerfix_nodc'#, 'nue_very_high_energy',
+            'nue_high_energy_cmc_fine'#, 'nue_very_high_energy',
             # "21218"
     ]
 
