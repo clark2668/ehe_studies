@@ -105,7 +105,7 @@ events_per_file = {
     "mu_very_high_energy": 20
 }
 
-which_reco_e = 'depe'
+which_reco_e = 'emequive'
 if which_reco_e is 'depe':
     which_reco_e_var = 'DepE'
     xlabel = 'Deposited Energy'
@@ -116,7 +116,7 @@ which_reco_e_val = 'value'
 
 which_sample = 'cmc_fine'
 
-do_contained = True
+containment_selection = 'all'
 
 #############################
 # ehe/cosmogenic flux (juliet)
@@ -183,11 +183,14 @@ for f in ehe_mask.keys():
     ndoms_mask = ehe_ndoms[f] > ndoms_cut
     track_qual_mask = cuts.track_quality_cut(ehe_classifier[f], ehe_charge[f])
     track_mask = ehe_classifier[f] < 0.27
-    contained_mask = ehe_contaiment[f] > 0
     total_mask = np.logical_and(q_mask, ndoms_mask)
     total_mask = np.logical_and(total_mask, track_qual_mask)
     total_mask = np.logical_and(total_mask, track_mask)
-    if do_contained:
+    if containment_selection is 'uncontained':
+        contained_mask = ehe_contaiment[f] < 1
+        total_mask = np.logical_and(total_mask, contained_mask)
+    elif containment_selection is 'contained':
+        contained_mask = ehe_contaiment[f] > 0
         total_mask = np.logical_and(total_mask, contained_mask)
     ehe_mask[f] = total_mask
     # ehe_mask[f] = ehe_charge[f] > 0
@@ -207,7 +210,7 @@ if make_plots:
     do_e = True
     if do_e:
 
-        # energy
+        # energycontainment_selection
         fig = plt.figure(figsize=(7,5))
         ax = fig.add_subplot(111)
         vals, xedges, yedges, im = plotting.make_2D_hist(
@@ -233,11 +236,11 @@ if make_plots:
         ax.legend()
         ax.set_xscale('log')
         ax.set_yscale('log')
-        ax.set_title(f"{which_sample}, {which_reco_e}, Contained {do_contained}")
+        ax.set_title(f"{which_sample}, {which_reco_e}, {containment_selection}")
 
         # im.set_clim(clims)
         fig.tight_layout()
-        fig.savefig(f'./figs/reco_energy_monopod_{which_sample}_{which_reco_e}_contained_{do_contained}.png')
+        fig.savefig(f'./figs/reco_energy_monopod_{which_sample}_{which_reco_e}_{containment_selection}.png')
         del fig, ax, im
 
         # energy
@@ -248,7 +251,7 @@ if make_plots:
             y_values=(ehe_reco_e['nue'][ehe_mask['nue']] - ehe_true_e['nue'][ehe_mask['nue']])/ehe_true_e['nue'][ehe_mask['nue']],
             xbins=xedges,
         )
-        ax.set_title(f"{which_sample}, {which_reco_e}, Contained {do_contained}")
+        ax.set_title(f"{which_sample}, {which_reco_e}, {containment_selection}")
         ax.fill_between(x, y_med, y_hi, color='C0', alpha=0.2)
         ax.fill_between(x,y_med, y_lo, color='C0', alpha=0.2)
         ax.set_ylabel('(Reco-True)/True')
@@ -258,7 +261,7 @@ if make_plots:
         ax.grid()
         ax.hlines(0.,1E6, 1E10, linestyles='--')
         fig.tight_layout()
-        fig.savefig(f'./figs/reco_energy_resolution_monopod_{which_sample}_{which_reco_e}_{do_contained}.png')
+        fig.savefig(f'./figs/reco_energy_resolution_monopod_{which_sample}_{which_reco_e}_{containment_selection}.png')
         del fig, ax
 
     do_dir = False
