@@ -25,7 +25,7 @@ print(livetime)
 cfg_file = 'config.yaml'
 cfg_file = yaml.safe_load(open(cfg_file))
 
-qcut = 21500
+qcut = 27500
 charge_var = 'hqtot'
 classifier_var = 'speed'
 classifier_bins = np.linspace(0, 0.5, 150)
@@ -116,7 +116,7 @@ which_reco_e_val = 'value'
 
 which_sample = 'cmc_fine'
 
-containment_selection = 'contained'
+containment_selection = 'all'
 
 #############################
 # ehe/cosmogenic flux (juliet)
@@ -179,13 +179,13 @@ ehe_mask = {
 
 # build masks
 for f in ehe_mask.keys():
-    qcut = 1000000
+    # qcut = 27500
     q_mask = ehe_charge[f] > qcut
     ndoms_mask = ehe_ndoms[f] > ndoms_cut
-    # track_qual_mask = cuts.track_quality_cut(ehe_classifier[f], ehe_charge[f])
+    track_qual_mask = cuts.track_quality_cut(ehe_classifier[f], ehe_charge[f])
     track_mask = ehe_classifier[f] < 0.27
     total_mask = np.logical_and(q_mask, ndoms_mask)
-    # total_mask = np.logical_and(total_mask, track_qual_mask)
+    total_mask = np.logical_and(total_mask, track_qual_mask)
     total_mask = np.logical_and(total_mask, track_mask)
     if containment_selection is 'uncontained':
         contained_mask = ehe_contaiment[f] < 1
@@ -259,6 +259,7 @@ if make_plots:
         ax.set_xlabel(xlabel)
         ax.set_xscale('log')
         ax.set_ylim([-0.05,0.15])
+        ax.set_ylim([-1, 2])
         ax.grid()
         ax.hlines(0.,1E6, 1E10, linestyles='--')
         fig.tight_layout()
