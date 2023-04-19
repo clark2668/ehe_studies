@@ -8,7 +8,7 @@ from eheanalysis import weighting, plotting, analysis_9yr
 import matplotlib.pyplot as plt
 from matplotlib import style
 import pandas as pd
-style.use('/home/brian/IceCube/ehe/max_tools/EHE_analysis/eheanalysis/ehe.mplstyle')
+style.use('/home/brian/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
 
 cfg_file = '../config.yaml'
 cfg_file = yaml.safe_load(open(cfg_file))
