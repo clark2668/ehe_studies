@@ -45,11 +45,11 @@ for iS, s in enumerate(juliet_species):
         truezen = the_f.get_node('/I3JulietPrimaryParticle').col('zenith')
         n_gen = cfg_file['juliet'][s][l]['n_files'] * evts_per_file
         
-        # muon_bundle_pass = analysis_9yr.muon_bundle_cut_pass_9yr(recozen, npe)
-        # track_quality_pass = analysis_9yr.track_quality_cut_pass_9yr(fitqual, npe)
-        # total_pass = np.logical_and(muon_bundle_pass, track_quality_pass)
-        muon_bundle_pass_3yr = analysis_9yr.muon_bundle_cut_pass_3yr(recozen, npe)
-        total_pass = muon_bundle_pass_3yr
+        muon_bundle_pass = analysis_9yr.muon_bundle_cut_pass_9yr(recozen, npe)
+        track_quality_pass = analysis_9yr.track_quality_cut_pass_9yr(fitqual, npe)
+        total_pass = np.logical_and(muon_bundle_pass, track_quality_pass)
+        # muon_bundle_pass_3yr = analysis_9yr.muon_bundle_cut_pass_3yr(recozen, npe)
+        # total_pass = muon_bundle_pass_3yr
 
         # first, get the weighting for this species specifically
         area = weighting.calc_juliet_effective_area(
