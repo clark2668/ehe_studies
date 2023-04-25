@@ -6,7 +6,9 @@ from I3Tray import I3Tray
 from icecube import hdfwriter, weighting_module
 
 import sys
-sys.path.append('/home/brian/IceCube/ehe/ehe_software/venv_ehe')
+# sys.path.append('/home/brian/IceCube/ehe/ehe_software/venv_ehe')
+sys.path.append('/data/i3home/baclark/IceCube/ehe/ehe_software/venv_ehe')
+
 
 from eheanalysis import millipede
 
@@ -106,17 +108,17 @@ tray.AddModule(determine_containment, 'determineContainment',
                )
 keeps.extend(['EHE_Monopod_Containment'])
 
-tray.Add('Delete', 
-    Keys=['PropagationMatrixNuE', 'PropagationMatrixNuMu', 'PropagationMatrixNuTau',
-    'JulietWeightDict'
-    ]
-)
+# tray.Add('Delete', 
+#     Keys=['PropagationMatrixNuE', 'PropagationMatrixNuMu', 'PropagationMatrixNuTau',
+#     'JulietWeightDict'
+#     ]
+# )
 
-# okay, now juliet weighting for L2 files
-tray.AddModule(weighting_module.I3PropagationMatrixFiller,
-               output_name='PropagationMatrix',
-               propagation_matrix_dir='/data/IceCube/JULIeT/propMtxZeus/BB/HDF5',
-               split_flavors=True)
+# # okay, now juliet weighting for L2 files
+# tray.AddModule(weighting_module.I3PropagationMatrixFiller,
+#                output_name='PropagationMatrix',
+#                propagation_matrix_dir='/data/IceCube/JULIeT/propMtxZeus/BB/HDF5',
+#                split_flavors=True)
 
 tray.AddSegment(hdfwriter.I3HDFWriter, 'hdf', 
     Output=f'{args.output_file}.hdf5', 

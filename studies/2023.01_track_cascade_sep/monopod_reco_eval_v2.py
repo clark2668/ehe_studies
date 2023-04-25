@@ -16,8 +16,8 @@ from eheanalysis import weighting, plotting, cuts
 gzk_flux = fluxes.EHEFlux("cosmogenic_ahlers2010_1E18")
 gzk_partial = partial(gzk_flux, which_species="nue_sum") 
 
-style.use('/home/brian/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
-# style.use('/data/i3home/baclark/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
+# style.use('/home/brian/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
+style.use('/data/i3home/baclark/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
 
 livetime = 365 * 24 * 60 * 60
 print(livetime)
@@ -41,6 +41,20 @@ elif which_reco is 'linefit':
     reco_name='EHELineFit'
 
 energy_reco = 'EHE_Monopod'
+
+which_reco_e = 'emequive'
+if which_reco_e is 'depe':
+    which_reco_e_var = 'DepE'
+    xlabel = 'Deposited Energy'
+elif which_reco_e is 'emequive':
+    which_reco_e_var = 'EMEquivVisDepE'
+    xlabel = 'EM Equiv Energy'
+which_reco_e_val = 'value'
+
+which_sample = 'cmc_fine_highqcut'
+
+containment_selection = 'uncontained'
+
 
 ehe_weights ={
     "nue": np.asarray([]),
@@ -104,19 +118,6 @@ events_per_file = {
     "mu_high_energy": 150,
     "mu_very_high_energy": 20
 }
-
-which_reco_e = 'emequive'
-if which_reco_e is 'depe':
-    which_reco_e_var = 'DepE'
-    xlabel = 'Deposited Energy'
-elif which_reco_e is 'emequive':
-    which_reco_e_var = 'EMEquivVisDepE'
-    xlabel = 'EM Equiv Energy'
-which_reco_e_val = 'value'
-
-which_sample = 'cmc_fine'
-
-containment_selection = 'all'
 
 #############################
 # ehe/cosmogenic flux (juliet)
@@ -259,7 +260,7 @@ if make_plots:
         ax.set_xlabel(xlabel)
         ax.set_xscale('log')
         ax.set_ylim([-0.05,0.15])
-        ax.set_ylim([-1, 2])
+        # ax.set_ylim([-1, 2])
         ax.grid()
         ax.hlines(0.,1E6, 1E10, linestyles='--')
         fig.tight_layout()

@@ -2,12 +2,18 @@
 
 
 # juliet HE nue
-ls /disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine/1/*.zst > files_nue_high_energy_cmc_fine.txt
+# ls /disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine/1/*.zst > files_nue_high_energy_cmc_fine.txt
 # ls /disk20/users/brian/IceCube/juliet/level5/nue_high_energy_hitmakerfix_nodc/1/*.zst > files_nue_high_energy_hitmakerfix_nodc.txt
 
 # nugen L5
 # ls /data/i3home/baclark/i3store/nugen/level5/21218/0*/*.zst > files_21218.txt
 
+# juliet at UMD
+# ls /data/i3store/users/baclark/juliet/level5/nue_high_energy_nopatch/1/*.zst > files_nue_high_energy_nopatch.txt
+# ls /data/i3store/users/baclark/juliet/level5/nue_high_energy_patch/1/*.zst > files_nue_high_energy_patch.txt
+# ls /data/i3store/users/baclark/juliet/level5/nue_high_energy_patch_usf/1/*.zst > files_nue_high_energy_patch_usf.txt
+# ls /data/i3store/users/baclark/juliet/level5/nue_high_energy_hitmakerfix/1/*.zst > files_nue_high_energy_hitmakerfix.txt
+ls /data/i3store/users/baclark/juliet/level5/nue_high_energy_cmc_fine_highqcut/1/*.zst > files_nue_high_energy_cmc_fine_highqcut.txt
 
 # juliet HE
 # ls /home/mmeier/data/simulations/table_based_sim/juliet/numu/high_energy/L2/1/*.zst > files_numu_high_energy.txt

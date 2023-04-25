@@ -1,10 +1,10 @@
-log    = /scratch/brian/trash/log/$(infile).log
-output = /scratch/brian/trash/out/$(infile).out
-error = /scratch/brian/trash/err/$(infile).err
+#log    = /scratch/brian/trash/log/$(infile).log
+#output = /scratch/brian/trash/out/$(infile).out
+#error = /scratch/brian/trash/err/$(infile).err
 
-#log    = /data/condor_builds/users/baclark/condor_logs/log/$(infile).log
-#output = /data/condor_builds/users/baclark/condor_logs/out/$(infile).out
-#error = /data/condor_builds/users/baclark/condor_logs/err/$(infile).err
+log    = /data/condor_builds/users/baclark/condor_logs/log/$(infile).log
+output = /data/condor_builds/users/baclark/condor_logs/out/$(infile).out
+error = /data/condor_builds/users/baclark/condor_logs/err/$(infile).err
 
 request_cpus = 1
 request_memory = 1GB
