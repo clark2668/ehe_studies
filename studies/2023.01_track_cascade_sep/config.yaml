@@ -78,6 +78,10 @@ juliet:
       cmc_fine_highqcut:
         n_files: 1000
         file: "/data/i3store/users/baclark/juliet/level5/nue_high_energy_cmc_fine_highqcut/merged_nue_high_energy_cmc_fine_highqcut_1kfiles.hdf5"
+      cmc_fine:
+        n_files: 1000
+        file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine/merged_nue_high_energy_cmc_fine_1kfiles.hdf5"
+  
 
   # mu:
   #   high_energy:

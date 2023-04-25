@@ -16,8 +16,8 @@ from eheanalysis import weighting, plotting, cuts
 gzk_flux = fluxes.EHEFlux("cosmogenic_ahlers2010_1E18")
 gzk_partial = partial(gzk_flux, which_species="nue_sum") 
 
-# style.use('/home/brian/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
-style.use('/data/i3home/baclark/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
+style.use('/home/brian/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
+# style.use('/data/i3home/baclark/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
 
 livetime = 365 * 24 * 60 * 60
 print(livetime)
@@ -51,9 +51,11 @@ elif which_reco_e is 'emequive':
     xlabel = 'EM Equiv Energy'
 which_reco_e_val = 'value'
 
-which_sample = 'cmc_fine_highqcut'
+which_sample = 'cmc_fine'
 
-containment_selection = 'uncontained'
+containment_selection = 'all'
+
+cut_level="L2"
 
 
 ehe_weights ={
@@ -180,14 +182,30 @@ ehe_mask = {
 
 # build masks
 for f in ehe_mask.keys():
-    # qcut = 27500
-    q_mask = ehe_charge[f] > qcut
-    ndoms_mask = ehe_ndoms[f] > ndoms_cut
-    track_qual_mask = cuts.track_quality_cut(ehe_classifier[f], ehe_charge[f])
+    # always select tracks
     track_mask = ehe_classifier[f] < 0.27
-    total_mask = np.logical_and(q_mask, ndoms_mask)
-    total_mask = np.logical_and(total_mask, track_qual_mask)
-    total_mask = np.logical_and(total_mask, track_mask)
+
+    if cut_level is 'L1':
+        # very minimal Q cut
+        qcut = 4000
+        q_mask = ehe_charge[f] > qcut
+        total_mask = np.logical_and(track_mask, q_mask)
+    if cut_level is 'L2':
+        # strong charge cut + ndoms cut
+        q_mask = ehe_charge[f] > qcut
+        ndoms_mask = ehe_ndoms[f] > ndoms_cut
+        total_mask = np.logical_and(track_mask, q_mask)
+        total_mask = np.logical_and(total_mask, ndoms_mask)
+    if cut_level is 'L3':
+        # strong charge cut + ndoms cut + track quality cut
+        q_mask = ehe_charge[f] > qcut
+        ndoms_mask = ehe_ndoms[f] > ndoms_cut
+        total_mask = np.logical_and(track_mask, q_mask)
+        total_mask = np.logical_and(total_mask, ndoms_mask)
+        track_qual_mask = cuts.track_quality_cut(ehe_classifier[f], ehe_charge[f])
+        total_mask = np.logical_and(total_mask, track_qual_mask)
+    
+    # containment decision
     if containment_selection is 'uncontained':
         contained_mask = ehe_contaiment[f] < 1
         total_mask = np.logical_and(total_mask, contained_mask)
@@ -195,7 +213,6 @@ for f in ehe_mask.keys():
         contained_mask = ehe_contaiment[f] > 0
         total_mask = np.logical_and(total_mask, contained_mask)
     ehe_mask[f] = total_mask
-    # ehe_mask[f] = ehe_charge[f] > 0
 
 
 cmap=plt.cm.plasma
@@ -238,11 +255,11 @@ if make_plots:
         ax.legend()
         ax.set_xscale('log')
         ax.set_yscale('log')
-        ax.set_title(f"{which_sample}, {which_reco_e}, {containment_selection}")
+        ax.set_title(f"{which_sample}, {which_reco_e}, {containment_selection}, {cut_level}")
 
         # im.set_clim(clims)
         fig.tight_layout()
-        fig.savefig(f'./figs/reco_energy_monopod_{which_sample}_{which_reco_e}_{containment_selection}.png')
+        fig.savefig(f'./figs/reco_energy_monopod_{which_sample}_{which_reco_e}_{containment_selection}_{cut_level}.png')
         del fig, ax, im
 
         # energy
@@ -253,7 +270,7 @@ if make_plots:
             y_values=(ehe_reco_e['nue'][ehe_mask['nue']] - ehe_true_e['nue'][ehe_mask['nue']])/ehe_true_e['nue'][ehe_mask['nue']],
             xbins=xedges,
         )
-        ax.set_title(f"{which_sample}, {which_reco_e}, {containment_selection}")
+        ax.set_title(f"{which_sample}, {which_reco_e}, {containment_selection}, {cut_level}")
         ax.fill_between(x, y_med, y_hi, color='C0', alpha=0.2)
         ax.fill_between(x,y_med, y_lo, color='C0', alpha=0.2)
         ax.set_ylabel('(Reco-True)/True')
@@ -264,8 +281,26 @@ if make_plots:
         ax.grid()
         ax.hlines(0.,1E6, 1E10, linestyles='--')
         fig.tight_layout()
-        fig.savefig(f'./figs/reco_energy_resolution_monopod_{which_sample}_{which_reco_e}_{containment_selection}.png')
+        fig.savefig(f'./figs/reco_energy_resolution_monopod_{which_sample}_{which_reco_e}_{containment_selection}_{cut_level}.png')
         del fig, ax
+
+        fig = plt.figure(figsize=(7,5))
+        ax = fig.add_subplot(111)
+        local_mask_a = ehe_true_e['nue'][ehe_mask['nue']] > 1E8
+        local_mask_b = ehe_true_e['nue'][ehe_mask['nue']] < 1E9
+        local_mask_c = np.logical_and(local_mask_a, local_mask_b)
+        diff = np.log10(ehe_reco_e['nue'][ehe_mask['nue']]) - np.log10(ehe_true_e['nue'][ehe_mask['nue']])
+        bins = np.linspace(-0.5,0.5,100)
+        ax.hist(
+            diff[local_mask_c], bins=bins,
+            histtype='step', linewidth=3
+        )
+        ax.set_title(f"{which_sample}, {which_reco_e}, {containment_selection}, {cut_level}")
+        ax.set_ylabel("number of events")
+        ax.set_xlabel("log10(reco)-log10(true)")
+        fig.tight_layout()
+        fig.savefig(f'./figs/recominustrue_{which_sample}_{which_reco_e}_{containment_selection}_{cut_level}.png')
+        del fig, ax        
 
     do_dir = False
     if do_dir:

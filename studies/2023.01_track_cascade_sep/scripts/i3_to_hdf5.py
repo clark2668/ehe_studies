@@ -6,8 +6,8 @@ from I3Tray import I3Tray
 from icecube import hdfwriter, weighting_module
 
 import sys
-# sys.path.append('/home/brian/IceCube/ehe/ehe_software/venv_ehe')
-sys.path.append('/data/i3home/baclark/IceCube/ehe/ehe_software/venv_ehe')
+sys.path.append('/home/brian/IceCube/ehe/ehe_software/venv_ehe')
+# sys.path.append('/data/i3home/baclark/IceCube/ehe/ehe_software/venv_ehe')
 
 
 from eheanalysis import millipede

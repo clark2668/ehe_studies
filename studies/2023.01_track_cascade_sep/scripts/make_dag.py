@@ -2,8 +2,8 @@ import numpy as np
 import os
 from pathlib import Path
 
-# output_directory_head = '/disk20/users/brian/IceCube/juliet/level5'
-output_directory_head = '/data/i3store/users/baclark/juliet/level5'
+output_directory_head = '/disk20/users/brian/IceCube/juliet/level5'
+# output_directory_head = '/data/i3store/users/baclark/juliet/level5'
 
 datasets = [
             # 'numu_high_energy', 'numu_very_high_energy',
@@ -14,7 +14,8 @@ datasets = [
             # 'nue_high_energy_patch',
             # 'nue_high_energy_patch_usf'
             # 'nue_high_energy_hitmakerfix'
-            'nue_high_energy_cmc_fine_highqcut'
+            # 'nue_high_energy_cmc_fine_highqcut'
+            'nue_high_energy_cmc_fine'
     ]
 
 for d in datasets:
