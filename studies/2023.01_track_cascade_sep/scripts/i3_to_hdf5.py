@@ -77,6 +77,8 @@ tray.AddModule(millipede.calculate_em_equiv_dep_energy,
                )
 keeps.extend(['EMEquivVisDepE'])
 
+
+
 # straight up "visible" energy (no hadronic correction)
 def calculate_depe(frame):
     dep_e = frame['NuEProperties']['visible_energy']
@@ -85,14 +87,19 @@ def calculate_depe(frame):
 tray.AddModule(calculate_depe, 'calcDepE')
 keeps.extend(['DepE'])
 
-# vertex distance from hull to check containment
-# from ic3_labels.labels.utils import geometry
-# def calculate_dist_to_hull(frame, polygon, reco_particle_name):
-#     reco_particle = frame.Get(reco_particle_name)
-#     # position = reco_particle.pos
-#     # dist = geometry.distance_to_convex_hull(hull, position)
-#     dist = polygon.GetDistanceToHull(reco_particle.pos, reco_particle.dir)
-#     print(dist)
+# # special case (just copy the EM equiv...)
+# tray.AddModule(millipede.calculate_em_equiv_dep_energy,
+#                mctree_name='I3MCTree',
+#                primary_name='PrimaryEvent',
+#                output_name="DepE"
+#                )
+# keeps.extend(['DepE'])
+
+
+# def printy(frame):
+#     print(frame['EMEquivVisDepE'])
+#     print(frame['DepE'])
+# tray.AddModule(printy, "printy")
 
 from ic3_labels.labels.utils import geometry
 def determine_containment(frame, hull, reco_particle_name, result_name):

@@ -2,8 +2,19 @@
 
 
 # juliet HE nue
-ls /disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine/1/*.zst > files_nue_high_energy_cmc_fine.txt
+# ls /disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine/1/*.zst > files_nue_high_energy_cmc_fine.txt
 # ls /disk20/users/brian/IceCube/juliet/level5/nue_high_energy_hitmakerfix_nodc/1/*.zst > files_nue_high_energy_hitmakerfix_nodc.txt
+# ls /disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine_oldicetray/1/*.zst > files_nue_high_energy_cmc_fine_oldicetray.txt
+# ls /disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine_oldicetray_eonly/1/*.zst > files_nue_high_energy_cmc_fine_oldicetray_eonly.txt
+# ls /disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine_oldicetray_eonly/1/*.zst > files_nue_high_energy_cmc_fine_oldicetray_eonly.txt
+# ls /disk20/users/brian/IceCube/juliet/level5/cascade_em_1e8_test_matchicetray/1/*.zst > files_cascade_em_1e8_test_matchicetray.txt
+# ls /disk20/users/brian/IceCube/juliet/level5/cascade_em_1e8_test_matchicetray_fixeff/1/*.zst > files_cascade_em_1e8_test_matchicetray_fixeff.txt
+# ls /disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine_matchicetray_fixeff/1/*.zst > files_nue_high_energy_cmc_fine_matchicetray_fixeff.txt
+# ls /disk20/users/brian/IceCube/juliet/level5/nue_high_energy_patch_fixeffv2/1/*.zst > files_nue_high_energy_patch_fixeffv2.txt
+# ls /disk20/users/brian/IceCube/juliet/level5/nue_high_energy_oldicetray_patch_fixeffv2/1/*.zst > files_nue_high_energy_oldicetray_patch_fixeffv2.txt
+# ls /disk20/users/brian/IceCube/juliet/level5/cascade_em_1e6_test_matchicetray/1/*.zst > files_cascade_em_1e6_test_matchicetray.txt
+# ls /disk20/users/brian/IceCube/juliet/level5/cascade_em_1e6_test_matchicetray_nospecorr/1/*.zst > files_cascade_em_1e6_test_matchicetray_nospecorr.txt
+ls /disk20/users/brian/IceCube/juliet/level5/nue_high_energy_hitmaker_fix_spe_corr/1/*.zst > files_nue_high_energy_hitmaker_fix_spe_corr.txt
 
 # nugen L5
 # ls /data/i3home/baclark/i3store/nugen/level5/21218/0*/*.zst > files_21218.txt

@@ -51,11 +51,11 @@ elif which_reco_e is 'emequive':
     xlabel = 'EM Equiv Energy'
 which_reco_e_val = 'value'
 
-which_sample = 'cmc_fine'
+which_sample = 'nue_high_energy_hitmaker_fix_spe_corr'
 
 containment_selection = 'all'
 
-cut_level="L2"
+cut_level="L1"
 
 
 ehe_weights ={
@@ -143,8 +143,8 @@ for s in juliet_species:
         classifier = the_f.get_node(f"/{cfg_file['variables'][classifier_var]['variable']}").col(f"{cfg_file['variables'][classifier_var]['value']}")
         reco_zen = the_f.get_node(f"/{reco_name}").col("zenith")
         reco_azi = the_f.get_node(f"/{reco_name}").col("azimuth")
-        truth_zen = the_f.get_node("/PolyplopiaPrimary").col("zenith")
-        truth_azi = the_f.get_node("/PolyplopiaPrimary").col("azimuth")
+        # truth_zen = the_f.get_node("/PolyplopiaPrimary").col("zenith")
+        # truth_azi = the_f.get_node("/PolyplopiaPrimary").col("azimuth")
         # true_e = the_f.get_node(f"/EMEquivVisDepE").col('value')
         true_e = the_f.get_node(f"/{which_reco_e_var}").col(f"{which_reco_e_val}")
         reco_e = the_f.get_node(f"/{energy_reco}").col("energy")
@@ -166,8 +166,8 @@ for s in juliet_species:
         ehe_reco_zen[s] = np.concatenate((ehe_reco_zen[s], copy.deepcopy(reco_zen)))
         ehe_reco_azi[s] = np.concatenate((ehe_reco_azi[s], copy.deepcopy(reco_azi)))
         
-        ehe_true_zen[s] = np.concatenate((ehe_true_zen[s], copy.deepcopy(truth_zen)))
-        ehe_true_azi[s] = np.concatenate((ehe_true_azi[s], copy.deepcopy(truth_azi)))
+        # ehe_true_zen[s] = np.concatenate((ehe_true_zen[s], copy.deepcopy(truth_zen)))
+        # ehe_true_azi[s] = np.concatenate((ehe_true_azi[s], copy.deepcopy(truth_azi)))
 
         ehe_true_e[s] = np.concatenate((ehe_true_e[s], copy.deepcopy(true_e)))
         ehe_reco_e[s] = np.concatenate((ehe_reco_e[s], copy.deepcopy(reco_e)))
@@ -191,6 +191,7 @@ for f in ehe_mask.keys():
         q_mask = ehe_charge[f] > qcut
         total_mask = np.logical_and(track_mask, q_mask)
     if cut_level is 'L2':
+        print("Making L2 cut!")
         # strong charge cut + ndoms cut
         q_mask = ehe_charge[f] > qcut
         ndoms_mask = ehe_ndoms[f] > ndoms_cut
@@ -224,7 +225,8 @@ if make_plots:
     norm = colors.LogNorm()
     czen_bins = np.linspace(-1, 1, 40)
     azi_bins = np.linspace(0,np.pi*2, 40)
-    e_bins = np.logspace(np.log10(1E6),np.log10(1E10),40)
+    e_bins = np.logspace(np.log10(1E4),np.log10(1E10),40)
+    # e_bins = np.logspace(np.log10(5E7),np.log10(2E8),40)
 
     do_e = True
     if do_e:
@@ -243,7 +245,7 @@ if make_plots:
             ylabel='Reco Energy [GeV]',
             title=f"{which_reco}"
         )
-        cbar = plt.colorbar(im, ax=ax, label='Evts/Year')
+        cbar = plt.colorbar(im, ax=ax, label='Evts')
         x, y_med, y_lo, y_hi = plotting.find_contours_2D(
             x_values=ehe_true_e['nue'][ehe_mask['nue']],
             y_values=ehe_reco_e['nue'][ehe_mask['nue']],
@@ -276,7 +278,7 @@ if make_plots:
         ax.set_ylabel('(Reco-True)/True')
         ax.set_xlabel(xlabel)
         ax.set_xscale('log')
-        ax.set_ylim([-0.05,0.15])
+        ax.set_ylim([-0.20,0.20])
         # ax.set_ylim([-1, 2])
         ax.grid()
         ax.hlines(0.,1E6, 1E10, linestyles='--')
@@ -286,18 +288,20 @@ if make_plots:
 
         fig = plt.figure(figsize=(7,5))
         ax = fig.add_subplot(111)
-        local_mask_a = ehe_true_e['nue'][ehe_mask['nue']] > 1E8
-        local_mask_b = ehe_true_e['nue'][ehe_mask['nue']] < 1E9
+        local_mask_a = ehe_true_e['nue'][ehe_mask['nue']] > 1E5
+        local_mask_b = ehe_true_e['nue'][ehe_mask['nue']] < 1E7
         local_mask_c = np.logical_and(local_mask_a, local_mask_b)
-        diff = np.log10(ehe_reco_e['nue'][ehe_mask['nue']]) - np.log10(ehe_true_e['nue'][ehe_mask['nue']])
-        bins = np.linspace(-0.5,0.5,100)
+        diff = (ehe_reco_e['nue'][ehe_mask['nue']] - ehe_true_e['nue'][ehe_mask['nue']])/ehe_true_e['nue'][ehe_mask['nue']]
+        median = np.median(diff)
+        print(f"Median is {median}")
+        bins = np.linspace(-0.07,0.07,100)
         ax.hist(
             diff[local_mask_c], bins=bins,
             histtype='step', linewidth=3
         )
         ax.set_title(f"{which_sample}, {which_reco_e}, {containment_selection}, {cut_level}")
         ax.set_ylabel("number of events")
-        ax.set_xlabel("log10(reco)-log10(true)")
+        ax.set_xlabel("(Reco-True)/True")
         fig.tight_layout()
         fig.savefig(f'./figs/recominustrue_{which_sample}_{which_reco_e}_{containment_selection}_{cut_level}.png')
         del fig, ax        
@@ -319,7 +323,7 @@ if make_plots:
             ylabel='Reco czen',
             title=f"{which_reco}"
         )
-        cbar = plt.colorbar(im, ax=ax, label='Evts/Year')
+        cbar = plt.colorbar(im, ax=ax, label='Evts')
         x, y_med, y_lo, y_hi = plotting.find_contours_2D(
             x_values=np.cos(ehe_true_zen['nue'][ehe_mask['nue']]),
             y_values=np.cos(ehe_reco_zen['nue'][ehe_mask['nue']]),
@@ -330,7 +334,7 @@ if make_plots:
         ax.plot(x, y_hi, 'r-.', label='68% contour')
         ax.legend()
 
-        im.set_clim(clims)
+        # im.set_clim(clims)
         fig.tight_layout()
         fig.savefig(f'./figs/reco_czen_{which_reco}.png')
         del fig, ax, im
@@ -357,7 +361,7 @@ if make_plots:
         ax.vlines(r1, 0, maxval, 'C1', linestyle=':', label='68%: [{:.2f}, {:.2f}]'.format(r1,r2))
         ax.vlines(r2, 0, maxval, 'C1', linestyle=':')
         ax.legend()
-        ax.set_xlabel('True-Reco Czen'); ax.set_ylabel('Evts/Yr')
+        ax.set_xlabel('True-Reco Czen'); ax.set_ylabel('Evts')
         ax.set_title(f"{which_reco}")
         fig.tight_layout()
         fig.savefig(f'./figs/delta_czen_{which_reco}.png')
@@ -378,7 +382,7 @@ if make_plots:
             ylabel='Reco azi',
             title=f"{which_reco}"
         )
-        cbar = plt.colorbar(im, ax=ax, label='Evts/Year')
+        cbar = plt.colorbar(im, ax=ax, label='Evts')
         x, y_med, y_lo, y_hi = plotting.find_contours_2D(
             x_values=ehe_true_azi['nue'][ehe_mask['nue']],
             y_values=ehe_reco_azi['nue'][ehe_mask['nue']],
@@ -389,7 +393,7 @@ if make_plots:
         ax.plot(x, y_hi, 'r-.', label='68% contour')
         ax.legend()
 
-        im.set_clim(clims)
+        # im.set_clim(clims)
         fig.tight_layout()
         fig.savefig(f'./figs/reco_azi_{which_reco}.png')
         del fig, ax, im
@@ -413,7 +417,7 @@ if make_plots:
         ax.vlines(r1, 0, maxval, 'C1', linestyle=':', label='68%: [{:.2f}, {:.2f}]'.format(r1,r2))
         ax.vlines(r2, 0, maxval, 'C1', linestyle=':')
         ax.legend()
-        ax.set_xlabel('True-Reco Azi [deg]'); ax.set_ylabel('Evts/Yr')
+        ax.set_xlabel('True-Reco Azi [deg]'); ax.set_ylabel('Evts')
         ax.set_title(f"{which_reco}")
         fig.tight_layout()
         fig.savefig(f'./figs/delta_azi_{which_reco}.png')

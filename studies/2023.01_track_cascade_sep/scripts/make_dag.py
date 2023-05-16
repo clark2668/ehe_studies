@@ -15,7 +15,17 @@ datasets = [
             # 'nue_high_energy_patch_usf'
             # 'nue_high_energy_hitmakerfix'
             # 'nue_high_energy_cmc_fine_highqcut'
-            'nue_high_energy_cmc_fine'
+            # 'nue_high_energy_cmc_fine'
+            # 'nue_high_energy_cmc_fine_oldicetray',
+            # 'nue_high_energy_cmc_fine_oldicetray_eonly'
+            # 'cascade_em_1e8_test_matchicetray'
+            # 'cascade_em_1e8_test_matchicetray_fixeff'
+            # 'nue_high_energy_cmc_fine_matchicetray_fixeff'
+            # 'nue_high_energy_patch_fixeffv2'
+            # 'nue_high_energy_oldicetray_patch_fixeffv2'
+            # 'cascade_em_1e6_test_matchicetray'
+            # 'cascade_em_1e6_test_matchicetray_nospecorr',
+            'nue_high_energy_hitmaker_fix_spe_corr'
     ]
 
 for d in datasets:
