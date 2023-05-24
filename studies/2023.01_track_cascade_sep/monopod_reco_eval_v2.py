@@ -42,7 +42,7 @@ elif which_reco is 'linefit':
 
 energy_reco = 'EHE_Monopod'
 
-which_reco_e = 'emequive'
+which_reco_e = 'depe'
 if which_reco_e is 'depe':
     which_reco_e_var = 'DepE'
     xlabel = 'Deposited Energy'
@@ -51,7 +51,7 @@ elif which_reco_e is 'emequive':
     xlabel = 'EM Equiv Energy'
 which_reco_e_val = 'value'
 
-which_sample = 'nue_high_energy_hitmaker_fix_spe_corr'
+which_sample = 'nue_high_energy_with_corrections'
 
 containment_selection = 'all'
 
@@ -261,7 +261,7 @@ if make_plots:
 
         # im.set_clim(clims)
         fig.tight_layout()
-        fig.savefig(f'./figs/reco_energy_monopod_{which_sample}_{which_reco_e}_{containment_selection}_{cut_level}.png')
+        # fig.savefig(f'./figs/reco_energy_monopod_{which_sample}_{which_reco_e}_{containment_selection}_{cut_level}.png')
         del fig, ax, im
 
         # energy
@@ -278,33 +278,34 @@ if make_plots:
         ax.set_ylabel('(Reco-True)/True')
         ax.set_xlabel(xlabel)
         ax.set_xscale('log')
-        ax.set_ylim([-0.20,0.20])
+        ax.set_ylim([-0.3,0.3])
         # ax.set_ylim([-1, 2])
         ax.grid()
         ax.hlines(0.,1E6, 1E10, linestyles='--')
+        ax.set_xlim(1E4,1E10)
         fig.tight_layout()
-        fig.savefig(f'./figs/reco_energy_resolution_monopod_{which_sample}_{which_reco_e}_{containment_selection}_{cut_level}.png')
+        fig.savefig(f'./figs/reco_energy_resolution_monopod_{which_sample}_{which_reco_e}_{containment_selection}_{cut_level}.png', dpi=300)
         del fig, ax
 
-        fig = plt.figure(figsize=(7,5))
-        ax = fig.add_subplot(111)
-        local_mask_a = ehe_true_e['nue'][ehe_mask['nue']] > 1E5
-        local_mask_b = ehe_true_e['nue'][ehe_mask['nue']] < 1E7
-        local_mask_c = np.logical_and(local_mask_a, local_mask_b)
-        diff = (ehe_reco_e['nue'][ehe_mask['nue']] - ehe_true_e['nue'][ehe_mask['nue']])/ehe_true_e['nue'][ehe_mask['nue']]
-        median = np.median(diff)
-        print(f"Median is {median}")
-        bins = np.linspace(-0.07,0.07,100)
-        ax.hist(
-            diff[local_mask_c], bins=bins,
-            histtype='step', linewidth=3
-        )
-        ax.set_title(f"{which_sample}, {which_reco_e}, {containment_selection}, {cut_level}")
-        ax.set_ylabel("number of events")
-        ax.set_xlabel("(Reco-True)/True")
-        fig.tight_layout()
-        fig.savefig(f'./figs/recominustrue_{which_sample}_{which_reco_e}_{containment_selection}_{cut_level}.png')
-        del fig, ax        
+        # fig = plt.figure(figsize=(7,5))
+        # ax = fig.add_subplot(111)
+        # local_mask_a = ehe_true_e['nue'][ehe_mask['nue']] > 1E5
+        # local_mask_b = ehe_true_e['nue'][ehe_mask['nue']] < 1E7
+        # local_mask_c = np.logical_and(local_mask_a, local_mask_b)
+        # diff = (ehe_reco_e['nue'][ehe_mask['nue']] - ehe_true_e['nue'][ehe_mask['nue']])/ehe_true_e['nue'][ehe_mask['nue']]
+        # median = np.median(diff)
+        # print(f"Median is {median}")
+        # bins = np.linspace(-0.07,0.07,100)
+        # ax.hist(
+        #     diff[local_mask_c], bins=bins,
+        #     histtype='step', linewidth=3
+        # )
+        # ax.set_title(f"{which_sample}, {which_reco_e}, {containment_selection}, {cut_level}")
+        # ax.set_ylabel("number of events")
+        # ax.set_xlabel("(Reco-True)/True")
+        # fig.tight_layout()
+        # fig.savefig(f'./figs/recominustrue_{which_sample}_{which_reco_e}_{containment_selection}_{cut_level}.png')
+        # del fig, ax        
 
     do_dir = False
     if do_dir:

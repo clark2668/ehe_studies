@@ -8,8 +8,8 @@ variables:
     value: "bestNPEbtw"
     label: "Portia log10(NPE)"
   speed:
-    variable: "EHELineFit"
-    # variable: "LineFitEHE"
+    # variable: "EHELineFit"
+    variable: "LineFitEHE"
     value: "speed"
     label: "LineFit Speed"
   redchisqu:
@@ -44,83 +44,87 @@ burn_sample:
 
 corsika:
   "20787":
-    # file: "/disk20/users/brian/IceCube/corsika/combo_20787_smaller.hdf5"
-    # n_files: 1000
-    file: "/disk20/users/brian/IceCube/corsika/combo_20787.hdf5"
-    n_files: 10000
+    file: "/disk20/users/brian/IceCube/corsika/combo_20787_smaller.hdf5"
+    n_files: 1000
+    # file: "/disk20/users/brian/IceCube/corsika/combo_20787.hdf5"
+    # n_files: 10000
 
 
 juliet:
   nue:
-    # high_energy:
-    #   file: "/disk20/users/brian/IceCube/juliet/level4/nue_high_energy/nue_high_energy_merged_998files.hdf5"
-    #   n_files: 998
-    # very_high_energy:
-    #   file: "/disk20/users/brian/IceCube/juliet/level4/nue_very_high_energy/nue_very_high_energy_merged_999files.hdf5"
-    #   n_files: 999
-    # for level5 tests
     high_energy:
-      # cmc_fine:
+      file: "/disk20/users/brian/IceCube/juliet/level4/nue_high_energy/nue_high_energy_merged_998files.hdf5"
+      n_files: 998
+    very_high_energy:
+      file: "/disk20/users/brian/IceCube/juliet/level4/nue_very_high_energy/nue_very_high_energy_merged_999files.hdf5"
+      n_files: 999
+    # # for level5 tests
+    # high_energy:
+    #   # cmc_fine:
+    #   #   n_files: 1000
+    #   #   file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine/merged_nue_high_energy_cmc_fine_1kfiles.hdf5"
+    #   nopatch:
+    #     n_files: 1000
+    #     file: "/data/i3store/users/baclark/juliet/level5/nue_high_energy_nopatch/merged_nue_high_energy_nopatch_1kfiles.hdf5"
+    #   patch:
+    #     n_files: 1000
+    #     file: "/data/i3store/users/baclark/juliet/level5/nue_high_energy_patch/merged_nue_high_energy_patch_1kfiles.hdf5"
+    #   patch_usf:
+    #     n_files: 1000
+    #     file: "/data/i3store/users/baclark/juliet/level5/nue_high_energy_patch_usf/merged_nue_high_energy_patch_usf_1kfiles.hdf5"
+    #   hitmakerfix:
+    #     n_files: 1000
+    #     file: "/data/i3store/users/baclark/juliet/level5/nue_high_energy_hitmakerfix/merged_nue_high_energy_hitmakerfix_1kfiles.hdf5"
+    #   cmc_fine_highqcut:
+    #     n_files: 1000
+    #     file: "/data/i3store/users/baclark/juliet/level5/nue_high_energy_cmc_fine_highqcut/merged_nue_high_energy_cmc_fine_highqcut_1kfiles.hdf5"
+    #   cmc_fine:
+    #     n_files: 1000
+    #     file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine/merged_nue_high_energy_cmc_fine_1kfiles.hdf5"
+    #   cmc_fine_oldicetray:
+    #     n_files: 1000
+    #     file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine_oldicetray/merged_nue_high_energy_cmc_fine_oldicetray_1kfiles.hdf5"
+    #   cmc_fine_oldicetray_eonly:
+    #     n_files: 1000
+    #     file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine_oldicetray_eonly/merged_nue_high_energy_cmc_fine_oldicetray_eonly_1kfiles.hdf5"
+    #   cascade_em_1e8_test_matchicetray:
+    #     n_files: 1000
+    #     file: "/disk20/users/brian/IceCube/juliet/level5/cascade_em_1e8_test_matchicetray/merged_cascade_em_1e8_test_matchicetray.hdf5"
+    #   cascade_em_1e8_test_matchicetray_fixeff:
+    #     n_files: 1000
+    #     file: "/disk20/users/brian/IceCube/juliet/level5/cascade_em_1e8_test_matchicetray_fixeff/merged_cascade_em_1e8_test_matchicetray_fixeff.hdf5"
+    #   cmc_fine_matchicetray_fixeff:
+    #     n_files: 1000
+    #     file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine_matchicetray_fixeff/merged_nue_high_energy_cmc_fine_matchicetray_fixeff.hdf5"
+    #   patch_fixeffv2:
+    #     n_files: 1000
+    #     file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_patch_fixeffv2/merged_nue_high_energy_patch_fixeffv2.hdf5"
+    #   oldicetray_patch_fixeffv2:
+    #     n_files: 1000
+    #     file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_oldicetray_patch_fixeffv2/merged_nue_high_energy_oldicetray_patch_fixeffv2.hdf5"
+    #   cascade_em_1e6_test_matchicetray:
+    #     n_files: 1000
+    #     file: "/disk20/users/brian/IceCube/juliet/level5/cascade_em_1e6_test_matchicetray/merged_cascade_em_1e6_test_matchicetray.hd5"
+    #   cascade_em_1e6_test_matchicetray_nospecorr:
+    #     n_files: 1000
+    #     file: "/disk20/users/brian/IceCube/juliet/level5/cascade_em_1e6_test_matchicetray_nospecorr/merged_cascade_em_1e6_test_matchicetray_nospecorr.hd5"
+    #   nue_high_energy_hitmaker_fix_spe_corr:
+    #     n_files: 1000
+    #     file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_hitmaker_fix_spe_corr/merged_nue_high_energy_hitmaker_fix_spe_corr.hd5"
+      # nue_high_energy_with_corrections:
       #   n_files: 1000
-      #   file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine/merged_nue_high_energy_cmc_fine_1kfiles.hdf5"
-      nopatch:
-        n_files: 1000
-        file: "/data/i3store/users/baclark/juliet/level5/nue_high_energy_nopatch/merged_nue_high_energy_nopatch_1kfiles.hdf5"
-      patch:
-        n_files: 1000
-        file: "/data/i3store/users/baclark/juliet/level5/nue_high_energy_patch/merged_nue_high_energy_patch_1kfiles.hdf5"
-      patch_usf:
-        n_files: 1000
-        file: "/data/i3store/users/baclark/juliet/level5/nue_high_energy_patch_usf/merged_nue_high_energy_patch_usf_1kfiles.hdf5"
-      hitmakerfix:
-        n_files: 1000
-        file: "/data/i3store/users/baclark/juliet/level5/nue_high_energy_hitmakerfix/merged_nue_high_energy_hitmakerfix_1kfiles.hdf5"
-      cmc_fine_highqcut:
-        n_files: 1000
-        file: "/data/i3store/users/baclark/juliet/level5/nue_high_energy_cmc_fine_highqcut/merged_nue_high_energy_cmc_fine_highqcut_1kfiles.hdf5"
-      cmc_fine:
-        n_files: 1000
-        file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine/merged_nue_high_energy_cmc_fine_1kfiles.hdf5"
-      cmc_fine_oldicetray:
-        n_files: 1000
-        file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine_oldicetray/merged_nue_high_energy_cmc_fine_oldicetray_1kfiles.hdf5"
-      cmc_fine_oldicetray_eonly:
-        n_files: 1000
-        file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine_oldicetray_eonly/merged_nue_high_energy_cmc_fine_oldicetray_eonly_1kfiles.hdf5"
-      cascade_em_1e8_test_matchicetray:
-        n_files: 1000
-        file: "/disk20/users/brian/IceCube/juliet/level5/cascade_em_1e8_test_matchicetray/merged_cascade_em_1e8_test_matchicetray.hdf5"
-      cascade_em_1e8_test_matchicetray_fixeff:
-        n_files: 1000
-        file: "/disk20/users/brian/IceCube/juliet/level5/cascade_em_1e8_test_matchicetray_fixeff/merged_cascade_em_1e8_test_matchicetray_fixeff.hdf5"
-      cmc_fine_matchicetray_fixeff:
-        n_files: 1000
-        file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_cmc_fine_matchicetray_fixeff/merged_nue_high_energy_cmc_fine_matchicetray_fixeff.hdf5"
-      patch_fixeffv2:
-        n_files: 1000
-        file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_patch_fixeffv2/merged_nue_high_energy_patch_fixeffv2.hdf5"
-      oldicetray_patch_fixeffv2:
-        n_files: 1000
-        file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_oldicetray_patch_fixeffv2/merged_nue_high_energy_oldicetray_patch_fixeffv2.hdf5"
-      cascade_em_1e6_test_matchicetray:
-        n_files: 1000
-        file: "/disk20/users/brian/IceCube/juliet/level5/cascade_em_1e6_test_matchicetray/merged_cascade_em_1e6_test_matchicetray.hd5"
-      cascade_em_1e6_test_matchicetray_nospecorr:
-        n_files: 1000
-        file: "/disk20/users/brian/IceCube/juliet/level5/cascade_em_1e6_test_matchicetray_nospecorr/merged_cascade_em_1e6_test_matchicetray_nospecorr.hd5"
-      nue_high_energy_hitmaker_fix_spe_corr:
-        n_files: 1000
-        file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_hitmaker_fix_spe_corr/merged_nue_high_energy_hitmaker_fix_spe_corr.hd5"
+      #   file: "/disk20/users/brian/IceCube/juliet/level5/nue_high_energy_with_corrections/merged_nue_high_energy_with_corrections.hd5"
 
 
 
-  # mu:
-  #   high_energy:
-  #     file: "/disk20/users/brian/IceCube/juliet/level4/mu_high_energy/mu_high_energy_merged_999files.hdf5"
-  #     n_files: 999
-  #   very_high_energy:
-  #     file: "/disk20/users/brian/IceCube/juliet/level4/mu_very_high_energy/mu_very_high_energy_merged_999files.hdf5"
-  #     n_files: 999
+
+  mu:
+    high_energy:
+      file: "/disk20/users/brian/IceCube/juliet/level4/mu_high_energy/mu_high_energy_merged_999files.hdf5"
+      n_files: 999
+    very_high_energy:
+      file: "/disk20/users/brian/IceCube/juliet/level4/mu_very_high_energy/mu_very_high_energy_merged_999files.hdf5"
+      n_files: 999
 
 
 nugen:
