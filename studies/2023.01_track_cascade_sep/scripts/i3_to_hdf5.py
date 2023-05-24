@@ -19,7 +19,7 @@ keeps = [
         'CVMultiplicity', 'CVStatistics', 'Homogenized_QTot', 
         'EHELineFit', 'LineFit', 'LineFitEHE',
         'EHEOpheliaParticleSRT_ImpLF', 'EHEOpheliaSRT_ImpLF', 'EHEPortiaEventSummarySRT',
-        'EHE_SplineMPE', "EHE_Monopod"
+        'EHE_SplineMPE', "EHE_Monopod", 'NuEProperties'
     ]
 
 import argparse

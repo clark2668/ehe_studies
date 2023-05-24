@@ -25,7 +25,7 @@ datasets = [
             # 'nue_high_energy_oldicetray_patch_fixeffv2'
             # 'cascade_em_1e6_test_matchicetray'
             # 'cascade_em_1e6_test_matchicetray_nospecorr',
-            'nue_high_energy_hitmaker_fix_spe_corr'
+            'nue_high_energy_with_corrections'
     ]
 
 for d in datasets:
