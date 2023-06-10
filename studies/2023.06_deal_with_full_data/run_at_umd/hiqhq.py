@@ -15,7 +15,7 @@ infile = args.infile
 
 uw_in = infile
 
-remote_transfer = False
+remote_transfer = True
 if remote_transfer:
     
     # where does it live in the grid?
@@ -45,6 +45,7 @@ tray = I3Tray()
 # tray.context['I3FileStager'] = dataio.get_stagers() # apparently it loads the stager itself?
 tray.Add(dataio.I3Reader, 'reader', FilenameList=[the_in_file])
 
+
 def filt(frame):
     
     filter_name = ['EHEFilter_12', 'EHEFilter_13', 'EHEAlertFilter_15',
@@ -56,7 +57,6 @@ def filt(frame):
                 passes = True
     return passes
 
-tray.Add(filt)
 
 def FilterHighCharge(frame, cut_value):
     if frame.Has('Homogenized_QTot'):
@@ -68,12 +68,19 @@ def FilterHighCharge(frame, cut_value):
     else:
         return False
 
-tray.AddModule(FilterHighCharge, 'charge cut',
-               cut_value=(10**3.6),
-               Streams=[icetray.I3Frame.Physics]
-        )
 
-tray.Add("I3OrphanQDropper")
+moving_data = False
+if moving_data:
+
+    tray.Add(filt)
+
+    tray.AddModule(FilterHighCharge, 'charge cut',
+                cut_value=(10**3.6),
+                Streams=[icetray.I3Frame.Physics]
+            )
+
+    tray.Add("I3OrphanQDropper")
+
 tray.Add("I3Writer", FileName=the_out_file)
 
 print(time.ctime())
