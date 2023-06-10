@@ -39,6 +39,7 @@ month_folders = []
 run_folders = []
 year_folders = []
 the_l2_files = []
+the_gcd_files = []
 
 for run_id in run_ids:
     gcd_file = grl[run_id].get_gcd_file()
@@ -49,6 +50,8 @@ for run_id in run_ids:
     month_folders.append(month_folder)
     run_folders.append(run_folder)
     year_folders.append(year_folder)
+    
+    the_gcd_files.append(gcd_file)
     
     l2_files = grl[run_id].get_files()
     for f in l2_files:
@@ -65,7 +68,8 @@ del json_object, dictionary
 dictionary = {
     'month_folders': month_folders,
     'run_folders': run_folders,
-    'year_folders': year_folders
+    'year_folders': year_folders,
+    'gcd_files': the_gcd_files
 }
 json_object = json.dumps(dictionary, indent=4)
 
