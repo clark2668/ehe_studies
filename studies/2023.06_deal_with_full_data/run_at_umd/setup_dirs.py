@@ -12,7 +12,8 @@ parser.add_argument("-d", type=str,
 args = parser.parse_args()
 which_set = args.dataset
 
-top_dir = '/data/i3store/users/baclark/datawarehouse_copy'
+# top_dir = '/data/i3store/users/baclark/datawarehouse_copy'
+top_dir = '/data/user/brianclark/IceCube/EHE/datawarehouse_copy'
 
 do_setup_year_folders = False
 if do_setup_year_folders:

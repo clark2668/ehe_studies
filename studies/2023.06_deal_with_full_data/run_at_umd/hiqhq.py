@@ -15,23 +15,35 @@ infile = args.infile
 
 uw_in = infile
 
+remote_transfer = False
+if remote_transfer:
+    
+    # where does it live in the grid?
+    # grid_in = f"http://icecube:skua@convey.icecube.wisc.edu{uw_in}"
+    the_in_file = f"gsiftp://gridftp.icecube.wisc.edu{uw_in}"
+    
+    # make a replacement to write it out here at UMD
+    the_out_file = uw_in.replace(
+        "/data/exp/IceCube/",
+        "/data/i3store/users/baclark/datawarehouse_copy/"
+    )
+else:
+    
+    the_in_file = uw_in
+    
+    # put it in Brian's copy of the datawarehouse
+    the_out_file = uw_in.replace(
+        "/data/exp/IceCube/",
+        "/data/user/brianclark/IceCube/EHE/datawarehouse_copy/"
+    )
 
-# make a replacement to write it out here at UMD
-umd_out = uw_in.replace(
-    "/data/exp/IceCube/",
-    "/data/i3store/users/baclark/datawarehouse_copy/"
-)
-umd_out = f"file://{umd_out}" # do file staging
-print(umd_out)
-
-# where does it live in the grid?
-# grid_in = f"http://icecube:skua@convey.icecube.wisc.edu{uw_in}"
-grid_in = f"gsiftp://gridftp.icecube.wisc.edu{uw_in}"
+# the_out_file = f"file://{the_out_file}" # do file staging
+print(f"The out file is: {the_out_file}")
 
 
 tray = I3Tray()
 # tray.context['I3FileStager'] = dataio.get_stagers() # apparently it loads the stager itself?
-tray.Add(dataio.I3Reader, 'reader', FilenameList=[grid_in])
+tray.Add(dataio.I3Reader, 'reader', FilenameList=[the_in_file])
 
 def filt(frame):
     
@@ -62,7 +74,7 @@ tray.AddModule(FilterHighCharge, 'charge cut',
         )
 
 tray.Add("I3OrphanQDropper")
-tray.Add("I3Writer", FileName=umd_out)
+tray.Add("I3Writer", FileName=the_out_file)
 
 print(time.ctime())
 tray.Execute()
