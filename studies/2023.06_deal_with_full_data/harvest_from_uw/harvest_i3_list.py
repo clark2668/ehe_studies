@@ -29,29 +29,33 @@ def parse_get_folders(gcd_file):
     # path is in the [0] entry, the file is in the second [1] entry
     # need to dissect the former more
     # it should look like this: /data/exp/IceCube/2010/filtered/level2pass2a/0614/Run00116048
+    run_folder_path = split[0]
     split = split[0].split('/')
     run_folder = split[-1]
     month_folder = split[-2]
     year_folder = split[-5]
-    return month_folder, run_folder, year_folder
+    return run_folder_path, month_folder, run_folder, year_folder
 
 month_folders = []
 run_folders = []
 year_folders = []
 the_l2_files = []
 the_gcd_files = []
+run_folder_paths = []
 
 for run_id in run_ids:
     gcd_file = grl[run_id].get_gcd_file()
     print(gcd_file)
 
     # work out the directory structure that we need
-    month_folder, run_folder, year_folder = parse_get_folders(gcd_file)
+    run_folder_path, month_folder, run_folder, year_folder = parse_get_folders(gcd_file)
     month_folders.append(month_folder)
     run_folders.append(run_folder)
     year_folders.append(year_folder)
     
     the_gcd_files.append(gcd_file)
+    run_folder_paths.append(run_folder_path)
+
     
     l2_files = grl[run_id].get_files()
     for f in l2_files:
@@ -69,7 +73,8 @@ dictionary = {
     'month_folders': month_folders,
     'run_folders': run_folders,
     'year_folders': year_folders,
-    'gcd_files': the_gcd_files
+    'gcd_files': the_gcd_files,
+    'run_folder_paths': run_folder_paths
 }
 json_object = json.dumps(dictionary, indent=4)
 

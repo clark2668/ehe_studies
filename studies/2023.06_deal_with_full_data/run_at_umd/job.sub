@@ -1,19 +1,19 @@
-log    = /data/condor_builds/users/baclark/condor_logs/trash/log/$(Cluster).$(Process).log
-output = /data/condor_builds/users/baclark/condor_logs/trash/out/$(Cluster).$(Process).out
-error = /data/condor_builds/users/baclark/condor_logs/trash/err/$(Cluster).$(Process).err
+#log    = /data/condor_builds/users/baclark/condor_logs/trash/log/$(Cluster).$(Process).log
+#output = /data/condor_builds/users/baclark/condor_logs/trash/out/$(Cluster).$(Process).out
+#error = /data/condor_builds/users/baclark/condor_logs/trash/err/$(Cluster).$(Process).err
 
-#log    = /scratch/brianclark/IceCube/trash/log/$(Cluster).$(Process).log
-#output = /scratch/brianclark/IceCube/trash/out/$(Cluster).$(Process).out
-#error =  /scratch/brianclark/IceCube/trash/err/$(Cluster).$(Process).err
+log    = /scratch/brianclark/IceCube/trash/log/$(Cluster).$(Process).log
+output = /scratch/brianclark/IceCube/trash/out/$(Cluster).$(Process).out
+error =  /scratch/brianclark/IceCube/trash/err/$(Cluster).$(Process).err
 
 
 request_cpus = 1
-request_memory = 1GB
+request_memory = 4GB
 request_disk = 1GB
 Universe = vanilla
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-use_x509userproxy = true
+#use_x509userproxy = true
 #+AccountingGroup="quicktest.$ENV(USER)"
 
 executable = job.sh

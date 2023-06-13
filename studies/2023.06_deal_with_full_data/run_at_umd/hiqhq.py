@@ -15,7 +15,7 @@ infile = args.infile
 
 uw_in = infile
 
-remote_transfer = True
+remote_transfer = False
 if remote_transfer:
     
     # where does it live in the grid?
@@ -69,7 +69,7 @@ def FilterHighCharge(frame, cut_value):
         return False
 
 
-moving_data = False
+moving_data = True
 if moving_data:
 
     tray.Add(filt)
