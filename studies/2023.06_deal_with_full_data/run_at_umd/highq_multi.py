@@ -16,7 +16,7 @@ indir = args.indir
 # put it in Brian's copy of the datawarehouse
 outdir = indir.replace(
     "/data/exp/IceCube/",
-    "/data/user/brianclark/IceCube/EHE/datawarehouse_copy/"
+    "file:///data/user/brianclark/IceCube/EHE/datawarehouse_copy/"
     )
 print(f"The out dir is: {outdir}")
 
@@ -26,6 +26,7 @@ file_list = sorted(glob.glob(f"{indir}/*.i3.zst"))
 new_file_list = []
 for f in file_list:
     if 'GCD' not in f:
+        # new_file_list.append(f"file://{f}")
         new_file_list.append(f)
 file_list = copy.deepcopy(new_file_list)
 del new_file_list # careful for cleanup
