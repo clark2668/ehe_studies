@@ -14,30 +14,30 @@ which_set = args.dataset
 
 which_to_move = 'gcdfiles'
 if which_to_move == 'l2files':
-    
-	f = open(f"json_files/{which_set}.detector.l2files.json")
-	stuff = json.load(f)
-	files_to_move = stuff['l2_files']
+        
+    f = open(f"json_files/{which_set}.detector.l2files.json")
+    stuff = json.load(f)
+    files_to_move = stuff['l2_files']
+    dag_file_name = f'dagman_{which_set}_l2filesall.dag'
+
 elif which_to_move == 'gcdfiles':
     
-	f = open(f"json_files/{which_set}.detector.folders.json")
-	stuff = json.load(f)
-	files_to_move = stuff['gcd_files']
-    
+    f = open(f"json_files/{which_set}.detector.folders.json")
+    stuff = json.load(f)
+    files_to_move = stuff['gcd_files']
+    dag_file_name = f'dagman_{which_set}_gcd.dag'    
 
-
-dag_file_name = f'dagman_{which_set}.dag'
 instructions = ""
 instructions += 'CONFIG config.dagman\n\n'
 
 with open(dag_file_name, 'w') as f:
-	f.write(instructions)
+    f.write(instructions)
 
 for i, f in enumerate(files_to_move):
 
-	instructions = ""
-	instructions += f'JOB job_{i} job.sub \n'
-	instructions += f'VARS job_{i} infile="{f}"\n\n'
+    instructions = ""
+    instructions += f'JOB job_{i} job.sub \n'
+    instructions += f'VARS job_{i} infile="{f}"\n\n'
 
-	with open(dag_file_name, 'a') as f:
-		f.write(instructions)
+    with open(dag_file_name, 'a') as f:
+        f.write(instructions)
