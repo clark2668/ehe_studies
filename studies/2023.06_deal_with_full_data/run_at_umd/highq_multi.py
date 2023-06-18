@@ -16,7 +16,8 @@ indir = args.indir
 # put it in Brian's copy of the datawarehouse
 outdir = indir.replace(
     "/data/exp/IceCube/",
-    "file:///data/user/brianclark/IceCube/EHE/datawarehouse_copy/"
+    # "file:///data/user/brianclark/IceCube/EHE/datawarehouse_copy/"
+    "/data/user/brianclark/IceCube/EHE/datawarehouse_copy/"
     )
 print(f"The out dir is: {outdir}")
 
