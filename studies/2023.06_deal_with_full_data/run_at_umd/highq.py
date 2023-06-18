@@ -69,7 +69,7 @@ def FilterHighCharge(frame, cut_value):
         return False
 
 
-moving_data = True
+moving_data = False # false if just moving GCD files
 if moving_data:
 
     tray.Add(filt)
