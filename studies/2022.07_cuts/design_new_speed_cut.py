@@ -68,6 +68,12 @@ burn_samples = ["IC86-I-pass2", "IC86-II-pass2", "IC86-III-pass2"]
 
 style.use('/home/brian/IceCube/ehe/ehe_software/ehe_code/EHE_analysis/eheanalysis/ehe.mplstyle')
 
+from matplotlib import rc
+
+rc('font', **{'family': 'serif',
+   'serif': ['Computer Modern']})
+# rc('text', usetex=True)
+
 livetime = 0
 for b in burn_samples:
     livetime += cfg_file['burn_sample'][b]['livetime']
@@ -163,14 +169,43 @@ ehe_energy_weights_nocuts = None
 ehe_energy_weights_after_L2 = None
 ehe_energy_weights_after_L3 = None
 
+def correct_events_per_file(juliet_species, juliet_energy_level):
+    n_he = 150
+    n_vhe = 20
+    nu_scaling = 4
+    
+    evts_per_file = -1
+    
+    if juliet_species in ['nue', 'numu', 'nutau']:
+        if juliet_energy_level == 'very_high_energy':
+            evts_per_file = n_vhe * nu_scaling
+        else:
+            evts_per_file = n_he * nu_scaling
+    else:
+        if juliet_energy_level == 'very_high_energy':
+            if juliet_species == 'tau':
+                evts_per_file = 100
+            else:
+                evts_per_file = n_vhe
+        else:
+            evts_per_file = n_he
+    
+    return evts_per_file
+
+
 for s in juliet_species:
     for l in juliet_energy_levels:
 
         if s in juliet_species:
+            
+            evts_per_file = correct_events_per_file(s, l)
+            print(f"{s}, {l}, {evts_per_file}")
+
 
             print(f"Working on juliet {s}, {l}")
             the_f = tables.open_file(cfg_file['juliet'][s][l]['file'])
             weight_dict, prop_matrix, evts_per_file = weighting.get_juliet_weightdict_and_propmatrix(the_f)
+            evts_per_file = correct_events_per_file(s, l)
             charge = the_f.get_node(f'/{charge_var}').col(f'{charge_val}')
             ndoms = the_f.get_node(f'/{ndoms_var}').col(f'{ndoms_val}')
             speed = the_f.get_node(f'/{speed_var}').col(f'{speed_val}')
@@ -284,13 +319,14 @@ if do_plots:
             return 10**5.2
     
     def get_track_quality_cut_NextGen(speed):
+        new_scaling = 1.27 * 0.94 # this fixes our MC issue from before
         if speed < 0.26:
-            return 10**5.25
+            return (10**5.25)*new_scaling
         elif speed >= 0.26 and speed < 0.28:
             # return np.power(10, 4.65 + (0.6/0.02) * (speed - 0.26)) 
-            return np.power(10, 5.2 - (0.6/0.02) * (speed - 0.26))
+            return (np.power(10, 5.2 - (0.6/0.02) * (speed - 0.26)))*new_scaling
         elif speed >= 0.28:
-            return 10**4.65
+            return (10**4.65)*new_scaling
     
     charge_cut_vals = []    
     for s in speed_bins:
@@ -314,9 +350,10 @@ if do_plots:
         print("L3 Pass rate nugen {}".format(np.sum(nugen_atmo_weights[pass_mask_nugen])))
         print("L3 Pass rate ehe {}".format(np.sum(ehe_weights[pass_mask_ehe])))
 
+    bins = np.logspace(4, 9, 21)
+
     # energy distrbution of nugen events
     fig, ax = plt.subplots(1, 1, figsize=(7,5))
-    bins = np.logspace(4, 9, 21)
     ax.hist(nugen_energy, bins=bins, weights=nugen_atmo_weights,
         linewidth=3, histtype='step', 
         label="After L2, {:.1e} evts".format(np.sum(nugen_atmo_weights))
@@ -343,48 +380,66 @@ if do_plots:
         'zlims':  (1E-5, 1E2)
     }
 
-    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18,5))
+    np.savez(f'corsika_stuff_{version}.npz',
+            cor_speed=cor_speed,
+            cor_charge=cor_charge,
+            cor_weights=cor_weights,
+            )
     
-    # corsika
-    cor_sum, cor_xedges, cor_yedges, cor_im = ax1.hist2d(
-        x = cor_speed, y = cor_charge, 
-        weights = cor_weights, bins = [speed_bins, charge_bins],
-        cmap = plotting_options['cmap'], norm=colors.LogNorm()
-    )
-    ax1.set_title("Atm Muon (Corsika)")
-    cor_cbar = plt.colorbar(cor_im, ax=ax1)
-    
-    # nugen
-    nugen_sum, nugen_xedges, nugen_yedges, nugen_im = ax2.hist2d(
-        x = nugen_speed, y = nugen_charge, 
-        weights = nugen_atmo_weights, bins = [speed_bins, charge_bins],
-        cmap = plotting_options['cmap'], norm=colors.LogNorm()
-    )
-    ax2.set_title("Atm Nu (Nugen)")
-    nugen_cbar = plt.colorbar(nugen_im, ax=ax2)
-    
-    # juliet
-    ehe_sum, ehe_xedges, ehe_yedges, ehe_im = ax3.hist2d(
-        x = ehe_speed, y = ehe_charge, 
-        weights = ehe_weights, bins = [speed_bins, charge_bins],
-        cmap = plotting_options['cmap'], norm=colors.LogNorm()
-    )
-    ax3.set_title("Cosmogenic (Juliet)")
-    ehe_cbar = plt.colorbar(ehe_im, ax=ax3)
-    
-    # decorate all the stuff with titles, blah blah
-    for a in [ax1, ax2, ax3]: # axes
-        a.set_yscale('log')
-        a.set_xlabel(plotting_options['xlabel'])
-        a.set_ylabel(plotting_options['ylabel'])
-        a.set_xlim(speed_lims)
-        a.plot(speed_bins, charge_cut_vals, color='red')
-    for i in [cor_im, nugen_im, ehe_im]: # im objects
-        i.set_clim(*plotting_options['zlims'])
-    for c in [cor_cbar, nugen_cbar, ehe_cbar]: # cbars
-        c.set_label(plotting_options['zlabel'])
-        
-    fig.tight_layout()
-    fig.savefig('hist2d_q_speed_{}.png'.format(version), dpi=300)
+    np.savez(f'nugen_stuff_{version}.npz',
+            nugen_speed=nugen_speed,
+            nugen_charge=nugen_charge,
+            nugen_atmo_weights=nugen_atmo_weights
+            )
+    np.savez(f'juliet_stuff_{version}.npz',
+            ehe_speed=ehe_speed,
+            ehe_charge=ehe_charge,
+            ehe_weights=ehe_weights,
+            )
 
-    del fig, ax1, ax2, ax3
+    # fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18,5))
+
+    # # corsika
+    # cor_sum, cor_xedges, cor_yedges, cor_im = ax1.hist2d(
+    #     x = cor_speed, y = cor_charge, 
+    #     weights = cor_weights, bins = [speed_bins, charge_bins],
+    #     cmap = plotting_options['cmap'], norm=colors.LogNorm()
+    # )
+    # ax1.set_title("Atm Muon (Corsika)")
+    # cor_cbar = plt.colorbar(cor_im, ax=ax1)
+    # ax.text(0.05, 5E6, 'IceCube Work-in-progress', color='red')
+    
+    # # nugen
+    # nugen_sum, nugen_xedges, nugen_yedges, nugen_im = ax2.hist2d(
+    #     x = nugen_speed, y = nugen_charge, 
+    #     weights = nugen_atmo_weights, bins = [speed_bins, charge_bins],
+    #     cmap = plotting_options['cmap'], norm=colors.LogNorm()
+    # )
+    # ax2.set_title("Atm Nu (Nugen)")
+    # nugen_cbar = plt.colorbar(nugen_im, ax=ax2)
+    
+    # # juliet
+    # ehe_sum, ehe_xedges, ehe_yedges, ehe_im = ax3.hist2d(
+    #     x = ehe_speed, y = ehe_charge, 
+    #     weights = ehe_weights, bins = [speed_bins, charge_bins],
+    #     cmap = plotting_options['cmap'], norm=colors.LogNorm()
+    # )
+    # ax3.set_title("Cosmogenic (Juliet)")
+    # ehe_cbar = plt.colorbar(ehe_im, ax=ax3)
+    
+    # # decorate all the stuff with titles, blah blah
+    # for a in [ax1, ax2, ax3]: # axes
+    #     a.set_yscale('log')
+    #     a.set_xlabel(plotting_options['xlabel'])
+    #     a.set_ylabel(plotting_options['ylabel'])
+    #     a.set_xlim(speed_lims)
+    #     a.plot(speed_bins, charge_cut_vals, color='red')
+    # for i in [cor_im, nugen_im, ehe_im]: # im objects
+    #     i.set_clim(*plotting_options['zlims'])
+    # for c in [cor_cbar, nugen_cbar, ehe_cbar]: # cbars
+    #     c.set_label(plotting_options['zlabel'])
+        
+    # fig.tight_layout()
+    # fig.savefig('hist2d_q_speed_{}.png'.format(version), dpi=300)
+
+    # del fig, ax1, ax2, ax3

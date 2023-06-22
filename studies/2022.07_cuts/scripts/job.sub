@@ -1,6 +1,6 @@
-log    = /scratch/brian/trash/log/$(infile).log
-output = /scratch/brian/trash/out/$(infile).out
-error = /scratch/brian/trash/err/$(infile).err
+log    = /scratch/brian/trash/trash/log/$(infile).log
+output = /scratch/brian/trash/trash/out/$(infile).out
+error =  /scratch/brian/trash/trash/err/$(infile).err
 
 request_cpus = 1
 request_memory = 1GB
@@ -9,7 +9,7 @@ Universe = vanilla
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 
-executable = job.sh
+executable = job_simple.sh
 #arguments = $(indir) $(infile) $(outdir) $(outfile) $(corsel)
 arguments = $(indir) $(infile) $(outdir) $(outfile) $(corsel)
 
