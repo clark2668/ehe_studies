@@ -22,8 +22,8 @@ hdfwriter-merge $top_dir/tau_high_energy/1/*.hdf5 -o $top_dir/tau_high_energy_me
 hdfwriter-merge $top_dir/nue_very_high_energy/1/*.hdf5 -o $top_dir/nue_very_high_energy_merged_1kfiles.hdf5
 hdfwriter-merge $top_dir/numu_very_high_energy/1/*.hdf5 -o $top_dir/numu_very_high_energy_merged_1kfiles.hdf5
 hdfwriter-merge $top_dir/nutau_very_high_energy/1/*.hdf5 -o $top_dir/nutau_very_high_energy_merged_1kfiles.hdf5
-hdfwriter-merge $top_dir/mu_very_high_energy/1/*.hdf5 -o $top_dir/mu_high_very_energy_merged_1kfiles.hdf5
-hdfwriter-merge $top_dir/tau_very_high_energy/1/*.hdf5 -o $top_dir/tau_high_very_energy_merged_1kfiles.hdf5
+hdfwriter-merge $top_dir/mu_very_high_energy/1/*.hdf5 -o $top_dir/mu_very_high_energy_merged_1kfiles.hdf5
+hdfwriter-merge $top_dir/tau_very_high_energy/1/*.hdf5 -o $top_dir/tau_very_high_energy_merged_1kfiles.hdf5
 
 
 # ls /disk19/users/mmeier/EHE/level4_v2/numu_high_energy/1/*.zst > files_numu_high_energy.txt

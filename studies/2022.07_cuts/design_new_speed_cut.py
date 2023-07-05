@@ -20,7 +20,7 @@ cfg_file = 'config.yaml'
 cfg_file = yaml.safe_load(open(cfg_file))
 
 do_efficiency = True
-do_plots = True
+do_plots = False
 version = 'old'
 version = 'new'
 if version == 'new':
@@ -90,7 +90,7 @@ cor_charge = np.asarray([])
 cor_speed = np.asarray([])
 
 corsika_sets = ["20787"]
-# corsika_sets = []
+corsika_sets = []
 for c in corsika_sets:
     print("Working on corsika {}".format(c))
     cor_file = pd.HDFStore(cfg_file['corsika'][c]['file'])
@@ -120,8 +120,7 @@ nugen_speed = np.asarray([])
 nugen_energy = np.asarray([])
 
 nugen_sets = ["nue", "numu", "nutau"]
-# nugen_sets = ["nue"]
-# nugen_sets = []
+nugen_sets = []
 for n in nugen_sets:
     print("Working on nugen {}".format(n))
 
@@ -161,9 +160,6 @@ ehe_L2_mask = np.asarray([])
 
 juliet_species = ["nue", "numu", "nutau", "mu", "tau"]
 juliet_energy_levels = ["high_energy", "very_high_energy"]
-# juliet_species = ["nue"]
-# juliet_energy_levels = ["high_energy"]
-# juliet_species = []
 
 ehe_energy_weights_nocuts = None
 ehe_energy_weights_after_L2 = None
@@ -198,10 +194,6 @@ for s in juliet_species:
 
         if s in juliet_species:
             
-            evts_per_file = correct_events_per_file(s, l)
-            print(f"{s}, {l}, {evts_per_file}")
-
-
             print(f"Working on juliet {s}, {l}")
             the_f = tables.open_file(cfg_file['juliet'][s][l]['file'])
             weight_dict, prop_matrix, evts_per_file = weighting.get_juliet_weightdict_and_propmatrix(the_f)
@@ -271,6 +263,28 @@ for s in juliet_species:
 
         the_f.close()
 
+# # save all of these to numpy files for easier plotting later...
+# np.savez(f'corsika_stuff_{version}.npz',
+#         cor_speed=cor_speed,
+#         cor_charge=cor_charge,
+#         cor_weights=cor_weights,
+#         )
+
+# np.savez(f'nugen_stuff_{version}.npz',
+#         nugen_speed=nugen_speed,
+#         nugen_charge=nugen_charge,
+#         nugen_atmo_weights=nugen_atmo_weights
+#         )
+
+# np.savez(f'juliet_stuff_{version}.npz',
+#         ehe_speed=ehe_speed,
+#         ehe_charge=ehe_charge,
+#         ehe_weights=ehe_weights,
+#         ehe_energy_weights_nocuts=ehe_energy_weights_nocuts,
+#         ehe_energy_weights_after_L2=ehe_energy_weights_after_L2,
+#         ehe_energy_weights_after_L3=ehe_energy_weights_after_L3
+#         )
+
 if do_efficiency:
 
     # eff vs energy    
@@ -310,31 +324,6 @@ if do_efficiency:
 
 if do_plots:
         
-    def get_track_quality_cut_9yr(fit_quality):
-        if fit_quality <= 80:
-            return 10**4.6
-        elif fit_quality > 80 and fit_quality < 120:
-            return np.power(10, 4.6 + (0.6/40) * (fit_quality - 80))
-        elif fit_quality >= 120:
-            return 10**5.2
-    
-    def get_track_quality_cut_NextGen(speed):
-        new_scaling = 1.27 * 0.94 # this fixes our MC issue from before
-        if speed < 0.26:
-            return (10**5.25)*new_scaling
-        elif speed >= 0.26 and speed < 0.28:
-            # return np.power(10, 4.65 + (0.6/0.02) * (speed - 0.26)) 
-            return (np.power(10, 5.2 - (0.6/0.02) * (speed - 0.26)))*new_scaling
-        elif speed >= 0.28:
-            return (10**4.65)*new_scaling
-    
-    charge_cut_vals = []    
-    for s in speed_bins:
-        if version == 'old':
-            charge_cut_vals.append(get_track_quality_cut_9yr(s))
-        elif version == 'new':
-            charge_cut_vals.append(get_track_quality_cut_NextGen(s))
-
     if version == "old":
         pass_mask_cor = analysis_9yr.track_quality_cut_pass_9yr(cor_speed, cor_charge)
         pass_mask_nugen = analysis_9yr.track_quality_cut_pass_9yr(nugen_speed, nugen_charge)
@@ -370,33 +359,43 @@ if do_plots:
     ax.legend()
     fig.savefig("num_events_atmo_nu_L3_{}.png".format(version), dpi=300)
     del fig, ax
-        
-    plotting_options = {
-        'xlabel': r'LineFit Speed',
-        'ylabel': 'Q / PE',
-        'zlabel': 'Number of Events',
-        'cmap': plt.cm.plasma ,
-        'norm': colors.LogNorm(),
-        'zlims':  (1E-5, 1E2)
-    }
 
-    np.savez(f'corsika_stuff_{version}.npz',
-            cor_speed=cor_speed,
-            cor_charge=cor_charge,
-            cor_weights=cor_weights,
-            )
+
+    # see make_L3_plot.ipynb (python notebook)
+    # for the plotting elements of this particular part of the script    
     
-    np.savez(f'nugen_stuff_{version}.npz',
-            nugen_speed=nugen_speed,
-            nugen_charge=nugen_charge,
-            nugen_atmo_weights=nugen_atmo_weights
-            )
-    np.savez(f'juliet_stuff_{version}.npz',
-            ehe_speed=ehe_speed,
-            ehe_charge=ehe_charge,
-            ehe_weights=ehe_weights,
-            )
-
+    # def get_track_quality_cut_9yr(fit_quality):
+    #     if fit_quality <= 80:
+    #         return 10**4.6
+    #     elif fit_quality > 80 and fit_quality < 120:
+    #         return np.power(10, 4.6 + (0.6/40) * (fit_quality - 80))
+    #     elif fit_quality >= 120:
+    #         return 10**5.2
+    
+    # def get_track_quality_cut_NextGen(speed):
+    #     if speed < 0.26:
+    #         return (10**5.327)
+    #     elif speed >= 0.26 and speed < 0.28:
+    #         return (np.power(10, 5.327 - (0.6/0.02) * (speed - 0.26)))
+    #     elif speed >= 0.28:
+    #         return (10**4.727)
+    
+    # charge_cut_vals = []    
+    # for s in speed_bins:
+    #     if version == 'old':
+    #         charge_cut_vals.append(get_track_quality_cut_9yr(s))
+    #     elif version == 'new':
+    #         charge_cut_vals.append(get_track_quality_cut_NextGen(s))
+    
+    # plotting_options = {
+    #     'xlabel': r'LineFit Speed',
+    #     'ylabel': 'Q / PE',
+    #     'zlabel': 'Number of Events',
+    #     'cmap': plt.cm.plasma ,
+    #     'norm': colors.LogNorm(),
+    #     'zlims':  (1E-5, 1E2)
+    # }
+    
     # fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18,5))
 
     # # corsika

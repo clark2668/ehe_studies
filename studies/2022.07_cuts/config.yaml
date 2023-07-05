@@ -88,27 +88,28 @@ juliet:
 #       n_files: 999
 
 
+# these may no longer work...
 # juliet:
 #   nue:
 #     high_energy:
-#       file: "/disk20/users/brian/IceCube/juliet/l2_prime/nue_high_energy_merged_9996files.hdf5 "
+#       file: "/disk20/users/brian/IceCube/juliet_old/hide_deeper/nue_high_energy_merged_9996files.hdf5"
 #       n_files: 9996
 #     very_high_energy:
-#       file: "/disk20/users/brian/IceCube/juliet/l2_prime/nue_very_high_energy_merged_2000files.hdf5"
+#       file: "/disk20/users/brian/IceCube/juliet_old/hide_deeper/nue_very_high_energy_merged_2000files.hdf5"
 #       n_files: 2000 
 #   numu:
 #     high_energy:
-#       file: "/disk20/users/brian/IceCube/juliet/l2_prime/numu_high_energy_merged_9998files.hdf5 "
+#       file: "/disk20/users/brian/IceCube/juliet_old/hide_deeper/numu_high_energy_merged_9998files.hdf5"
 #       n_files: 9998
 #     very_high_energy:
-#       file: "/disk20/users/brian/IceCube/juliet/l2_prime/numu_very_high_energy_merged_2000files.hdf5"
+#       file: "/disk20/users/brian/IceCube/juliet_old/hide_deeper/numu_very_high_energy_merged_2000files.hdf5"
 #       n_files: 2000
 #   nutau:
 #     high_energy:
-#       file: "/disk20/users/brian/IceCube/juliet/l2_prime/nutau_high_energy_merged_9977files.hdf5"
+#       file: "/disk20/users/brian/IceCube/juliet_old/hide_deeper/nutau_high_energy_merged_9977files.hdf5"
 #       n_files: 9977
 #     very_high_energy:
-#       file: "/disk20/users/brian/IceCube/juliet/l2_prime/nutau_very_high_energy_merged_1997files.hdf5"
+#       file: "/disk20/users/brian/IceCube/juliet_old/hide_deeper/nutau_very_high_energy_merged_1997files.hdf5"
 #       n_files: 1997
 #   mu:
 #     high_energy:
