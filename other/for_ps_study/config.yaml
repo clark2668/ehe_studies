@@ -1,0 +1,36 @@
+juliet:
+  nue:
+    high_energy:
+      file: "files/nue_high_energy_merged_1kfiles.hdf5"
+      n_files: 1000
+    very_high_energy:
+      file: "files/nue_very_high_energy_merged_1kfiles.hdf5"
+      n_files: 1000 
+  numu:
+    high_energy:
+      file: "files/numu_high_energy_merged_1kfiles.hdf5"
+      n_files: 1000
+    very_high_energy:
+      file: "files/numu_very_high_energy_merged_1kfiles.hdf5"
+      n_files: 1000
+  nutau:
+    high_energy:
+      file: "files/nutau_high_energy_merged_1kfiles.hdf5"
+      n_files: 1000
+    very_high_energy:
+      file: "files/nutau_very_high_energy_merged_1kfiles.hdf5"
+      n_files: 1000
+  mu:
+    high_energy:
+      file: "files/mu_high_energy_merged_1kfiles.hdf5"
+      n_files: 1000
+    very_high_energy:
+      file: "files/mu_very_high_energy_merged_1kfiles.hdf5"
+      n_files: 1000
+  tau:
+    high_energy:
+      file: "files/tau_high_energy_merged_1kfiles.hdf5"
+      n_files: 1000
+    very_high_energy:
+      file: "files/tau_very_high_energy_merged_1kfiles.hdf5"
+      n_files: 1000
