@@ -2,6 +2,7 @@ import os
 from pypet import Trajectory
 from neutrino_level.steps.general_modules.utils import add_dict_to_traj
 from neutrino_level.steps.general_modules.label_maker import add_label_from_components_to_df
+import numpy as np
 
 
 def build_trajectory():
@@ -296,3 +297,24 @@ to_ignore=[
         'ddddr_150_features'
 ]
         
+
+def get_aeff(resource_name):
+    '''
+    Return energy bin centers and effective area
+    
+    Energy bin centers should be in units of GeV
+    Effective area should be in units of meters^2 * steradian
+    
+    '''
+    
+    energy_GeV = None
+    aeffsr_m2sr = None
+    
+    if resource_name == 'ehenextgen':
+        data = np.load('ehenextgen_total_aeff_scale.npz')
+        energy_GeV = data['bin_center']
+        aeffsr_m2sr =data['avg_aeff_m2sr']
+    else:
+        raise NotImplementedError
+
+    return energy_GeV, aeffsr_m2sr
