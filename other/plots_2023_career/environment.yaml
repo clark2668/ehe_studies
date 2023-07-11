@@ -15,11 +15,15 @@ dependencies:
   - notebook
   - tqdm
   - scikit-learn
+  - scikit-image
   - click
   - docopt
+  - nuflux # custom icecube
   - pip:
     - tables
     - nb-clean
     - pypet
+    - git+https://github.com/icecube/simweights.git
+    # - git+https://github.com/icecube/nuflux.git
 
   
