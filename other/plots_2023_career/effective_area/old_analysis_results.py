@@ -325,15 +325,15 @@ nutau_exposure_7yr = np.array([
 ]).reshape(-1, 2)
 
 LIVETIME_7YR = 2426 * 24 * 3600
-CM2_TO_M2 = 1e4
+CM2_IN_M2 = 1e4
 SOLID_ANGLE = 4 * np.pi
 
 nue_aeff_7yr = copy(nue_exposure_7yr)
-nue_aeff_7yr[:, 1] /= (LIVETIME_7YR * CM2_TO_M2 * SOLID_ANGLE)
+nue_aeff_7yr[:, 1] /= (LIVETIME_7YR * CM2_IN_M2 * SOLID_ANGLE)
 
 numu_aeff_7yr = copy(numu_exposure_7yr)
-numu_aeff_7yr[:, 1] /= (LIVETIME_7YR * CM2_TO_M2 * SOLID_ANGLE)
+numu_aeff_7yr[:, 1] /= (LIVETIME_7YR * CM2_IN_M2 * SOLID_ANGLE)
 
 nutau_aeff_7yr = copy(nutau_exposure_7yr)
-nutau_aeff_7yr[:, 1] /= (LIVETIME_7YR * CM2_TO_M2 * SOLID_ANGLE)
+nutau_aeff_7yr[:, 1] /= (LIVETIME_7YR * CM2_IN_M2 * SOLID_ANGLE)
 
