@@ -318,3 +318,31 @@ def get_aeff(resource_name):
         raise NotImplementedError
 
     return energy_GeV, aeffsr_m2sr
+
+def get_aeff_vs_zen(resource_name):
+    
+    energy_bins_GeV = None
+    czen_bins = None
+    aeff_m2 = None
+    
+    if resource_name == 'ehenextgen':
+        data = np.load('ehenextgen_total_aeff_vs_e_and_zen_scale.npz')
+        energy_bins_GeV = data['energy_bins']
+        czen_bins = data['czen_bins']
+        aeff_m2 = data['avg_aeff_m2']
+    else:
+        raise NotImplementedError
+
+    return energy_bins_GeV, czen_bins, aeff_m2
+    
+    
+def find_nearest_energy_bin(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array-value)).argmin()
+    return idx, array[idx]
+
+def get_bin_centers(bins):
+    return (bins[1:] + bins[:-1]) * 0.5
+
+def get_bin_widths(bins):
+     return bins[:-1] - bins[1:]
