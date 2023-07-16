@@ -604,6 +604,98 @@ def build_muon_test_trajectory():
     
     return traj
 
+def build_angres_trajectory():
+    traj = Trajectory(name='Trajectory', add_time=False)
+    if os.uname().nodename in ['Brians-MBP', 'dhcp-172-16-174-138.private.pa.umd.edu']:
+        DATA_PATH='/Users/brianclark/Desktop/new_i3files'
+        JULIET_PATH = '/Users/brianclark/Desktop/new_i3files'
+    elif os.uname().nodename in ['condor00']:
+        DATA_PATH='/data/i3home/baclark/transfer_files'
+        JULIET_PATH = '/data/i3home/baclark/transfer_files'
+    else:
+        raise NotImplementedError
+    
+    # numu events from nugen (cuz why not?)
+    comp_dict_nm = {}
+    comp_dict_nm['type'] = ['numu', 'Component type.']
+
+    comp_dict_nm['file_list'] = [
+        [os.path.join(DATA_PATH, '21220_merged.hd5')],
+        'Files for the component.']
+    comp_dict_nm['flux_names'] = [
+        ['northern_tracks'],
+        'Weight cols.']
+    comp_dict_nm['additional_obs'] = [['I3MCWeightDict.InteractionType',
+                                       'NuMuProperties.muon_energy',
+                                       'NuMuProperties.muon_energy_losses'],
+                                      'Additional observables.']
+    comp_dict_nm['n_files_total'] = [10000, 'Number of files in Madison.']
+    comp_dict_nm['n_files_loaded'] = [[10000], 'Number of files loaded.']
+
+    add_dict_to_traj(traj, 'components.numu', 'NuMu Component.',
+                     comp_dict_nm, to_log=False)
+
+    
+    # corsika
+    comp_dict_mu = {}
+    comp_dict_mu['type'] = ['corsika', 'Component type.']
+    comp_dict_mu['file_list'] = [
+        [os.path.join(DATA_PATH, '20848_10k_files_merged.hd5'),
+        #  os.path.join(DATA_PATH, '20848_10k_more_files_merged.hd5'),
+         os.path.join(DATA_PATH, '22023_with_corrections/22023_0_1000.hd5'),
+        #  os.path.join(DATA_PATH, '22023_with_corrections/22023_1_999.hd5'),
+        #  os.path.join(DATA_PATH, '22023_with_corrections/22023_2_998.hd5'),
+        #  os.path.join(DATA_PATH, '22023_with_corrections/22023_3_998.hd5'),
+        #  os.path.join(DATA_PATH, '22023_with_corrections/22023_4_998.hd5'),
+        #  os.path.join(DATA_PATH, '22023_with_corrections/22023_5_1000.hd5'),
+        #  os.path.join(DATA_PATH, '22023_with_corrections/22023_6_1000.hd5'),
+        #  os.path.join(DATA_PATH, '22023_with_corrections/22023_7_1000.hd5'),
+        #  os.path.join(DATA_PATH, '22023_with_corrections/22023_8_1000.hd5'),
+        #  os.path.join(DATA_PATH, '22023_with_corrections/22023_9_999.hd5'),
+         os.path.join(DATA_PATH, '21962_with_corrections/21962_0_998.hd5'),
+        #  os.path.join(DATA_PATH, '21962_with_corrections/21962_1_1000.hd5'),
+        #  os.path.join(DATA_PATH, '21962_with_corrections/21962_2_997.hd5'),
+        #  os.path.join(DATA_PATH, '21962_with_corrections/21962_3_995.hd5'),
+        #  os.path.join(DATA_PATH, '21962_with_corrections/21962_4_999.hd5'),
+        #  os.path.join(DATA_PATH, '21962_with_corrections/21962_5_999.hd5'),
+        #  os.path.join(DATA_PATH, '21962_with_corrections/21962_6_997.hd5'),
+        #  os.path.join(DATA_PATH, '21962_with_corrections/21962_7_996.hd5'),
+        #  os.path.join(DATA_PATH, '21962_with_corrections/21962_8_992.hd5'),
+        #  os.path.join(DATA_PATH, '21962_with_corrections/21962_9_996.hd5'),
+         os.path.join(DATA_PATH, '22187_with_corrections/22187_0_982.hd5'),
+        #  os.path.join(DATA_PATH, '22187_with_corrections/22187_1_989.hd5'),
+        #  os.path.join(DATA_PATH, '22187_with_corrections/22187_2_987.hd5'),
+        #  os.path.join(DATA_PATH, '22187_with_corrections/22187_3_986.hd5'),
+        #  os.path.join(DATA_PATH, '22187_with_corrections/22187_4_987.hd5'),
+        #  os.path.join(DATA_PATH, '22187_with_corrections/22187_5_986.hd5'),
+        #  os.path.join(DATA_PATH, '22187_with_corrections/22187_6_981.hd5'),
+        #  os.path.join(DATA_PATH, '22187_with_corrections/22187_7_982.hd5'),
+        #  os.path.join(DATA_PATH, '22187_with_corrections/22187_8_982.hd5'),
+        #  os.path.join(DATA_PATH, '22187_with_corrections/22187_9_979.hd5'),
+        ],
+        'Files for the component.']
+    comp_dict_mu['flux_names'] = [
+        ['GaisserH4a'],
+        'Weight cols.']
+    comp_dict_mu['n_files_total'] = [99812, 'Number of files in Madison.']
+    comp_dict_mu['n_files_loaded'] = [
+        [
+            9981.2, 
+            # 9981.2,
+            1000., 
+            # 999., 998., 998., 998., 1000., 1000., 1000., 1000., 999.,
+            998., 
+            # 1000., 997., 995., 999., 999., 997., 996., 992., 996.,
+            982., 
+            # 989., 987., 986., 987., 986., 981., 982., 982., 979.
+        ],
+        'Number of files loaded.']
+
+    add_dict_to_traj(traj, 'components.corsika', 'Corsika Component.',
+                     comp_dict_mu, to_log=False)
+    
+    return traj
+
 to_ignore=[
         'Borderness',
         'Dustyness',
