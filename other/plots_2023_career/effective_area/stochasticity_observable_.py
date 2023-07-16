@@ -10,7 +10,14 @@ from scipy.signal import argrelmin
 from scipy.integrate import quad
 
 import sys
-sys.path.append('/Users/brianclark/Documents/work/IceCube/ehe/ehe_deps/energy_loss_pdfs')
+import os
+if os.uname().nodename in ['Brians-MBP', 'dhcp-172-16-174-138.private.pa.umd.edu']:
+    sys.path.append('/Users/brianclark/Documents/work/IceCube/ehe/ehe_deps/energy_loss_pdfs')
+elif os.uname().nodename in ['condor00']:
+    sys.path.append('/data/i3home/baclark/IceCube/ehe/career_plots/tools/energy_loss_pdfs')
+else:
+    raise NotImplementedError
+
 from likelihood import Likelihood_1D
 
 
@@ -289,7 +296,13 @@ def get_1d_rlogl_with_deposited_energy(
         return None
 
 
-filename = '/Users/brianclark/Documents/work/IceCube/ehe/ehe_deps/energy_loss_pdfs/pdf_slice_spline_40m.pkl'
+if os.uname().nodename in ['Brians-MBP', 'dhcp-172-16-174-138.private.pa.umd.edu']:
+    filename = '/Users/brianclark/Documents/work/IceCube/ehe/ehe_deps/energy_loss_pdfs/pdf_slice_spline_40m.pkl'
+elif os.uname().nodename in ['condor00']:
+    filename = '/data/i3home/baclark/IceCube/ehe/career_plots/tools/energy_loss_pdfs/pdf_slice_spline_40m.pkl'
+else:
+    raise NotImplementedError
+
 with open(filename, 'rb') as open_file:
     spline = pickle.load(open_file)
 
