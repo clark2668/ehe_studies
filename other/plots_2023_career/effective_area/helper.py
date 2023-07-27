@@ -8,8 +8,8 @@ import numpy as np
 def build_trajectory():
     traj = Trajectory(name='Trajectory', add_time=False)
     if os.uname().nodename in ['Brians-MBP', 'dhcp-172-16-174-138.private.pa.umd.edu']:
-        DATA_PATH='/Users/brianclark/Desktop/new_i3files'
-        JULIET_PATH = '/Users/brianclark/Desktop/new_i3files'
+        DATA_PATH='/Users/brianclark/Documents/work/IceCube/ehe/new_i3files'
+        JULIET_PATH = '/Users/brianclark/Documents/work/IceCube/ehe/new_i3files'
     elif os.uname().nodename in ['condor00']:
         DATA_PATH='/data/i3home/baclark/transfer_files'
         JULIET_PATH = '/data/i3home/baclark/transfer_files'
@@ -262,8 +262,8 @@ def build_trajectory():
 def build_muon_test_trajectory():
     traj = Trajectory(name='Trajectory', add_time=False)
     if os.uname().nodename in ['Brians-MBP', 'dhcp-172-16-174-138.private.pa.umd.edu']:
-        DATA_PATH='/Users/brianclark/Desktop/new_i3files'
-        JULIET_PATH = '/Users/brianclark/Desktop/new_i3files'
+        DATA_PATH='/Users/brianclark/Documents/work/IceCube/ehe/new_i3files'
+        JULIET_PATH = '/Users/brianclark/Documents/work/IceCube/ehe/new_i3files'
     elif os.uname().nodename in ['condor00']:
         DATA_PATH='/data/i3home/baclark/transfer_files'
         JULIET_PATH = '/data/i3home/baclark/transfer_files'
@@ -607,8 +607,8 @@ def build_muon_test_trajectory():
 def build_angres_trajectory():
     traj = Trajectory(name='Trajectory', add_time=False)
     if os.uname().nodename in ['Brians-MBP', 'dhcp-172-16-174-138.private.pa.umd.edu']:
-        DATA_PATH='/Users/brianclark/Desktop/new_i3files'
-        JULIET_PATH = '/Users/brianclark/Desktop/new_i3files'
+        DATA_PATH='/Users/brianclark/Documents/work/IceCube/ehe/new_i3files'
+        JULIET_PATH = '/Users/brianclark/Documents/work/IceCube/ehe/new_i3files'
     elif os.uname().nodename in ['condor00']:
         DATA_PATH='/data/i3home/baclark/transfer_files'
         JULIET_PATH = '/data/i3home/baclark/transfer_files'
