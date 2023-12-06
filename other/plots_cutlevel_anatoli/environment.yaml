@@ -1,0 +1,29 @@
+name: ehe
+channels:
+  - conda-forge
+dependencies:
+  - python >=3.8
+  - numpy
+  - scipy
+  - h5py
+  - wquantiles
+  - matplotlib
+  - ipykernel
+  - pandas
+  - pyyaml
+  - pip
+  - notebook
+  - tqdm
+  - scikit-learn
+  - scikit-image
+  - click
+  - docopt
+  - nuflux # custom icecube
+  - pip:
+    - tables
+    - nb-clean
+    - pypet
+    - git+https://github.com/icecube/simweights.git
+    # - git+https://github.com/icecube/nuflux.git
+
+  
