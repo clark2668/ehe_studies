@@ -11,7 +11,7 @@ from scipy.integrate import quad
 
 import sys
 import os
-if os.uname().nodename in ['Brians-MBP', 'dhcp-172-16-174-147.private.pa.umd.edu']:
+if os.uname().nodename in ['Brians-MBP','Brians-MBP-2', 'dhcp-172-16-174-147.private.pa.umd.edu']:
     sys.path.append('/Users/brianclark/Documents/work/IceCube/ehe/ehe_deps/energy_loss_pdfs')
 elif os.uname().nodename in ['condor00']:
     sys.path.append('/data/i3home/baclark/IceCube/ehe/career_plots/tools/energy_loss_pdfs')
@@ -296,7 +296,7 @@ def get_1d_rlogl_with_deposited_energy(
         return None
 
 
-if os.uname().nodename in ['Brians-MBP', 'dhcp-172-16-174-147.private.pa.umd.edu']:
+if os.uname().nodename in ['Brians-MBP','Brians-MBP-2', 'dhcp-172-16-174-147.private.pa.umd.edu']:
     filename = '/Users/brianclark/Documents/work/IceCube/ehe/ehe_deps/energy_loss_pdfs/pdf_slice_spline_40m.pkl'
 elif os.uname().nodename in ['condor00']:
     filename = '/data/i3home/baclark/IceCube/ehe/career_plots/tools/energy_loss_pdfs/pdf_slice_spline_40m.pkl'
